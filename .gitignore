@@ -1,0 +1,5 @@
+doc/
+.yardoc/
+*.swp
+*~
+work/
