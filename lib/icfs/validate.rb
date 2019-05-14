@@ -252,13 +252,13 @@ module Validate
   # check a string
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [#include?] :allowed Value which is always okay
-  # @option opt [#match] :valid check for okay value
-  # @option opt [Boolean] :whitelist Must be valid or allowed
-  # @option opt [#match] :invalid check for bad values
-  # @option opt [Integer] :min Minimum length
-  # @option opt [Integer] :max Maximum length
+  # @param val [Hash] options
+  # @option val [#include?] :allowed Value which is always okay
+  # @option val [#match] :valid check for okay value
+  # @option val [Boolean] :whitelist Must be valid or allowed
+  # @option val [#match] :invalid check for bad values
+  # @option val [Integer] :min Minimum length
+  # @option val [Integer] :max Maximum length
   # @return [Hash,NilClass] error descriptions
   #
   def self.string(obj, val)
@@ -302,11 +302,11 @@ module Validate
   # check an array
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Integer] :min Minimum length
-  # @option opt [Integer] :max Maximum length
-  # @option opt [TrueClass] :uniq Require all members to be unique
-  # @option opt [Hash,Array] :check Validations for members of the array.
+  # @param val [Hash] options
+  # @option val [Integer] :min Minimum length
+  # @option val [Integer] :max Maximum length
+  # @option val [TrueClass] :uniq Require all members to be unique
+  # @option val [Hash,Array] :check Validations for members of the array.
   #    If a Hash is provided, all members will be checked against it.
   #    If an Array is provided, they will be checked in order.
   # @return [Hash,NilClass] error descriptions
@@ -371,12 +371,11 @@ module Validate
   # check a hash
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Hash] :required Keys which must be present and their checks
-  # @option opt [Hash] :optional Keys which may be present and their checks
-  # @option opt [TrueClass] :others Allow other keys
+  # @param val [Hash] options
+  # @option val [Hash] :required Keys which must be present and their checks
+  # @option val [Hash] :optional Keys which may be present and their checks
+  # @option val [TrueClass] :others Allow other keys
   # @return [Hash,NilClass] error descriptions
-  #
   #
   def self.hash(obj, val)
 
