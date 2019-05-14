@@ -26,42 +26,32 @@ class Users
   #
   ValUser = {
     method: :hash,
-    opts: {
-      required: {
-        'name' => Items::FieldUsergrp,
-        'type' => {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'user'.freeze,
-              'role'.freeze,
-              'group'.freeze,
-            ].freeze
-          }.freeze
-        }.freeze
+    required: {
+      'name' => Items::FieldUsergrp,
+      'type' => {
+        method: :string,
+        allowed: Set[
+          'user'.freeze,
+          'role'.freeze,
+          'group'.freeze,
+        ].freeze
+      }.freeze
+    }.freeze,
+    optional: {
+      'roles' => {
+        method: :array,
+        check: Items::FieldUsergrp,
+        uniq: true
       }.freeze,
-      optional: {
-        'roles' => {
-          method: :array,
-          opts: {
-            check: Items::FieldUsergrp,
-            uniq: true
-          }
-        },
-        'groups' => {
-          method: :array,
-          opts: {
-            check: Items::FieldUsergrp,
-            uniq: true
-          }
-        },
-        'perms' => {
-          method: :array,
-          opts: {
-            check: Items::FieldPermGlobal,
-            uniq: true
-          }
-        },
+      'groups' => {
+        method: :array,
+        check: Items::FieldUsergrp,
+        uniq: true
+      }.freeze,
+      'perms' => {
+        method: :array,
+        check: Items::FieldPermGlobal,
+        uniq: true
       }.freeze
     }.freeze
   }.freeze

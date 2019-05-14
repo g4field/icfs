@@ -66,45 +66,35 @@ class UsersElastic < Users
   #
   ValUserCache = {
     method: :hash,
-    opts: {
-      required: {
-        'name' => Items::FieldUsergrp,
-        'type' => {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'user'.freeze,
-              'role'.freeze,
-              'group'.freeze,
-            ].freeze
-          }.freeze
-        }.freeze,
-        'first' => Validate::ValIntPos,
-        'last' => Validate::ValIntPos,
-        'active' => Validate::ValBoolean,
+    required: {
+      'name' => Items::FieldUsergrp,
+      'type' => {
+        method: :string,
+        allowed: Set[
+          'user'.freeze,
+          'role'.freeze,
+          'group'.freeze,
+        ].freeze
       }.freeze,
-      optional: {
-        'roles' => {
-          method: :array,
-          opts: {
-            check: Items::FieldUsergrp,
-            uniq: true
-          }
-        },
-        'groups' => {
-          method: :array,
-          opts: {
-            check: Items::FieldUsergrp,
-            uniq: true
-          }
-        },
-        'perms' => {
-          method: :array,
-          opts: {
-            check: Items::FieldPermGlobal,
-            uniq: true
-          }
-        },
+      'first' => Validate::ValIntPos,
+      'last' => Validate::ValIntPos,
+      'active' => Validate::ValBoolean,
+    }.freeze,
+    optional: {
+      'roles' => {
+        method: :array,
+        check: Items::FieldUsergrp,
+        uniq: true
+      }.freeze,
+      'groups' => {
+        method: :array,
+        check: Items::FieldUsergrp,
+        uniq: true
+      }.freeze,
+      'perms' => {
+        method: :array,
+        check: Items::FieldPermGlobal,
+        uniq: true
       }.freeze
     }.freeze
   }.freeze

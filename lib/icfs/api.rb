@@ -22,31 +22,25 @@ class Api
   # Validate a size
   ValSize = {
     method: :integer,
-    opts: {
-      min: 2,
-      max: 100
-    }.freeze,
+    min: 2,
+    max: 100
   }.freeze
 
 
   # Validate a page
   ValPage = {
     method: :integer,
-    opts: {
-      min: 1,
-      max: 10
-    }.freeze,
+    min: 1,
+    max: 10
   }.freeze
 
 
   # Validate a purpose
   ValPurpose = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 32,
-      invalid: /[[:cntrl:]]/.freeze
-    }.freeze
+    min: 1,
+    max: 32,
+    invalid: /[[:cntrl:]]/.freeze
   }.freeze
 
 
@@ -446,19 +440,17 @@ class Api
   # Validate a case search query
   ValCaseSearch = {
     method: :hash,
-    opts: {
-      optional: {
-        title: Items::FieldTitle,
-        tags: Items::FieldTagAny,
-        status: Validate::ValBoolean,
-        template: Validate::ValBoolean,
-        grantee: Items::FieldUsergrp,
-        perm: Items::FieldPermAny,
-        size: ValSize,
-        page: ValPage,
-        purpose: ValPurpose,
-      }.freeze,
-    }.freeze
+    optional: {
+      title: Items::FieldTitle,
+      tags: Items::FieldTagAny,
+      status: Validate::ValBoolean,
+      template: Validate::ValBoolean,
+      grantee: Items::FieldUsergrp,
+      perm: Items::FieldPermAny,
+      size: ValSize,
+      page: ValPage,
+      purpose: ValPurpose,
+    }.freeze,
   }.freeze
 
 
@@ -476,28 +468,24 @@ class Api
   # Validate a log search
   ValLogSearch = {
     method: :hash,
-    opts: {
-      optional: {
-        caseid: Items::FieldCaseid,
-        after: Validate::ValIntPos,
-        before: Validate::ValIntPos,
-        user: Items::FieldUsergrp,
-        entry: Validate::ValIntPos,
-        index: Validate::ValIntPos,
-        action: Validate::ValIntPos,
-        size: ValSize,
-        page: ValPage,
-        purpose: ValPurpose,
-        sort: {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'time_desc'.freeze,
-              'time_asc'.freeze,
-            ].freeze,
-            whitelist: true,
-          }.freeze
-        }.freeze
+    optional: {
+      caseid: Items::FieldCaseid,
+      after: Validate::ValIntPos,
+      before: Validate::ValIntPos,
+      user: Items::FieldUsergrp,
+      entry: Validate::ValIntPos,
+      index: Validate::ValIntPos,
+      action: Validate::ValIntPos,
+      size: ValSize,
+      page: ValPage,
+      purpose: ValPurpose,
+      sort: {
+        method: :string,
+        allowed: Set[
+          'time_desc'.freeze,
+          'time_asc'.freeze,
+        ].freeze,
+        whitelist: true,
       }.freeze
     }.freeze
   }.freeze
@@ -517,31 +505,27 @@ class Api
   # Validate an entry search query
   ValEntrySearch = {
     method: :hash,
-    opts: {
-      optional: {
-        title: Items::FieldTitle,
-        content: Items::FieldContent,
-        tags: Items::FieldTagAny,
-        caseid: Items::FieldCaseid,
-        action: Validate::ValIntPos,
-        index: Validate::ValIntPos,
-        after: Validate::ValIntPos,
-        before: Validate::ValIntPos,
-        stat: Items::FieldStat,
-        credit: Items::FieldUsergrp,
-        size: ValSize,
-        page: ValPage,
-        purpose: ValPurpose,
-        sort: {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'time_desc'.freeze,
-              'time_asc'.freeze,
-            ].freeze,
-            whitelist: true,
-          }.freeze
-        }.freeze
+    optional: {
+      title: Items::FieldTitle,
+      content: Items::FieldContent,
+      tags: Items::FieldTagAny,
+      caseid: Items::FieldCaseid,
+      action: Validate::ValIntPos,
+      index: Validate::ValIntPos,
+      after: Validate::ValIntPos,
+      before: Validate::ValIntPos,
+      stat: Items::FieldStat,
+      credit: Items::FieldUsergrp,
+      size: ValSize,
+      page: ValPage,
+      purpose: ValPurpose,
+      sort: {
+        method: :string,
+        allowed: Set[
+          'time_desc'.freeze,
+          'time_asc'.freeze,
+        ].freeze,
+        whitelist: true,
       }.freeze
     }.freeze
   }.freeze
@@ -593,42 +577,36 @@ class Api
   # Validate a task search
   ValActionSearch = {
     method: :hash,
-    opts: {
-      required: {
-        assigned: {
-          method: :any,
-          opts: {
-            check: [
-              Items::FieldUsergrp,
-              {
-                method: :equals,
-                opts: { check: ICFS::UserCase }.freeze
-              }.freeze
-            ].freeze
-          }.freeze
-        }.freeze,
-      }.freeze,
-      optional: {
-        caseid: Items::FieldCaseid,
-        title: Items::FieldTitle,
-        status: Validate::ValBoolean,
-        flag: Validate::ValBoolean,
-        before: Validate::ValIntPos,
-        after: Validate::ValIntPos,
-        tags: Items::FieldTagAny,
-        size: ValSize,
-        page: ValPage,
-        purpose: ValPurpose,
-        sort: {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'time_desc'.freeze,
-              'time_asc'.freeze,
-            ].freeze,
-            whitelist: true,
-          }.freeze
-        }.freeze
+    required: {
+      assigned: {
+        method: :any,
+        check: [
+          Items::FieldUsergrp,
+          {
+            method: :equals,
+            check: ICFS::UserCase
+          }
+        ].freeze
+      }.freeze
+    }.freeze,
+    optional: {
+      caseid: Items::FieldCaseid,
+      title: Items::FieldTitle,
+      status: Validate::ValBoolean,
+      flag: Validate::ValBoolean,
+      before: Validate::ValIntPos,
+      after: Validate::ValIntPos,
+      tags: Items::FieldTagAny,
+      size: ValSize,
+      page: ValPage,
+      purpose: ValPurpose,
+      sort: {
+        method: :string,
+        allowed: Set[
+          'time_desc'.freeze,
+          'time_asc'.freeze,
+        ].freeze,
+        whitelist: true,
       }.freeze
     }.freeze
   }.freeze
@@ -655,28 +633,24 @@ class Api
   # Validate an index search query
   ValIndexSearch = {
     method: :hash,
-    opts: {
-      optional: {
-        caseid: Items::FieldCaseid,
-        title: Items::FieldTitle,
-        prefix: Items::FieldTitle,
-        content: Items::FieldContent,
-        tags: Items::FieldTagAny,
-        size: ValSize,
-        page: ValPage,
-        purpose: ValPurpose,
-        sort: {
-          method: :string,
-          opts: {
-            allowed: Set[
-              'title_desc'.freeze,
-              'title_asc'.freeze,
-              'index_desc'.freeze,
-              'index_asc'.freeze,
-            ].freeze,
-            whitelist: true,
-          }.freeze
-        }.freeze
+    optional: {
+      caseid: Items::FieldCaseid,
+      title: Items::FieldTitle,
+      prefix: Items::FieldTitle,
+      content: Items::FieldContent,
+      tags: Items::FieldTagAny,
+      size: ValSize,
+      page: ValPage,
+      purpose: ValPurpose,
+      sort: {
+        method: :string,
+        allowed: Set[
+          'title_desc'.freeze,
+          'title_asc'.freeze,
+          'index_desc'.freeze,
+          'index_asc'.freeze,
+        ].freeze,
+        whitelist: true,
       }.freeze
     }.freeze
   }.freeze
@@ -695,14 +669,12 @@ class Api
   # validate the stats query
   ValStatsSearch = {
     method: :hash,
-    opts: {
-      optional: {
-        caseid: Items::FieldCaseid,
-        after: Validate::ValIntPos,
-        before: Validate::ValIntPos,
-        credit: Items::FieldUsergrp,
-        purpose: ValPurpose,
-      }.freeze
+    optional: {
+      caseid: Items::FieldCaseid,
+      after: Validate::ValIntPos,
+      before: Validate::ValIntPos,
+      credit: Items::FieldUsergrp,
+      purpose: ValPurpose,
     }.freeze
   }.freeze
 
@@ -719,14 +691,12 @@ class Api
   # Case Tags search validation
   ValCaseTags = {
     method: :hash,
-    opts: {
-      optional: {
-        status: Validate::ValBoolean,
-        template: Validate::ValBoolean,
-        grantee: Items::FieldUsergrp,
-        purpose: ValPurpose,
-      }.freeze,
-    }.freeze
+    optional: {
+      status: Validate::ValBoolean,
+      template: Validate::ValBoolean,
+      grantee: Items::FieldUsergrp,
+      purpose: ValPurpose,
+    }.freeze,
   }.freeze
 
 
@@ -742,14 +712,12 @@ class Api
   # Entry Tags search validation
   ValEntryTags = {
     method: :hash,
-    opts: {
-      required: {
-        caseid: Items::FieldCaseid,
-      }.freeze,
-      optional: {
-        purpose: ValPurpose,
-      }.freeze,
-    }.freeze
+    required: {
+      caseid: Items::FieldCaseid,
+    }.freeze,
+    optional: {
+      purpose: ValPurpose,
+    }.freeze,
   }.freeze
 
 
@@ -769,30 +737,26 @@ class Api
   # Task Tags search validation
   ValActionTags = {
     method: :hash,
-    opts: {
-      required: {
-        assigned: {
-          method: :any,
-          opts: {
-            check: [
-              Items::FieldUsergrp,
-              {
-                method: :equals,
-                opts: { check: ICFS::UserCase }.freeze
-              }.freeze
-            ].freeze
+    required: {
+      assigned: {
+        method: :any,
+        check: [
+          Items::FieldUsergrp,
+          {
+            method: :equals,
+            check: ICFS::UserCase
           }.freeze
-        }.freeze,
+        ].freeze
       }.freeze,
-      optional: {
-        caseid: Items::FieldCaseid,
-        status: Validate::ValBoolean,
-        flag: Validate::ValBoolean,
-        before: Validate::ValIntPos,
-        after: Validate::ValIntPos,
-        purpose: ValPurpose,
-      }.freeze,
-    }.freeze
+    }.freeze,
+    optional: {
+      caseid: Items::FieldCaseid,
+      status: Validate::ValBoolean,
+      flag: Validate::ValBoolean,
+      before: Validate::ValIntPos,
+      after: Validate::ValIntPos,
+      purpose: ValPurpose,
+    }.freeze,
   }.freeze
 
 
@@ -816,14 +780,12 @@ class Api
 
   # Validate a index tag search
   ValIndexTags = {
-    method: :hash,
-    opts: {
-      required: {
-        caseid: Items::FieldCaseid,
-      }.freeze,
-      optional: {
-        purpose: ValPurpose,
-      }.freeze
+  method: :hash,
+    required: {
+      caseid: Items::FieldCaseid,
+    }.freeze,
+    optional: {
+      purpose: ValPurpose,
     }.freeze
   }.freeze
 

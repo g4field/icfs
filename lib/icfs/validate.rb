@@ -18,7 +18,6 @@ module ICFS
 ##########################################################################
 # Object validation
 #
-# @todo Remove use of opts as its own hash
 # @todo Move .parse and .generate to items or ICFS
 # @todo Remove all use of Error module
 # @todo Switch to use Is* (e.g. IsBoolean) rather than Val*
@@ -94,9 +93,9 @@ module Validate
   #
   def self.check(obj, val)
     if val.key?(:object)
-      err = val[:object].send(val[:method], obj, val[:opts])
+      err = val[:object].send(val[:method], obj, val)
     else
-      err = Validate.send(val[:method], obj, val[:opts])
+      err = Validate.send(val[:method], obj, val)
     end
     return err
   end # def self.check()
@@ -111,17 +110,17 @@ module Validate
   # check that any one validation is good
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Array<Hash>] :check validations to check
+  # @param val [Hash] options
+  # @option val [Array<Hash>] :check validations to check
   # @return [Array,NilClass] error descriptions
   #
-  def self.any(obj, opt={})
-    return nil unless opt[:check].is_a?(Array)
+  def self.any(obj, val)
+    return nil unless val[:check].is_a?(Array)
 
     errors = []
 
-    opt[:check].each do |check|
-      err = Validate.check(obj, check)
+    val[:check].each do |chk|
+      err = Validate.check(obj, chk)
       return nil if err.nil?
       errors << err
     end
@@ -134,23 +133,23 @@ module Validate
   # check that all the validations are good
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Array<Hash>] :check validations to check
-  # @option opt [Boolean] :all Always check all the validations
+  # @param val [Hash] options
+  # @option val [Array<Hash>] :check validations to check
+  # @option val [Boolean] :all Always check all the validations
   # @return [Array, NilClass] error descriptions
   #
-  def self.all(obj, opt={})
-    return nil unless opt[:check].is_a?(Array)
+  def self.all(obj, val)
+    return nil unless val[:check].is_a?(Array)
 
     errors = []
     bad = false
 
-    opt[:check].each do |check|
+    val[:check].each do |check|
       err = Validate.check(obj, check)
       if err
         errors << err
         bad = true
-        break unless opt[:all]
+        break unless val[:all]
       else
         errors << nil
       end
@@ -164,12 +163,12 @@ module Validate
   # Check for an exact value
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Integer] :check Value to compare
+  # @param val [Hash] options
+  # @option val [Integer] :check Value to compare
   # @return [String,NilClass] error descriptions
   #
-  def self.equals(obj, opt={})
-    if opt[:check] == obj
+  def self.equals(obj, val)
+    if val[:check] == obj
       return nil
     else
       return 'not equal'.freeze
@@ -181,21 +180,21 @@ module Validate
   # check an integer
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Integer] :min Minimum value
-  # @option opt [Integer] :max Maximum value
+  # @param val [Hash] options
+  # @option val [Integer] :min Minimum value
+  # @option val [Integer] :max Maximum value
   # @return [String,NilClass] error descriptions
   #
   #
-  def self.integer(obj, opt={})
+  def self.integer(obj, val)
     return 'not an Integer'.freeze unless obj.is_a?(Integer)
 
-    if opt[:min] && obj < opt[:min]
-      return 'too small: %d < %d'.freeze % [obj, opt[:min]]
+    if val[:min] && obj < val[:min]
+      return 'too small: %d < %d'.freeze % [obj, val[:min]]
     end
 
-    if opt[:max] && obj > opt[:max]
-      return 'too large: %d > %d '.freeze % [obj, opt[:max]]
+    if val[:max] && obj > val[:max]
+      return 'too large: %d > %d '.freeze % [obj, val[:max]]
     end
 
     return nil
@@ -206,20 +205,20 @@ module Validate
   # check a float
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Float] :min Minimum value
-  # @option opt [Float] :max Maximum value
+  # @param val [Hash] options
+  # @option val [Float] :min Minimum value
+  # @option val [Float] :max Maximum value
   # @return [String,NilClass] error descriptions
   #
-  def self.float(obj, opt={})
+  def self.float(obj, val)
     return 'not a Float'.freeze unless obj.is_a?(Float)
 
-    if opt[:min] && obj < opt[:min]
-      return 'too small: %f < %f'.freeze % [obj, opt[:min]]
+    if val[:min] && obj < val[:min]
+      return 'too small: %f < %f'.freeze % [obj, val[:min]]
     end
 
-    if opt[:max] && obj > opt[:max]
-      return 'too large: %f > %f'.freeze % [obj, opt[:max]]
+    if val[:max] && obj > val[:max]
+      return 'too large: %f > %f'.freeze % [obj, val[:max]]
     end
 
     return nil
@@ -230,18 +229,18 @@ module Validate
   # check for a type
   #
   # @param obj [Object] object to validate
-  # @param opt [Hash] options
-  # @option opt [Class,Array] :type The class or module to check
+  # @param val [Hash] options
+  # @option val [Class,Array] :type The class or module to check
   # @return [String,NilClass] error descriptions
   #
-  def self.type(obj, opt={})
-    if opt[:type]
-      if opt[:type].is_a?(Array)
-        opt[:type].each{|cl| return nil if obj.is_a?(cl) }
+  def self.type(obj, val)
+    if val[:type]
+      if val[:type].is_a?(Array)
+        val[:type].each{|cl| return nil if obj.is_a?(cl) }
         return 'not a listed type'.freeze
       else
-        if !obj.is_a?(opt[:type])
-          return 'not a %s'.freeze % opt[:type].name
+        if !obj.is_a?(val[:type])
+          return 'not a %s'.freeze % val[:type].name
         end
       end
     end
@@ -262,7 +261,7 @@ module Validate
   # @option opt [Integer] :max Maximum length
   # @return [Hash,NilClass] error descriptions
   #
-  def self.string(obj, opt={})
+  def self.string(obj, val)
 
     # type
     return 'not a String'.freeze unless obj.is_a?(String)
@@ -270,28 +269,28 @@ module Validate
     errors = {}
 
     # good values
-    if (opt[:allowed] && opt[:allowed].include?(obj)) ||
-       (opt[:valid] && opt[:valid].match(obj))
+    if (val[:allowed] && val[:allowed].include?(obj)) ||
+       (val[:valid] && val[:valid].match(obj))
       return nil
     end
 
     # if whitelisting
-    if opt[:whitelist]
+    if val[:whitelist]
       errors[:whitelist] = 'Value was not whitelisted'.freeze
     end
 
     # min length
-    if opt[:min] && obj.size < opt[:min]
-      errors[:min] = 'too short: %d < %d' % [obj.size, opt[:min]]
+    if val[:min] && obj.size < val[:min]
+      errors[:min] = 'too short: %d < %d' % [obj.size, val[:min]]
     end
 
     # max length
-    if opt[:max] && obj.size > opt[:max]
-      errors[:max] = 'too long: %d > %d' % [obj.size, opt[:max]]
+    if val[:max] && obj.size > val[:max]
+      errors[:max] = 'too long: %d > %d' % [obj.size, val[:max]]
     end
 
     # invalid
-    if opt[:invalid] && opt[:invalid].match(obj)
+    if val[:invalid] && val[:invalid].match(obj)
       errors[:invalid] = true
     end
 
@@ -312,7 +311,7 @@ module Validate
   #    If an Array is provided, they will be checked in order.
   # @return [Hash,NilClass] error descriptions
   #
-  def self.array(obj, opt={})
+  def self.array(obj, val)
 
     # type
     return 'not an Array'.freeze unless obj.is_a?(Array)
@@ -320,28 +319,28 @@ module Validate
     errors = {}
 
     # min size
-    if opt[:min] && obj.size < opt[:min]
+    if val[:min] && obj.size < val[:min]
       errors[:min] = true
     end
 
     # max size
-    if opt[:max] && obj.size > opt[:max]
+    if val[:max] && obj.size > val[:max]
       errors[:max] = true
     end
 
     # all members uniq
-    if opt[:uniq] && obj.size != obj.uniq.size
+    if val[:uniq] && obj.size != obj.uniq.size
       errors[:uniq] = true
     end
 
     # single check, all items of the array
-    if opt[:check].is_a?(Hash)
-      check = opt[:check]
+    if val[:check].is_a?(Hash)
+      check = val[:check]
 
       # each value
       obj.each_index do |ix|
-        if opt[ix]
-          err = Validate.check(obj[ix], opt[ix])
+        if val[ix]
+          err = Validate.check(obj[ix], val[ix])
         else
           err = Validate.check(obj[ix], check)
         end
@@ -349,14 +348,14 @@ module Validate
       end
 
     # an array of checks
-    elsif opt[:check].is_a?(Array)
-      cka = opt[:check]
+    elsif val[:check].is_a?(Array)
+      cka = val[:check]
       cs = cka.size
 
       # each value
       obj.each_index do |ix|
-        if opt[ix]
-          err = Validate.check(obj[ix], opt[ix])
+        if val[ix]
+          err = Validate.check(obj[ix], val[ix])
         else
           err = Validate.check(obj[ix], cka[ix % cs])
         end
@@ -379,18 +378,18 @@ module Validate
   # @return [Hash,NilClass] error descriptions
   #
   #
-  def self.hash(obj, opt={})
+  def self.hash(obj, val)
 
     # type
     return 'not a Hash'.freeze unless obj.is_a?(Hash)
 
     ary = obj.to_a
-    val = Array.new(ary.size)
+    chk = Array.new(ary.size)
     errors = {}
 
     # check all required keys
-    if opt[:required]
-      opt[:required].each do |key, check|
+    if val[:required]
+      val[:required].each do |key, check|
 
         # find the index
         ix = ary.index{|ok, ov| ok == key }
@@ -404,13 +403,13 @@ module Validate
         # check it
         err = Validate.check(ary[ix][1], check)
         errors[key] = err if err
-        val[ix] = true
+        chk[ix] = true
       end
     end
 
     # check all optional keys
-    if opt[:optional]
-      opt[:optional].each do |key, check|
+    if val[:optional]
+      val[:optional].each do |key, check|
 
         # find the index
         ix = ary.index{|ok, ov| ok == key }
@@ -419,14 +418,14 @@ module Validate
         # do the check
         err = Validate.check(ary[ix][1], check)
         errors[key] = err if err
-        val[ix] = true
+        chk[ix] = true
       end
     end
 
     # make sure we have validated all keys
-    if !opt[:others]
-      val.each_index do |ix|
-        next if val[ix]
+    if !val[:others]
+      chk.each_index do |ix|
+        next if chk[ix]
         errors[ary[ix][0]] = 'not allowed'.freeze
       end
     end
@@ -445,45 +444,35 @@ module Validate
   # Boolean
   ValBoolean = {
     method: :type,
-    opts: {
-      type: [ TrueClass, FalseClass ].freeze,
-    }.freeze
+    type: [ TrueClass, FalseClass ].freeze,
   }.freeze
 
 
   # Tempfile
   ValTempfile = {
     method: :type,
-    opts: {
-      type: Tempfile,
-    }.freeze
+    type: Tempfile,
   }.freeze
 
 
   # Float
   ValFloat = {
     method: :type,
-    opts: {
-      type: [ Float ].freeze
-    }.freeze
+    type: [ Float ].freeze
   }.freeze
 
 
   # Positive Integer
   ValIntPos = {
     method: :integer,
-    opts: {
-      min: 1
-    }.freeze
+    min: 1
   }.freeze
 
 
   # Unsigned Integer
   ValIntUns = {
     method: :integer,
-    opts: {
-      min: 0
-    }.freeze
+    min: 0
   }.freeze
 
 

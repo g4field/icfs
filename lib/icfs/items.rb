@@ -25,32 +25,26 @@ module Items
   # ICFS version
   FieldIcfs = {
     method: :integer,
-    opts: {
-      min: 1,
-      max: 1,
-    }.freeze
+    min: 1,
+    max: 1,
   }.freeze
 
 
   # Caseid
   FieldCaseid = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 32,
-      invalid: /[[:cntrl:][:space:]"\#$%'()*+\/;<=>?@\[\]\\^`{|}~]/.freeze,
-    }.freeze
+    min: 1,
+    max: 32,
+    invalid: /[[:cntrl:][:space:]"\#$%'()*+\/;<=>?@\[\]\\^`{|}~]/.freeze,
   }.freeze
 
 
   # Title
   FieldTitle = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 128,
-      invalid: /[[:cntrl:]]/.freeze,
-    }.freeze
+    min: 1,
+    max: 128,
+    invalid: /[[:cntrl:]]/.freeze,
   }.freeze
 
 
@@ -59,54 +53,46 @@ module Items
   # may not start with brackets or whitespace
   FieldTag = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 32,
-      invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
-    }.freeze
+    min: 1,
+    max: 32,
+    invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
   }.freeze
 
 
   # Tag for Entry
   FieldTagEntry = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 32,
-      allowed: Set[
-        ICFS::TagAction,
-        ICFS::TagIndex,
-        ICFS::TagCase,
-      ].freeze,
-      invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
-    }.freeze
+    min: 1,
+    max: 32,
+    allowed: Set[
+      ICFS::TagAction,
+      ICFS::TagIndex,
+      ICFS::TagCase,
+    ].freeze,
+    invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
   }.freeze
 
 
   # Special tags
   FieldTagSpecial = {
     method: :string,
-    opts: {
-      allowed: Set[
-        ICFS::TagNone,
-        ICFS::TagAction,
-        ICFS::TagIndex,
-        ICFS::TagCase,
-      ].freeze,
-      whitelist: true,
-    }.freeze
+    allowed: Set[
+      ICFS::TagNone,
+      ICFS::TagAction,
+      ICFS::TagIndex,
+      ICFS::TagCase,
+    ].freeze,
+    whitelist: true,
   }.freeze
 
 
   # Any tag, including empty
   FieldTagAny = {
     method: :any,
-    opts: {
-      check: [
-        FieldTag,
-        FieldTagSpecial
-      ].freeze,
-    }.freeze
+    check: [
+      FieldTag,
+      FieldTagSpecial
+    ].freeze,
   }.freeze
 
 
@@ -115,11 +101,9 @@ module Items
   # may not start with square brackets, curly brackets, or whitespace
   FieldPermNormal = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 64,
-      invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
-    }.freeze
+    min: 1,
+    max: 64,
+    invalid: /[[:cntrl:]]|^[\[\{ ]/.freeze,
   }.freeze
 
 
@@ -127,15 +111,13 @@ module Items
   # square brackets
   FieldPermReserve = {
     method: :string,
-    opts: {
-      allowed: Set[
-        ICFS::PermRead,
-        ICFS::PermWrite,
-        ICFS::PermManage,
-        ICFS::PermAction
-      ].freeze,
-      whitelist: true
-    }.freeze,
+    allowed: Set[
+      ICFS::PermRead,
+      ICFS::PermWrite,
+      ICFS::PermManage,
+      ICFS::PermAction
+    ].freeze,
+    whitelist: true
   }.freeze
 
 
@@ -143,37 +125,31 @@ module Items
   # curly brackets, no control characters
   FieldPermGlobal = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 64,
-      valid: /^\{[^[:cntrl:]]+\}$/.freeze,
-      whitelist: true,
-    }.freeze
+    min: 1,
+    max: 64,
+    valid: /^\{[^[:cntrl:]]+\}$/.freeze,
+    whitelist: true,
   }.freeze
 
 
   # A case perm
   FieldPermCase = {
     method: :any,
-    opts: {
-      check: [
-        FieldPermNormal,
-        FieldPermReserve,
-      ].freeze
-    }.freeze
+    check: [
+      FieldPermNormal,
+      FieldPermReserve,
+    ].freeze
   }.freeze
 
 
   # Any perm
   FieldPermAny = {
     method: :any,
-    opts: {
-      check: [
-        FieldPermNormal,
-        FieldPermReserve,
-        FieldPermGlobal,
-      ].freeze
-    }.freeze
+    check: [
+      FieldPermNormal,
+      FieldPermReserve,
+      FieldPermGlobal,
+    ].freeze
   }.freeze
 
 
@@ -182,55 +158,45 @@ module Items
   # no space, no punctuation except , - : _
   FieldUsergrp = {
     method: :string,
-    opts: {
-      min: 3,
-      max: 32,
-      invalid: /[\x00-\x2b\x2e\x2f\x3b-\x40\x5b-\x5e\x60\x7b-\x7f]/.freeze,
-    }.freeze
+    min: 3,
+    max: 32,
+    invalid: /[\x00-\x2b\x2e\x2f\x3b-\x40\x5b-\x5e\x60\x7b-\x7f]/.freeze,
   }.freeze
 
 
   # a hash
   FieldHash = {
     method: :string,
-    opts: {
-      min: 64,
-      max: 64,
-      invalid: /[^0-9a-f]/.freeze
-    }.freeze
+    min: 64,
+    max: 64,
+    invalid: /[^0-9a-f]/.freeze
   }.freeze
 
 
   # Content
   FieldContent = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 8*1024,
-      invalid: /[^[:graph:][:space:]]/.freeze,
-    }.freeze
+    min: 1,
+    max: 8*1024,
+    invalid: /[^[:graph:][:space:]]/.freeze,
   }.freeze
 
 
   # a stat name
   FieldStat = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 32,
-      invalid: /[[:cntrl:]\t\r\n\v\f]|^_/.freeze,
-    }.freeze
+    min: 1,
+    max: 32,
+    invalid: /[[:cntrl:]\t\r\n\v\f]|^_/.freeze,
   }.freeze
 
 
   # a filename
   FieldFilename = {
     method: :string,
-    opts: {
-      min: 1,
-      max: 128,
-      invalid: /[[:cntrl:]\\\/]|^\./.freeze
-    }.freeze
+    min: 1,
+    max: 128,
+    invalid: /[[:cntrl:]\\\/]|^\./.freeze
   }.freeze
 
 
@@ -242,13 +208,11 @@ module Items
   #
   SubTagsEmpty = {
     method: :array,
-    opts: {
-      min: 1,
-      max: 1,
-      check: {
-        method: :equals,
-        opts: { check: ICFS::TagNone }.freeze
-      }.freeze
+    min: 1,
+    max: 1,
+    check: {
+      method: :equals,
+      check: ICFS::TagNone
     }.freeze
   }.freeze
 
@@ -257,45 +221,35 @@ module Items
   #
   SubTagsEntry = {
     method: :array,
-    opts: {
-      min: 1,
-      check: FieldTagEntry
-    }.freeze
+    min: 1,
+    check: FieldTagEntry
   }.freeze
 
 
   # Tags
   SubTagsNormal = {
     method: :array,
-    opts: {
-      min: 1,
-      check: FieldTag
-    }.freeze
+    min: 1,
+    check: FieldTag
   }.freeze
 
 
   # Tags
   SubTags = {
     method: :any,
-    opts: {
-      check: [ SubTagsEmpty, SubTagsNormal ].freeze
-    }.freeze
+    check: [ SubTagsEmpty, SubTagsNormal ].freeze
   }.freeze
 
 
   # Grant
   SubGrant = {
     method: :hash,
-    opts: {
-      required: {
-        'perm' => FieldPermCase,
-        'grant' => {
-          method: :array,
-          opts: {
-            min: 1,
-            check: FieldUsergrp
-          }.freeze
-        }.freeze
+    required: {
+      'perm' => FieldPermCase,
+      'grant' => {
+        method: :array,
+        min: 1,
+        check: FieldUsergrp
       }.freeze
     }.freeze
   }.freeze
@@ -304,31 +258,25 @@ module Items
   # Access
   SubAccess = {
     method: :array,
-    opts: {
-      min: 1,
-      check: SubGrant
-    }.freeze
+    min: 1,
+    check: SubGrant
   }.freeze
 
 
   # Case stats
   SubCaseStats = {
     method: :array,
-    opts: {
-      min:1,
-      check: FieldStat,
-    }.freeze,
+    min:1,
+    check: FieldStat,
   }.freeze
 
 
   # An item in a log
   SubLogItem = {
     method: :hash,
-    opts: {
-      required: {
-        'num' => Validate::ValIntPos,
-        'hash' => FieldHash,
-      }.freeze
+    required: {
+      'num' => Validate::ValIntPos,
+      'hash' => FieldHash,
     }.freeze
   }.freeze
 
@@ -336,43 +284,33 @@ module Items
   # Indexes
   SubIndexes = {
     method: :array,
-    opts: {
-      min: 1,
-      check: Validate::ValIntPos,
-    }.freeze,
+    min: 1,
+    check: Validate::ValIntPos,
   }.freeze
 
 
   # Perms
   SubPerms = {
     method: :array,
-    opts: {
-      min: 1,
-      check: FieldPermAny
-    }.freeze
+    min: 1,
+    check: FieldPermAny
   }.freeze
 
 
   # Stats
   SubStats = {
     method: :array,
-    opts: {
-      min: 1,
-      check: {
-        method: :hash,
-        opts: {
-          required: {
-            "name" => FieldStat,
-            "value" => Validate::ValFloat,
-            "credit" => {
-              method: :array,
-              opts: {
-                min: 1,
-                max: 32,
-                check: FieldUsergrp
-              }.freeze
-            }.freeze
-          }.freeze
+    min: 1,
+    check: {
+      method: :hash,
+      required: {
+        "name" => FieldStat,
+        "value" => Validate::ValFloat,
+        "credit" => {
+          method: :array,
+          min: 1,
+          max: 32,
+          check: FieldUsergrp
         }.freeze
       }.freeze
     }.freeze
@@ -382,12 +320,10 @@ module Items
   # An old file
   SubFileOld = {
     method: :hash,
-    opts: {
-      required: {
-        'log' => Validate::ValIntPos,
-        'num' => Validate::ValIntUns,
-        'name' => FieldFilename,
-      }.freeze
+    required: {
+      'log' => Validate::ValIntPos,
+      'num' => Validate::ValIntUns,
+      'name' => FieldFilename,
     }.freeze
   }.freeze
 
@@ -395,21 +331,17 @@ module Items
   # Case task
   SubTaskCase = {
     method: :hash,
-    opts: {
-      required: {
-        'assigned' => {
-          method: :string,
-          opts: {
-            allowed: Set[ ICFS::UserCase ].freeze,
-            whitelist: true
-          }.freeze
-        }.freeze,
-        'title' => FieldTitle,
-        'status' => Validate::ValBoolean,
-        'flag' => Validate::ValBoolean,
-        'time' => Validate::ValIntPos,
-        'tags' => SubTags
-      }.freeze
+    required: {
+      'assigned' => {
+        method: :string,
+        allowed: Set[ ICFS::UserCase ].freeze,
+        whitelist: true
+      }.freeze,
+      'title' => FieldTitle,
+      'status' => Validate::ValBoolean,
+      'flag' => Validate::ValBoolean,
+      'time' => Validate::ValIntPos,
+      'tags' => SubTags
     }.freeze
   }.freeze
 
@@ -417,15 +349,13 @@ module Items
   # Normal task
   SubTaskNormal = {
     method: :hash,
-    opts: {
-      required: {
-        'assigned' => FieldUsergrp,
-        'title' => FieldTitle,
-        'status' => Validate::ValBoolean,
-        'flag' => Validate::ValBoolean,
-        'time' => Validate::ValIntPos,
-        'tags' => SubTags
-      }.freeze
+    required: {
+      'assigned' => FieldUsergrp,
+      'title' => FieldTitle,
+      'status' => Validate::ValBoolean,
+      'flag' => Validate::ValBoolean,
+      'time' => Validate::ValIntPos,
+      'tags' => SubTags
     }.freeze
   }.freeze
 
@@ -433,34 +363,28 @@ module Items
   # Tasks
   SubTasks = {
     method: :array,
-    opts: {
-      min: 1,
-      0 => SubTaskCase,
-      check: SubTaskNormal
-    }.freeze
+    min: 1,
+    0 => SubTaskCase,
+    check: SubTaskNormal
   }.freeze
 
 
   # Case task
   SubTaskEditCase = {
     method: :hash,
-    opts: {
-      required: {
-        'assigned' => {
-          method: :string,
-          opts: {
-            allowed: Set[ ICFS::UserCase ].freeze,
-            whitelist: true
-          }.freeze
-        }.freeze,
-        'title' => FieldTitle,
-        'status' => Validate::ValBoolean,
-        'flag' => Validate::ValBoolean,
-        'time' => Validate::ValIntPos,
+    required: {
+      'assigned' => {
+        method: :string,
+        allowed: Set[ ICFS::UserCase ].freeze,
+        whitelist: true
       }.freeze,
-      optional: {
-        'tags' => SubTags
-      }.freeze
+      'title' => FieldTitle,
+      'status' => Validate::ValBoolean,
+      'flag' => Validate::ValBoolean,
+      'time' => Validate::ValIntPos,
+    }.freeze,
+    optional: {
+      'tags' => SubTags
     }.freeze
   }.freeze
 
@@ -468,17 +392,15 @@ module Items
   # Normal task
   SubTaskEditNormal = {
     method: :hash,
-    opts: {
-      required: {
-        'assigned' => FieldUsergrp,
-        'title' => FieldTitle,
-        'status' => Validate::ValBoolean,
-        'flag' => Validate::ValBoolean,
-        'time' => Validate::ValIntPos,
-      }.freeze,
-      optional: {
-        'tags' => SubTags
-      }.freeze
+    required: {
+      'assigned' => FieldUsergrp,
+      'title' => FieldTitle,
+      'status' => Validate::ValBoolean,
+      'flag' => Validate::ValBoolean,
+      'time' => Validate::ValIntPos,
+    }.freeze,
+    optional: {
+      'tags' => SubTags
     }.freeze
   }.freeze
 
@@ -486,22 +408,18 @@ module Items
   # TasksEdit
   SubTasksEdit = {
     method: :array,
-    opts: {
-      min: 1,
-      0 => SubTaskEditCase,
-      check: SubTaskEditNormal,
-    }.freeze
+    min: 1,
+    0 => SubTaskEditCase,
+    check: SubTaskEditNormal,
   }.freeze
 
 
   # A new file
   SubFileNew = {
     method: :hash,
-    opts: {
-      required: {
-        'temp' => Validate::ValTempfile,
-        'name' => FieldFilename,
-      }.freeze
+    required: {
+      'temp' => Validate::ValTempfile,
+      'name' => FieldFilename,
     }.freeze
   }.freeze
 
@@ -514,17 +432,15 @@ module Items
   # Case - Edit
   ItemCaseEdit = {
     method: :hash,
-    opts: {
-      required: {
-        'template' => Validate::ValBoolean,
-        'status' => Validate::ValBoolean,
-        'title' => FieldTitle,
-        'access' => SubAccess
-      }.freeze,
-      optional: {
-        'tags' => SubTags,
-        'stats' => SubCaseStats,
-      }.freeze
+    required: {
+      'template' => Validate::ValBoolean,
+      'status' => Validate::ValBoolean,
+      'title' => FieldTitle,
+      'access' => SubAccess
+    }.freeze,
+    optional: {
+      'tags' => SubTags,
+      'stats' => SubCaseStats,
     }.freeze
   }.freeze
 
@@ -532,26 +448,22 @@ module Items
   # Entry - New only
   ItemEntryNew = {
     method: :hash,
-    opts: {
-      required: {
-        'caseid' => FieldCaseid,
-        'title' => FieldTitle,
-        'content' => FieldContent,
-      }.freeze,
-      optional: {
-        'time' => Validate::ValIntPos,
-        'tags' => SubTagsNormal,
-        'index' => SubIndexes,
-        'action' => Validate::ValIntPos,
-        'perms' => SubPerms,
-        'stats' => SubStats,
-        'files' => {
-          method: :array,
-          opts: {
-            min: 1,
-            check: SubFileNew
-          }.freeze
-        }.freeze
+    required: {
+      'caseid' => FieldCaseid,
+      'title' => FieldTitle,
+      'content' => FieldContent,
+    }.freeze,
+    optional: {
+      'time' => Validate::ValIntPos,
+      'tags' => SubTagsNormal,
+      'index' => SubIndexes,
+      'action' => Validate::ValIntPos,
+      'perms' => SubPerms,
+      'stats' => SubStats,
+      'files' => {
+        method: :array,
+        min: 1,
+        check: SubFileNew
       }.freeze
     }.freeze
   }.freeze
@@ -560,31 +472,25 @@ module Items
   # Entry - Edit or New
   ItemEntryEdit = {
     method: :hash,
-    opts: {
-      required: {
-        'caseid' => FieldCaseid,
-        'title' => FieldTitle,
-        'content' => FieldContent,
-      }.freeze,
-      optional: {
-        'entry' => Validate::ValIntPos,
-        'time' => Validate::ValIntPos,
-        'tags' => SubTagsEntry,
-        'index' => SubIndexes,
-        'action' => Validate::ValIntPos,
-        'perms' => SubPerms,
-        'stats' => SubStats,
-        'files' => {
-          method: :array,
-          opts: {
-            min: 1,
-            check: {
-              method: :any,
-              opts: {
-                check: [ SubFileOld, SubFileNew ].freeze
-              }.freeze
-            }.freeze
-          }.freeze
+    required: {
+      'caseid' => FieldCaseid,
+      'title' => FieldTitle,
+      'content' => FieldContent,
+    }.freeze,
+    optional: {
+      'entry' => Validate::ValIntPos,
+      'time' => Validate::ValIntPos,
+      'tags' => SubTagsEntry,
+      'index' => SubIndexes,
+      'action' => Validate::ValIntPos,
+      'perms' => SubPerms,
+      'stats' => SubStats,
+      'files' => {
+        method: :array,
+        min: 1,
+        check: {
+          method: :any,
+          check: [ SubFileOld, SubFileNew ].freeze
         }.freeze
       }.freeze
     }.freeze
@@ -594,30 +500,26 @@ module Items
   # Action - Edit or New
   ItemActionEdit = {
     method: :hash,
-    opts: {
-      required: {
-        'tasks' => SubTasksEdit
-      }.freeze,
-      optional: {
-        'action' => Validate::ValIntPos
-      }.freeze
+    required: {
+      'tasks' => SubTasksEdit
     }.freeze,
+    optional: {
+      'action' => Validate::ValIntPos
+    }.freeze
   }.freeze
 
 
   # Index - Edit or New
   ItemIndexEdit = {
     method: :hash,
-    opts: {
-      required: {
-        'title' => FieldTitle,
-        'content' => FieldContent,
-      }.freeze,
-      optional: {
-        'index' => Validate::ValIntPos,
-        'tags' => SubTags,
-      }.freeze
+    required: {
+      'title' => FieldTitle,
+      'content' => FieldContent,
     }.freeze,
+    optional: {
+      'index' => Validate::ValIntPos,
+      'tags' => SubTags,
+    }.freeze
   }.freeze
 
 
@@ -628,88 +530,76 @@ module Items
   # Case
   ItemCase = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'log' => Validate::ValIntPos,
-        'template' => Validate::ValBoolean,
-        'status' => Validate::ValBoolean,
-        'title' => FieldTitle,
-        'tags' => SubTags,
-        'access' => SubAccess,
-      }.freeze,
-      optional: {
-        'stats' => SubCaseStats,
-      }.freeze,
-    }.freeze
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'log' => Validate::ValIntPos,
+      'template' => Validate::ValBoolean,
+      'status' => Validate::ValBoolean,
+      'title' => FieldTitle,
+      'tags' => SubTags,
+      'access' => SubAccess,
+    }.freeze,
+    optional: {
+      'stats' => SubCaseStats,
+    }.freeze,
   }.freeze
 
 
   # Log
   ItemLog = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'log' => Validate::ValIntPos,
-        'prev' => FieldHash,
-        'time' => Validate::ValIntPos,
-        'user' => FieldUsergrp,
-        'entry' => SubLogItem,
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'log' => Validate::ValIntPos,
+      'prev' => FieldHash,
+      'time' => Validate::ValIntPos,
+      'user' => FieldUsergrp,
+      'entry' => SubLogItem,
+    }.freeze,
+    optional: {
+      'index' => SubLogItem,
+      'action' => SubLogItem,
+      'case_hash' => FieldHash,
+      'files_hash' => {
+        method: :array,
+        min: 1,
+        check: FieldHash
       }.freeze,
-      optional: {
-        'index' => SubLogItem,
-        'action' => SubLogItem,
-        'case_hash' => FieldHash,
-        'files_hash' => {
-          method: :array,
-          opts: {
-            min: 1,
-            check: FieldHash,
-          }.freeze
-        }.freeze,
-      }.freeze,
-    }.freeze
+    }.freeze,
   }.freeze
 
 
   # Entry
   ItemEntry = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'entry' => Validate::ValIntPos,
-        'log' => Validate::ValIntPos,
-        'user' => FieldUsergrp,
-        'time' => Validate::ValIntPos,
-        'title' => FieldTitle,
-        'content' => FieldContent,
-        'tags' => {
-          method: :any,
-          opts: {
-            check: [
-              SubTagsEmpty,
-              SubTagsEntry,
-            ].freeze
-          }.freeze
-        }.freeze,
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'entry' => Validate::ValIntPos,
+      'log' => Validate::ValIntPos,
+      'user' => FieldUsergrp,
+      'time' => Validate::ValIntPos,
+      'title' => FieldTitle,
+      'content' => FieldContent,
+      'tags' => {
+        method: :any,
+        check: [
+          SubTagsEmpty,
+          SubTagsEntry,
+        ].freeze
       }.freeze,
-      optional: {
-        'index' => SubIndexes,
-        'action' => Validate::ValIntPos,
-        'perms' => SubPerms,
-        'stats' => SubStats,
-        'files' => {
-          method: :array,
-          opts: {
-            min: 1,
-            check: SubFileOld,
-          }.freeze
-        }.freeze
+    }.freeze,
+    optional: {
+      'index' => SubIndexes,
+      'action' => Validate::ValIntPos,
+      'perms' => SubPerms,
+      'stats' => SubStats,
+      'files' => {
+        method: :array,
+        min: 1,
+        check: SubFileOld
       }.freeze
     }.freeze
   }.freeze
@@ -718,14 +608,12 @@ module Items
   # Action
   ItemAction = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'action' => Validate::ValIntPos,
-        'log' => Validate::ValIntPos,
-        'tasks' => SubTasks
-      }.freeze
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'action' => Validate::ValIntPos,
+      'log' => Validate::ValIntPos,
+      'tasks' => SubTasks
     }.freeze
   }.freeze
 
@@ -733,33 +621,29 @@ module Items
   # Index
   ItemIndex = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'index' => Validate::ValIntPos,
-        'log' => Validate::ValIntPos,
-        'title' => FieldTitle,
-        'content' => FieldContent,
-        'tags' => SubTags
-      }.freeze,
-    }.freeze
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'index' => Validate::ValIntPos,
+      'log' => Validate::ValIntPos,
+      'title' => FieldTitle,
+      'content' => FieldContent,
+      'tags' => SubTags
+    }.freeze,
   }.freeze
 
 
   # Current
   ItemCurrent = {
     method: :hash,
-    opts: {
-      required: {
-        'icfs' => FieldIcfs,
-        'caseid' => FieldCaseid,
-        'log' => Validate::ValIntPos,
-        'hash' => FieldHash,
-        'entry' => Validate::ValIntPos,
-        'action' => Validate::ValIntUns,
-        'index' => Validate::ValIntUns,
-      }.freeze
+    required: {
+      'icfs' => FieldIcfs,
+      'caseid' => FieldCaseid,
+      'log' => Validate::ValIntPos,
+      'hash' => FieldHash,
+      'entry' => Validate::ValIntPos,
+      'action' => Validate::ValIntUns,
+      'index' => Validate::ValIntUns,
     }.freeze
   }.freeze
 
