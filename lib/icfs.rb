@@ -46,6 +46,9 @@ module ICFS
   # permission to manage actions
   PermAction = '[action]'.freeze
 
+  # global permission to search
+  PermSearch = '{[search]}'.freeze
+
 
   # user group
   UserCase = '[case]'.freeze

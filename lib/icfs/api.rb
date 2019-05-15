@@ -221,16 +221,33 @@ class Api
 
     # have read permission on the case or
     # are assigned to the action
-    if access_list(cid).include?( ICFS::PermRead ) ||
-       (anum && _tasked?(cid, anum) )
+    if access_list(cid).include?( ICFS::PermRead )
+      return true
+    elsif anum && _tasked?(cid, anum)
       return true
     else
       return false
     end
 
+  # handle an action that isn't found
+  rescue Error::NotFound
+    return false
   end # def _can_read?()
   private :_can_read?
 
+
+  ###############################################
+  # Check if we have search permissions for a case
+  #
+  def _search?(query)
+    if( @perms.include?(ICFS::PermSearch) || ( query[:caseid] &&
+      access_list(query[:caseid]).include?(ICFS::PermRead) ) )
+      return true
+    else
+      return false
+    end      
+  end # def _search?()
+  private :_search?
 
 
   ##############################################################
@@ -531,11 +548,20 @@ class Api
   }.freeze
 
 
+
   ###############################################
   # Search for entries
   #
   def entry_search(query)
     Validate.validate(query, 'Entry Search'.freeze, ValEntrySearch)
+
+    # check permissions
+    # - have global search permissions / read access to the case
+    # - are searching for an action they can read
+    unless( _search?(query) || (query[:caseid] && 
+        query[:action] && _tasked?(query[:caseid], query[:action])))
+      raise(Error::Perms, 'Does not have permission to search'.freeze)
+    end
 
     # run the query
     res = @cache.entry_search(query)
@@ -558,11 +584,10 @@ class Api
       end
 
       # can read the case/action, missing perms for this entry
-      # leave time and perms
+      # leave time, perms, and action
       al = access_list(ent[:caseid])
       if !(Set.new(ent[:perms]) - al).empty?
         ent[:title] = nil
-        ent[:action] = nil
         ent[:tags] = nil
         ent[:files] = nil
         ent[:stats] = nil
@@ -618,11 +643,13 @@ class Api
   def action_search(query)
     Validate.validate(query, 'Action Search'.freeze, ValActionSearch)
 
-    # only allow searches for user/roles you have
-    unless @ur.include?(query[:assigned]) ||
+    # permissions check
+    # - have global search permissions / read access to the case
+    # - searching for role you have
+    unless( _search?(query) || @ur.include?(query[:assigned]) ||
        (query[:assigned] == ICFS::UserCase && query[:caseid] &&
-          access_list(query[:caseid]).include?(ICFS::PermAction) )
-      raise(Error::Perms, 'May not search for other\'s tasks'.freeze)
+        access_list(query[:caseid]).include?(ICFS::PermAction) ))
+      raise(Error::Perms, 'Does not have permission to search'.freeze)
     end
 
     # run the search
@@ -659,10 +686,29 @@ class Api
   ###############################################
   # Search for indexes
   #
-  # @todo permissions checks?
   def index_search(query)
     Validate.validate(query, 'Index Search'.freeze, ValIndexSearch)
-    @cache.index_search(query)
+
+    # permissions check
+    # - have global search permissions / read access to the case
+    unless _search?(query)
+      raise(Error::Perms, 'Do not have permission to search'.freeze)
+    end
+
+    # run the query
+    res = @cache.index_search(query)
+
+    # check perms for each index
+    res[:list].each do |se|
+      idx = se[:object]
+
+      unless access_list(idx[:caseid].include?(ICFS::PermRead))
+        idx[:title] = nil
+        idx[:tags] = nil
+      end
+    end
+
+    return res
   end
 
 
@@ -682,11 +728,18 @@ class Api
   ###############################################
   # Analyze stats
   #
-  # @todo permissions check?
   def stats(query)
     Validate.validate(query, 'Stats Search'.freeze, ValStatsSearch)
+
+    # permissions check
+    # - have global search permissions / read access to the case
+    unless _search?(query)
+      raise(Error::Perms, 'Do not have permissions to search'.freeze)
+    end
+
     @cache.stats(query)
   end
+
 
   # Case Tags search validation
   ValCaseTags = {
@@ -726,9 +779,11 @@ class Api
   #
   def entry_tags(query)
     Validate.validate(query, 'Entry Tags Search'.freeze, ValEntryTags)
-    al = access_list(query[:caseid])
-    if !al.include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % IFCS::PermRead)
+
+    # permissions
+    # - read access to case
+    unless access_list(query[:caseid]).include?(ICFS::PermRead)
+      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
     end
     return @cache.entry_tags(query)
   end # def entry_tags()
@@ -795,8 +850,7 @@ class Api
   #
   def index_tags(query)
     Validate.validate(query, 'Index Tags'.freeze, ValIndexTags)
-    al = access_list(query[:caseid])
-    if !al.include?(ICFS::PermRead)
+    unless access_list(query[:caseid]).include?(ICFS::PermRead)
       raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
     end
     return @cache.index_tags(query)
@@ -1097,6 +1151,8 @@ class Api
         anum = ent_pri['action']
       elsif act && act['action']
         anum = act['action']
+      elsif ent['action']
+        anum = ent['action']
       end
       if anum
         json = @cache.action_read(cid, anum)
