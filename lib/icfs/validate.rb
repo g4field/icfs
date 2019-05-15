@@ -20,7 +20,6 @@ module ICFS
 #
 # @todo Move .parse and .generate to items or ICFS
 # @todo Remove all use of Error module
-# @todo Switch to use Is* (e.g. IsBoolean) rather than Val*
 #
 module Validate
 
@@ -441,35 +440,35 @@ module Validate
 
 
   # Boolean
-  ValBoolean = {
+  IsBoolean = {
     method: :type,
     type: [ TrueClass, FalseClass ].freeze,
   }.freeze
 
 
   # Tempfile
-  ValTempfile = {
+  IsTempfile = {
     method: :type,
     type: Tempfile,
   }.freeze
 
 
   # Float
-  ValFloat = {
+  IsFloat = {
     method: :type,
     type: [ Float ].freeze
   }.freeze
 
 
   # Positive Integer
-  ValIntPos = {
+  IsIntPos = {
     method: :integer,
     min: 1
   }.freeze
 
 
   # Unsigned Integer
-  ValIntUns = {
+  IsIntUns = {
     method: :integer,
     min: 0
   }.freeze

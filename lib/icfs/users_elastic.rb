@@ -76,9 +76,9 @@ class UsersElastic < Users
           'group'.freeze,
         ].freeze
       }.freeze,
-      'first' => Validate::ValIntPos,
-      'last' => Validate::ValIntPos,
-      'active' => Validate::ValBoolean,
+      'first' => Validate::IsIntPos,
+      'last' => Validate::IsIntPos,
+      'active' => Validate::IsBoolean,
     }.freeze,
     optional: {
       'roles' => {

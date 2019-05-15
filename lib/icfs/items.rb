@@ -275,7 +275,7 @@ module Items
   SubLogItem = {
     method: :hash,
     required: {
-      'num' => Validate::ValIntPos,
+      'num' => Validate::IsIntPos,
       'hash' => FieldHash,
     }.freeze
   }.freeze
@@ -285,7 +285,7 @@ module Items
   SubIndexes = {
     method: :array,
     min: 1,
-    check: Validate::ValIntPos,
+    check: Validate::IsIntPos,
   }.freeze
 
 
@@ -305,7 +305,7 @@ module Items
       method: :hash,
       required: {
         "name" => FieldStat,
-        "value" => Validate::ValFloat,
+        "value" => Validate::IsFloat,
         "credit" => {
           method: :array,
           min: 1,
@@ -321,8 +321,8 @@ module Items
   SubFileOld = {
     method: :hash,
     required: {
-      'log' => Validate::ValIntPos,
-      'num' => Validate::ValIntUns,
+      'log' => Validate::IsIntPos,
+      'num' => Validate::IsIntUns,
       'name' => FieldFilename,
     }.freeze
   }.freeze
@@ -338,9 +338,9 @@ module Items
         whitelist: true
       }.freeze,
       'title' => FieldTitle,
-      'status' => Validate::ValBoolean,
-      'flag' => Validate::ValBoolean,
-      'time' => Validate::ValIntPos,
+      'status' => Validate::IsBoolean,
+      'flag' => Validate::IsBoolean,
+      'time' => Validate::IsIntPos,
       'tags' => SubTags
     }.freeze
   }.freeze
@@ -352,9 +352,9 @@ module Items
     required: {
       'assigned' => FieldUsergrp,
       'title' => FieldTitle,
-      'status' => Validate::ValBoolean,
-      'flag' => Validate::ValBoolean,
-      'time' => Validate::ValIntPos,
+      'status' => Validate::IsBoolean,
+      'flag' => Validate::IsBoolean,
+      'time' => Validate::IsIntPos,
       'tags' => SubTags
     }.freeze
   }.freeze
@@ -379,9 +379,9 @@ module Items
         whitelist: true
       }.freeze,
       'title' => FieldTitle,
-      'status' => Validate::ValBoolean,
-      'flag' => Validate::ValBoolean,
-      'time' => Validate::ValIntPos,
+      'status' => Validate::IsBoolean,
+      'flag' => Validate::IsBoolean,
+      'time' => Validate::IsIntPos,
     }.freeze,
     optional: {
       'tags' => SubTags
@@ -395,9 +395,9 @@ module Items
     required: {
       'assigned' => FieldUsergrp,
       'title' => FieldTitle,
-      'status' => Validate::ValBoolean,
-      'flag' => Validate::ValBoolean,
-      'time' => Validate::ValIntPos,
+      'status' => Validate::IsBoolean,
+      'flag' => Validate::IsBoolean,
+      'time' => Validate::IsIntPos,
     }.freeze,
     optional: {
       'tags' => SubTags
@@ -418,7 +418,7 @@ module Items
   SubFileNew = {
     method: :hash,
     required: {
-      'temp' => Validate::ValTempfile,
+      'temp' => Validate::IsTempfile,
       'name' => FieldFilename,
     }.freeze
   }.freeze
@@ -433,8 +433,8 @@ module Items
   ItemCaseEdit = {
     method: :hash,
     required: {
-      'template' => Validate::ValBoolean,
-      'status' => Validate::ValBoolean,
+      'template' => Validate::IsBoolean,
+      'status' => Validate::IsBoolean,
       'title' => FieldTitle,
       'access' => SubAccess
     }.freeze,
@@ -454,10 +454,10 @@ module Items
       'content' => FieldContent,
     }.freeze,
     optional: {
-      'time' => Validate::ValIntPos,
+      'time' => Validate::IsIntPos,
       'tags' => SubTagsNormal,
       'index' => SubIndexes,
-      'action' => Validate::ValIntPos,
+      'action' => Validate::IsIntPos,
       'perms' => SubPerms,
       'stats' => SubStats,
       'files' => {
@@ -478,11 +478,11 @@ module Items
       'content' => FieldContent,
     }.freeze,
     optional: {
-      'entry' => Validate::ValIntPos,
-      'time' => Validate::ValIntPos,
+      'entry' => Validate::IsIntPos,
+      'time' => Validate::IsIntPos,
       'tags' => SubTagsEntry,
       'index' => SubIndexes,
-      'action' => Validate::ValIntPos,
+      'action' => Validate::IsIntPos,
       'perms' => SubPerms,
       'stats' => SubStats,
       'files' => {
@@ -504,7 +504,7 @@ module Items
       'tasks' => SubTasksEdit
     }.freeze,
     optional: {
-      'action' => Validate::ValIntPos
+      'action' => Validate::IsIntPos
     }.freeze
   }.freeze
 
@@ -517,7 +517,7 @@ module Items
       'content' => FieldContent,
     }.freeze,
     optional: {
-      'index' => Validate::ValIntPos,
+      'index' => Validate::IsIntPos,
       'tags' => SubTags,
     }.freeze
   }.freeze
@@ -533,9 +533,9 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'log' => Validate::ValIntPos,
-      'template' => Validate::ValBoolean,
-      'status' => Validate::ValBoolean,
+      'log' => Validate::IsIntPos,
+      'template' => Validate::IsBoolean,
+      'status' => Validate::IsBoolean,
       'title' => FieldTitle,
       'tags' => SubTags,
       'access' => SubAccess,
@@ -552,9 +552,9 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'log' => Validate::ValIntPos,
+      'log' => Validate::IsIntPos,
       'prev' => FieldHash,
-      'time' => Validate::ValIntPos,
+      'time' => Validate::IsIntPos,
       'user' => FieldUsergrp,
       'entry' => SubLogItem,
     }.freeze,
@@ -577,10 +577,10 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'entry' => Validate::ValIntPos,
-      'log' => Validate::ValIntPos,
+      'entry' => Validate::IsIntPos,
+      'log' => Validate::IsIntPos,
       'user' => FieldUsergrp,
-      'time' => Validate::ValIntPos,
+      'time' => Validate::IsIntPos,
       'title' => FieldTitle,
       'content' => FieldContent,
       'tags' => {
@@ -593,7 +593,7 @@ module Items
     }.freeze,
     optional: {
       'index' => SubIndexes,
-      'action' => Validate::ValIntPos,
+      'action' => Validate::IsIntPos,
       'perms' => SubPerms,
       'stats' => SubStats,
       'files' => {
@@ -611,8 +611,8 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'action' => Validate::ValIntPos,
-      'log' => Validate::ValIntPos,
+      'action' => Validate::IsIntPos,
+      'log' => Validate::IsIntPos,
       'tasks' => SubTasks
     }.freeze
   }.freeze
@@ -624,8 +624,8 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'index' => Validate::ValIntPos,
-      'log' => Validate::ValIntPos,
+      'index' => Validate::IsIntPos,
+      'log' => Validate::IsIntPos,
       'title' => FieldTitle,
       'content' => FieldContent,
       'tags' => SubTags
@@ -639,11 +639,11 @@ module Items
     required: {
       'icfs' => FieldIcfs,
       'caseid' => FieldCaseid,
-      'log' => Validate::ValIntPos,
+      'log' => Validate::IsIntPos,
       'hash' => FieldHash,
-      'entry' => Validate::ValIntPos,
-      'action' => Validate::ValIntUns,
-      'index' => Validate::ValIntUns,
+      'entry' => Validate::IsIntPos,
+      'action' => Validate::IsIntUns,
+      'index' => Validate::IsIntUns,
     }.freeze
   }.freeze
 
