@@ -1,5 +1,5 @@
 Gem::Specification.new do |gs|
-  gs.version = '0.1.1'
+  gs.version = '0.1.0'
 
   gs.name = 'icfs'
   gs.license = 'GPL-3.0'
