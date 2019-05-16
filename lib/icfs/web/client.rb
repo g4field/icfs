@@ -1284,7 +1284,7 @@ class Client
             cd = _a_case_search(env, qu, it)
           when :action
             qu[:purpose] = 'Action Tag Search'.freeze
-            cd = _a_action_seach(env, qu, it)
+            cd = _a_action_search(env, qu, it)
           end
 
         # time
