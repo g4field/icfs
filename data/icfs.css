@@ -126,6 +126,7 @@ pre.sbar-main-content {
   border-bottom: thin solid;
   margin: 0px;
   padding: 0.25em;
+  white-space: pre-wrap;
 }
 
 
