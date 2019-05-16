@@ -43,4 +43,8 @@ app = Rack::Builder.new do
   run web
 end
 
-Rack::Handler::WEBrick.run app
+opts = {}
+opts[:Host] = cfg['web']['host'] if cfg['web']['host']
+opts[:Port] = cfg['web']['port'] if cfg['web']['port']
+
+Rack::Handler::WEBrick.run(app, opts)
