@@ -2327,7 +2327,7 @@ class Client
           tags: tg,
         }
         qu[:caseid] = cid if tk['assigned'] == ICFS::UserCase
-        DivActionTag % _a_action_tags(env, qu, tg)
+        DivActionTag % _a_action_search(env, qu, tg)
       end
 
       tasks << DivActionTask % [
