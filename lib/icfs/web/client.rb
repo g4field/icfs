@@ -649,6 +649,12 @@ class Client
         desc = 'New Entry'.freeze
       end
 
+      # see if editing is possible
+      unless( api.access_list(cid).include?(ICFS::PermWrite) || (
+        (anum != 0) && api.tasked?(cid, anum)))
+        raise(Error::Perms, 'Not able to edit this entry.'.freeze)
+      end
+
       # build form
       parts = [ _form_entry(env, cid, ent) ]
       if !ent &&
@@ -700,6 +706,12 @@ class Client
 
     # get the form
     if env['REQUEST_METHOD'] == 'GET'.freeze
+
+      # see if editing is possible
+      unless api.access_list(cid).include?(ICFS::PermWrite)
+        raise(Error::Perms, 'Not able to edit this index.'.freeze)
+      end
+
       xnum = _util_num(env, 2)
       idx = api.index_read(cid, xnum) if xnum != 0
       parts = [

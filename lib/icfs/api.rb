@@ -194,7 +194,7 @@ class Api
 
   ###############################################
   # See if we are tasked
-  def _tasked?(cid, anum)
+  def tasked?(cid, anum)
     id = '%s.%d'.freeze % [cid, anum]
     unless @tasked.key?(id)
       act = _action_read(cid, anum)
@@ -211,8 +211,7 @@ class Api
     end
 
     return @tasked[id]
-  end # def _tasked?()
-  private :_tasked?
+  end # def tasked?()
 
 
   ###############################################
@@ -223,7 +222,7 @@ class Api
     # are assigned to the action
     if access_list(cid).include?( ICFS::PermRead )
       return true
-    elsif anum && _tasked?(cid, anum)
+    elsif anum && tasked?(cid, anum)
       return true
     else
       return false
@@ -559,7 +558,7 @@ class Api
     # - have global search permissions / read access to the case
     # - are searching for an action they can read
     unless( _search?(query) || (query[:caseid] && 
-        query[:action] && _tasked?(query[:caseid], query[:action])))
+        query[:action] && tasked?(query[:caseid], query[:action])))
       raise(Error::Perms, 'Does not have permission to search'.freeze)
     end
 
