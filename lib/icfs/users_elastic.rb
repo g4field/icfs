@@ -120,12 +120,12 @@ class UsersElastic < Users
       obj['active'] = true
 
       # store in cache
-      json = Validate.generate(obj, 'User/Role/Group'.freeze, ValUserCache)
+      json = Items.generate(obj, 'User/Role/Group'.freeze, ValUserCache)
       _write(:users, urg, json)
 
     # use cached version
     else
-      obj = Validate.parse(json, 'User/Role/Group'.freeze, ValUserCache)
+      obj = Items.parse(json, 'User/Role/Group'.freeze, ValUserCache)
     end
 
     # expired
@@ -146,7 +146,7 @@ class UsersElastic < Users
       obj['last'] = now
 
       # and store in cache
-      json = Validate.generate(obj, 'User/Role/Group'.freeze, ValUserCache)
+      json = Items.generate(obj, 'User/Role/Group'.freeze, ValUserCache)
       _write(:users, urg, json)
     end
 

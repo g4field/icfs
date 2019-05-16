@@ -11,6 +11,8 @@
 
 require 'digest/sha2'
 
+require_relative 'icfs/validate'
+
 ##########################################################################
 # Investigative Case File System
 #
@@ -101,7 +103,6 @@ end # module ICFS::Error
 
 end # module ICFS
 
-require_relative 'icfs/validate'
 require_relative 'icfs/cache'
 require_relative 'icfs/store'
 require_relative 'icfs/items'

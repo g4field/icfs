@@ -26,7 +26,7 @@ class UsersFs < Users
   # read a raw file
   def _read(fn)
     json = File.read(File.join(@path, fn + '.json'.freeze))
-    obj = Validate.parse(json, 'User/Role/Group'.freeze, Users::ValUser)
+    obj = Items.parse(json, 'User/Role/Group'.freeze, Users::ValUser)
     if obj['name'] != fn
       raise(Error::Values, 'UsersFs user %s name mismatch'.freeze % fn)
     end
@@ -51,7 +51,7 @@ class UsersFs < Users
   # (see Users#read)
   #
   def read(urg)
-    Validate.validate(urg, 'User/Role/Group'.freeze, Items::FieldUsergrp)
+    Items.validate(urg, 'User/Role/Group'.freeze, Items::FieldUsergrp)
 
     # get the base user
     usr = _read(urg)
@@ -113,7 +113,7 @@ class UsersFs < Users
   # (see Users#write)
   #
   def write(obj)
-    Validate.validate(obj, 'User/Role/Group'.freeze, Users::ValUser)
+    Items.validate(obj, 'User/Role/Group'.freeze, Users::ValUser)
     json = JSON.pretty_generate(obj)
 
     # write to temp file

@@ -265,12 +265,12 @@ class Api
   def case_read(cid, lnum=0)
     if lnum != 0
       json = @store.case_read(cid, lnum)
-      return Validate.parse(json, 'case'.freeze, Items::ItemCase)
+      return Items.parse(json, 'case'.freeze, Items::ItemCase)
     end
 
     if !@cases.key?(cid)
       json = @cache.case_read(cid)
-      cur = Validate.parse(json, 'case'.freeze, Items::ItemCase)
+      cur = Items.parse(json, 'case'.freeze, Items::ItemCase)
       @cases[cid] = cur
     end
     return @cases[cid]
@@ -295,7 +295,7 @@ class Api
 
     # read
     json = @cache.log_read(cid, lnum)
-    return Validate.parse(json, 'log'.freeze, Items::ItemLog)
+    return Items.parse(json, 'log'.freeze, Items::ItemLog)
   end # def log_read()
 
 
@@ -313,7 +313,7 @@ class Api
     # get access list and current entry
     al = access_list(cid)
     json = @cache.entry_read(cid, enum)
-    ec = Validate.parse(json, 'entry'.freeze, Items::ItemEntry)
+    ec = Items.parse(json, 'entry'.freeze, Items::ItemEntry)
 
     # see if we can read the entry
     need = Set.new
@@ -330,7 +330,7 @@ class Api
       return ec
     else
       json = @store.entry_read(cid, enum, lnum)
-      return Validate.parse(json, 'entry'.freeze, Items::ItemEntry)
+      return Items.parse(json, 'entry'.freeze, Items::ItemEntry)
     end
   end # def entry_read()
 
@@ -362,7 +362,7 @@ class Api
     id = '%s.%d'.freeze % [cid, anum]
     unless @actions.key?(id)
       json = @cache.action_read(cid, anum)
-      act = Validate.parse(json, 'action'.freeze, Items::ItemAction)
+      act = Items.parse(json, 'action'.freeze, Items::ItemAction)
       @actions[id] = act
     end
     return @actions[id]
@@ -395,7 +395,7 @@ class Api
       return ac
     else
       json = @store.action_read( cid, anum, lnum)
-      return Validate.parse(json, 'action'.freeze, Items::ItemAction)
+      return Items.parse(json, 'action'.freeze, Items::ItemAction)
     end
   end # def action_read()
 
@@ -419,14 +419,14 @@ class Api
 
     # read curent index
     json = @cache.index_read(cid, xnum)
-    xc = Validate.parse(json, 'index'.freeze, Items::ItemIndex)
+    xc = Items.parse(json, 'index'.freeze, Items::ItemIndex)
 
     # return the requested version
     if( lnum == 0 || xc['log'] == lnum )
       return xc
     else
       json = @store.index_read(cid, xnum, lnum)
-      return Validate.parse(json, 'index'.freeze, Items::ItemIndex)
+      return Items.parse(json, 'index'.freeze, Items::ItemIndex)
     end
   end # def index_read()
 
@@ -444,7 +444,7 @@ class Api
     end
 
     json = @cache.current_read(cid)
-    return Validate.parse(json, 'current'.current, Items::ItemCurrent)
+    return Items.parse(json, 'current'.current, Items::ItemCurrent)
   end # end def current_read()
 
 
@@ -476,7 +476,7 @@ class Api
   # @param query [Hash] a query
   #
   def case_search(query)
-    Validate.validate(query, 'Case Search'.freeze, ValCaseSearch)
+    Items.validate(query, 'Case Search'.freeze, ValCaseSearch)
     @cache.case_search(query)
   end
 
@@ -513,7 +513,7 @@ class Api
   # @param query [Hash] a query
   #
   def log_search(query)
-    Validate.validate(query, 'Log Search'.freeze, ValLogSearch)
+    Items.validate(query, 'Log Search'.freeze, ValLogSearch)
     @cache.log_search(query)
   end
 
@@ -552,7 +552,7 @@ class Api
   # Search for entries
   #
   def entry_search(query)
-    Validate.validate(query, 'Entry Search'.freeze, ValEntrySearch)
+    Items.validate(query, 'Entry Search'.freeze, ValEntrySearch)
 
     # check permissions
     # - have global search permissions / read access to the case
@@ -640,7 +640,7 @@ class Api
   # Search for actions
   #
   def action_search(query)
-    Validate.validate(query, 'Action Search'.freeze, ValActionSearch)
+    Items.validate(query, 'Action Search'.freeze, ValActionSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
@@ -686,7 +686,7 @@ class Api
   # Search for indexes
   #
   def index_search(query)
-    Validate.validate(query, 'Index Search'.freeze, ValIndexSearch)
+    Items.validate(query, 'Index Search'.freeze, ValIndexSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
@@ -728,7 +728,7 @@ class Api
   # Analyze stats
   #
   def stats(query)
-    Validate.validate(query, 'Stats Search'.freeze, ValStatsSearch)
+    Items.validate(query, 'Stats Search'.freeze, ValStatsSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
@@ -757,7 +757,7 @@ class Api
   # Get case tags
   #
   def case_tags(query)
-    Validate.validate(query, 'Case Tags Search'.freeze, ValCaseTags)
+    Items.validate(query, 'Case Tags Search'.freeze, ValCaseTags)
     return @cache.case_tags(query)
   end # def case_tags()
 
@@ -778,7 +778,7 @@ class Api
   # Get entry tags
   #
   def entry_tags(query)
-    Validate.validate(query, 'Entry Tags Search'.freeze, ValEntryTags)
+    Items.validate(query, 'Entry Tags Search'.freeze, ValEntryTags)
 
     # permissions
     # - read access to case
@@ -819,7 +819,7 @@ class Api
   # Get action tags
   #
   def action_tags(query)
-    Validate.validate(query, 'Task Tags Search'.freeze, ValActionTags)
+    Items.validate(query, 'Task Tags Search'.freeze, ValActionTags)
 
     # only allow searches for user/roles you have
     unless @ur.include?(query[:assigned]) ||
@@ -849,7 +849,7 @@ class Api
   # Get index tags
   #
   def index_tags(query)
-    Validate.validate(query, 'Index Tags'.freeze, ValIndexTags)
+    Items.validate(query, 'Index Tags'.freeze, ValIndexTags)
     unless access_list(query[:caseid]).include?(ICFS::PermRead)
       raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
     end
@@ -875,8 +875,8 @@ class Api
     # Sanity checks
 
     # form & values
-    Validate.validate(ent, 'entry'.freeze, Items::ItemEntryNew)
-    Validate.validate(cse, 'case'.freeze, Items::ItemCaseEdit)
+    Items.validate(ent, 'entry'.freeze, Items::ItemEntryNew)
+    Items.validate(cse, 'case'.freeze, Items::ItemCaseEdit)
 
     # access users/roles/groups are valid
     cse["access"].each do |acc|
@@ -923,7 +923,7 @@ class Api
     cse['caseid'] = cid
     cse['log'] = 1
     cse['tags'] ||= [ ICFS::TagNone ]
-    citem = Validate.generate(cse, 'case'.freeze, Items::ItemCase)
+    citem = Items.generate(cse, 'case'.freeze, Items::ItemCase)
 
     # entry
     ent['icfs'] = 1
@@ -973,12 +973,12 @@ class Api
       # finish items
       ent['time'] ||= now
       ent['files'].each{|fi| fi['log'] ||= 1 } if ent['files']
-      eitem = Validate.generate(ent, 'entry'.freeze, Items::ItemEntry)
+      eitem = Items.generate(ent, 'entry'.freeze, Items::ItemEntry)
       log['time'] = now
       log['entry']['hash'] = ICFS.hash(eitem)
-      litem = Validate.generate(log, 'log'.freeze, Items::ItemLog)
+      litem = Items.generate(log, 'log'.freeze, Items::ItemLog)
       cur['hash'] = ICFS.hash(litem)
-      nitem = Validate.generate(cur, 'current'.freeze, Items::ItemCurrent)
+      nitem = Items.generate(cur, 'current'.freeze, Items::ItemCurrent)
 
       # write to cache
       @cache.entry_write(cid, 1, eitem)
@@ -1017,13 +1017,13 @@ class Api
 
     # form & content
     if idx || cse
-      Validate.validate(ent, 'New Entry'.freeze, Items::ItemEntryNew)
+      Items.validate(ent, 'New Entry'.freeze, Items::ItemEntryNew)
     else
-      Validate.validate(ent, 'Editable Entry'.freeze, Items::ItemEntryEdit)
+      Items.validate(ent, 'Editable Entry'.freeze, Items::ItemEntryEdit)
     end
-    Validate.validate(act, 'action'.freeze, Items::ItemActionEdit) if act
-    Validate.validate(idx, 'index'.freeze, Items::ItemIndexEdit) if idx
-    Validate.validate(cse, 'case'.freeze, Items::ItemCaseEdit) if cse
+    Items.validate(act, 'action'.freeze, Items::ItemActionEdit) if act
+    Items.validate(idx, 'index'.freeze, Items::ItemIndexEdit) if idx
+    Items.validate(cse, 'case'.freeze, Items::ItemCaseEdit) if cse
 
     # edit index OR case, not both
     if idx && cse
@@ -1133,13 +1133,13 @@ class Api
 
       # current
       json = @cache.current_read(cid)
-      cur = Validate.parse(json, 'current'.freeze, Items::ItemCurrent)
+      cur = Items.parse(json, 'current'.freeze, Items::ItemCurrent)
 
       # entry
       if ent['entry']
         enum = ent['entry']
         json = @cache.entry_read(cid, enum)
-        ent_pri = Validate.parse(json, 'entry'.freeze, Items::ItemEntry)
+        ent_pri = Items.parse(json, 'entry'.freeze, Items::ItemEntry)
         nxt['entry'] = cur['entry']
       else
         enum = cur['entry'] + 1
@@ -1156,7 +1156,7 @@ class Api
       end
       if anum
         json = @cache.action_read(cid, anum)
-        act_pri = Validate.parse(json, 'action'.freeze, Items::ItemAction)
+        act_pri = Items.parse(json, 'action'.freeze, Items::ItemAction)
         nxt['action'] = cur['action']
       elsif act
         anum = cur['action'] + 1
@@ -1318,7 +1318,7 @@ class Api
         end
       end
       ent['files'].each{|fi| fi['log'] ||= lnum } if ent['files']
-      eitem = Validate.generate(ent, 'entry'.freeze, Items::ItemEntry)
+      eitem = Items.generate(ent, 'entry'.freeze, Items::ItemEntry)
       log['entry'] = {
         'num' => enum,
         'hash' => ICFS.hash(eitem)
@@ -1328,7 +1328,7 @@ class Api
       if act
         act['action'] = anum
         act['log'] = lnum
-        aitem = Validate.generate(act, 'action'.freeze, Items::ItemAction)
+        aitem = Items.generate(act, 'action'.freeze, Items::ItemAction)
         log['action'] = {
           'num' => anum,
           'hash' => ICFS.hash(aitem)
@@ -1339,7 +1339,7 @@ class Api
       if idx
         idx['index'] = xnum
         idx['log'] = lnum
-        xitem = Validate.generate(idx, 'index'.freeze, Items::ItemIndex)
+        xitem = Items.generate(idx, 'index'.freeze, Items::ItemIndex)
         log['index'] = {
           'num' => xnum,
           'hash' => ICFS.hash(xitem)
@@ -1349,7 +1349,7 @@ class Api
       # case
       if cse
         cse['log'] = lnum
-        citem = Validate.generate(cse, 'case'.freeze, Items::ItemCase)
+        citem = Items.generate(cse, 'case'.freeze, Items::ItemCase)
         log['case_hash'] = ICFS.hash(citem)
       end
 
@@ -1357,11 +1357,11 @@ class Api
       log['log'] = lnum
       log['prev'] = cur['hash']
       log['time'] = now
-      litem = Validate.generate(log, 'log'.freeze, Items::ItemLog)
+      litem = Items.generate(log, 'log'.freeze, Items::ItemLog)
       nxt['hash'] = ICFS.hash(litem)
 
       # next
-      nitem = Validate.generate(nxt, 'current'.freeze, Items::ItemCurrent)
+      nitem = Items.generate(nxt, 'current'.freeze, Items::ItemCurrent)
 
 
       ####################

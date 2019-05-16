@@ -562,7 +562,7 @@ class Client
 
       # process entry
       ent = _post_entry(env, para)
-      Validate.validate(tid, 'Template ID'.freeze, Items::FieldCaseid)
+      Items.validate(tid, 'Template ID'.freeze, Items::FieldCaseid)
       ent['caseid'] = cid
 
       # create
@@ -4268,7 +4268,7 @@ class Client
       raise(Error::NotFound, 'No case specified in the URL'.freeze)
     end
     cid = Rack::Utils.unescape(cmps[1])
-    Validate.validate(cid, 'case'.freeze, Items::FieldCaseid)
+    Items.validate(cid, 'case'.freeze, Items::FieldCaseid)
     env['icfs.cid'] = cid
     return cid
   end # def _util_case()

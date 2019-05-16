@@ -10,7 +10,6 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 require 'set'
-require 'json'
 require 'tempfile'
 
 module ICFS
@@ -18,69 +17,7 @@ module ICFS
 ##########################################################################
 # Object validation
 #
-# @todo Move .parse and .generate to items or ICFS
-# @todo Remove all use of Error module
-#
 module Validate
-
-
-  ###############################################
-  # Parse JSON string and validate
-  #
-  # @param json [String] the JSON to parse
-  # @param name [String] description of the item
-  # @param val [Hash] the check to use
-  # @return [Object] the item
-  #
-  # @raise [Error::NotFound] if json is nil
-  # @raise [Error::Value] if parsing or validation fails
-  #
-  def self.parse(json, name, val)
-    if json.nil?
-      raise(Error::NotFound, '%s not found'.freeze % name)
-    end
-    begin
-      itm = JSON.parse(json)
-    rescue
-      raise(Error::Value, 'JSON parsing failed'.freeze)
-    end
-    Validate.validate(itm, name, val)
-    return itm
-  end # def self.parse()
-
-
-  ###############################################
-  # Validate and generate JSON
-  #
-  # @param itm [Object] item to validate
-  # @param name [String] description of the item
-  # @param val [Hash] the check to use
-  # @return [String] JSON encoded item
-  #
-  # @raise [Error::Value] if validation fails
-  #
-  def self.generate(itm, name, val)
-    Validate.validate(itm, name, val)
-    return JSON.pretty_generate(itm)
-  end # def self.generate()
-
-
-  ###############################################
-  # Validate an object
-  #
-  # @param obj [Object] object to validate
-  # @param name [String] description of the object
-  # @param val [Hash] the check to use
-  #
-  # @raise [Error::Value] if validation fails
-  #
-  def self.validate(obj, name, val)
-    err = Validate.check(obj, val)
-    if err
-      raise(Error::Value, '%s has bad values: %s'.freeze %
-        [name, err.inspect])
-    end
-  end
 
 
   ###############################################
