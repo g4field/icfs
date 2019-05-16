@@ -244,7 +244,7 @@ class Api
       return true
     else
       return false
-    end      
+    end
   end # def _search?()
   private :_search?
 
@@ -557,7 +557,7 @@ class Api
     # check permissions
     # - have global search permissions / read access to the case
     # - are searching for an action they can read
-    unless( _search?(query) || (query[:caseid] && 
+    unless( _search?(query) || (query[:caseid] &&
         query[:action] && tasked?(query[:caseid], query[:action])))
       raise(Error::Perms, 'Does not have permission to search'.freeze)
     end
@@ -732,7 +732,8 @@ class Api
 
     # permissions check
     # - have global search permissions / read access to the case
-    unless _search?(query)
+    # - are searching for a user/role/group you have
+    unless _search?(query) || (query[:credit] && @urg.include?(query[:credit]))
       raise(Error::Perms, 'Do not have permissions to search'.freeze)
     end
 
