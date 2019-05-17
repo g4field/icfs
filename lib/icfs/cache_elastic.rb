@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+require 'json'
+require 'socket'
 require_relative 'elastic'
 
 
@@ -153,6 +155,8 @@ class CacheElastic < Cache
   def initialize(map, es)
     @map = map
     @es = es
+    @name = '%s:%d' % [Socket.gethostname, Process.pid]
+    @name.freeze
   end
 
 
@@ -169,7 +173,7 @@ class CacheElastic < Cache
   #
   def lock_take(cid)
 
-    json = '{"client":"TODO"}'.freeze
+    json = '{"client":"%s"}'.freeze % @name
     url = '%s/_doc/%s/_create'.freeze % [@map[:lock], CGI.escape(cid)]
     head = {'Content-Type'.freeze => 'application/json'.freeze}.freeze
 
