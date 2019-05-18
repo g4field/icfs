@@ -58,6 +58,16 @@ class StoreFs < Store
 
 
   ###############################################
+  # (see Store#file_size)
+  #
+  def file_size(cid, enum, lnum, fnum)
+    File.size(_file(cid, enum, lnum, fnum))
+  rescue Errno::ENOENT
+    return nil
+  end
+
+
+  ###############################################
   # (see Store#tempfile)
   #
   def tempfile

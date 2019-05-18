@@ -116,6 +116,18 @@ class Store
 
 
   ###############################################
+  # Get a file size
+  #
+  # @param cid [String] caseid
+  # @param enum [Integer] Entry number
+  # @param lnum [Integer] Log number
+  # @param fnum [Integer] File number
+  # @return [Integer] The size of the file
+  #
+  def file_size(cid, enum, lnum, fnum); raise NotImplementedError; end
+
+
+  ###############################################
   # Read an action
   #
   # @param cid [String] caseid

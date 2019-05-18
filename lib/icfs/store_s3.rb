@@ -65,6 +65,17 @@ class StoreS3 < Store
 
 
   ###############################################
+  # (see Store#file_size)
+  def file_size(cid, enum, lnum, fnum)
+    key = _file(cid, enum, lnum, fnum)
+    resp = @s3.head_object( bucket: @bck, key: key )
+    return resp.content_length
+  rescue Aws::S3::Errors::NotFound
+    return nil
+  end
+
+
+  ###############################################
   # (see Store#tempfile)
   #
   def tempfile
