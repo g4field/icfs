@@ -169,8 +169,6 @@ class CacheElastic < Cache
   ###############################################
   # (see Cache#lock_take)
   #
-  # @todo Include client info to help with debugging
-  #
   def lock_take(cid)
 
     json = '{"client":"%s"}'.freeze % @name
