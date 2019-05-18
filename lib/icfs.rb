@@ -17,7 +17,6 @@ require_relative 'icfs/validate'
 # Investigative Case File System
 #
 # @todo Delete Items and move into this module
-# @todo Archive/move case tool written
 #
 module ICFS
 

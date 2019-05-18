@@ -11,7 +11,15 @@
 
 #
 module ICFS
+
+
+##########################################################################
+# Low level utilities for working directly with ICFS systems.
+#
+# @todo Archive/move case tool written
+#
 module Utils
+
 
 ##########################################################################
 # Check a case for errors
