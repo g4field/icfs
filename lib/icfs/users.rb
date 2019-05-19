@@ -19,6 +19,8 @@ module ICFS
 #
 # @abstract
 #
+# @todo Add cache flush method
+#
 class Users
 
   ###############################################
