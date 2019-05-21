@@ -55,12 +55,20 @@ class AuthSsl
       return [
         400,
         {'Content-Type' => 'text/plain'.freeze},
-        ['User not found for %s' % env['SSL_CLIENT_S_DN']]
+        ['%s: No User' % env['SSL_CLIENT_S_DN']]
       ]
     end
 
     # pass to app
-    @api.user = user
+    begin
+      @api.user = user
+    rescue Error::NotFound, Error::Value => err
+      return [
+        400,
+        {'Content-Type' => 'text/plain'.freeze},
+        ['%s: %s' % [err.message, env['SSL_CLIENT_S_DN']]]
+      ]
+    end
     env['icfs'] = @api
     return @app.call(env)
   end # def call()
