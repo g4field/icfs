@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  icfs-init:
+    image: icfs-ruby
+    volumes:
+      - ./icfs-init.rb:/usr/local/bin/icfs
+      - ./icfs-cfg.yml:/etc/icfs.yml
+      - icfs-app:/var/lib/icfs
+    command: ["/usr/local/bin/icfs"]
+
+  icfs-elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - icfs-es:/usr/share/elasticsearch/data
+
+volumes:
+  icfs-app:
+  icfs-es:
