@@ -701,7 +701,7 @@ class Api
     res[:list].each do |se|
       idx = se[:object]
 
-      unless access_list(idx[:caseid].include?(ICFS::PermRead))
+      unless access_list(idx[:caseid]).include?(ICFS::PermRead)
         idx[:title] = nil
         idx[:tags] = nil
       end
