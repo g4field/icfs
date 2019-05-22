@@ -1,4 +1,14 @@
 #!/usr/bin/env ruby
+#
+# Investigative Case File System
+#
+# Copyright 2019 by Graham A. Field
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3.
+#
+# This program is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 require 'faraday'
 require 'rack'
@@ -86,5 +96,3 @@ cfg['init']['templates'].each do |tmpl|
   api.case_create(ent, tp)
   puts "Created template: %s" % tmpl['caseid']
 end
-
-
