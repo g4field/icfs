@@ -3000,7 +3000,7 @@ class Client
         FormEntryStatEach % [
           stats_cnt, claim_cnt,
           stats_cnt, esc, esc,
-          stats_cnt, st['val'].to_s,
+          stats_cnt, st['value'].to_s,
           claims.join(''.freeze)
         ]
       end
@@ -3036,7 +3036,7 @@ class Client
         title, time, content,
         tags_cnt, tags,
         files_cnt, files,
-        Rack::Utils.escape(env['SCRIPT_NAME']),
+        env['SCRIPT_NAME'],
         Rack::Utils.escape(cid),
         index_cnt, index,
         stats_sel, stats_cnt, stats,
