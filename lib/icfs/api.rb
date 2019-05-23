@@ -444,7 +444,7 @@ class Api
     end
 
     json = @cache.current_read(cid)
-    return Items.parse(json, 'current'.current, Items::ItemCurrent)
+    return Items.parse(json, 'current'.freeze, Items::ItemCurrent)
   end # end def current_read()
 
 
