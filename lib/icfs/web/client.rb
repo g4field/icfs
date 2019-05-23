@@ -369,6 +369,8 @@ class Client
     ['after'.freeze, :after, :time].freeze,
     ['tags'.freeze, :tags, :string].freeze,
     ['purpose'.freeze, :purpose, :string].freeze,
+    ['size'.freeze, :size, :integer].freeze,
+    ['page'.freeze, :page, :integer].freeze,
     ['sort'.freeze, :sort, :string].freeze,
   ].freeze
 
@@ -430,6 +432,8 @@ class Client
     ['content'.freeze, :content, :string].freeze,
     ['tags'.freeze, :tags, :string].freeze,
     ['purpose'.freeze, :purpose, :string].freeze,
+    ['size'.freeze, :size, :integer].freeze,
+    ['page'.freeze, :page, :integer].freeze,
     ['sort'.freeze, :sort, :string].freeze,
   ].freeze
 
