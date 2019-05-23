@@ -1,3 +1,14 @@
+#
+# Investigative Case File System
+#
+# Copyright 2019 by Graham A. Field
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3.
+#
+# This program is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 Gem::Specification.new do |gs|
   gs.version = '0.1.1'
 
@@ -20,5 +31,5 @@ Gem::Specification.new do |gs|
     ] +
     Dir['lib/**/*'] +
     Dir['bin/*'] +
-    Dir['data/*']
+    Dir['data/**/*']
 end
