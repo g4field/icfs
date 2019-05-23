@@ -79,6 +79,7 @@ div.nav-tab {
   border: 1px;
   width: 7em;
   border-style: solid solid none solid;
+  border-radius: 5px 5px 0 0;
 }
 
 
