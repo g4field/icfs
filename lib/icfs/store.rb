@@ -188,6 +188,19 @@ class Store
   def tempfile; raise NotImplementedError; end
 
 
+  ###############################################
+  # Close the file returned by file_read()
+  #
+  # @param fi [File] The file to close
+  #
+  def close(fi)
+    if fi.respond_to?( :close! )
+      fi.close!
+    else
+      fi.close
+    end
+  end
+
   private
 
 
