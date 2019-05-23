@@ -658,7 +658,7 @@ class CacheElastic < Cache
     filter = [
       _query_term('caseid'.freeze, query[:caseid]),
       _query_term('tags'.freeze, query[:tags]),
-      _query_prefix('title'.freeze, query[:prefix]),
+      _query_prefix('title.raw'.freeze, query[:prefix]),
     ].compact
     req = { 'query' => _query_bool(must, filter, nil, nil) }
 
