@@ -1424,6 +1424,7 @@ class Api
           fhash << ICFS.hash_temp(fi)
         end
       end
+      fhash = nil if fhash.empty?
     end
 
     return [files, fhash]
