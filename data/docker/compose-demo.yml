@@ -19,9 +19,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./srv_cert.pem:/etc/nginx/server.crt:ro
-      - ./srv_key.pem:/etc/nginx/server.key:ro
-      - ./ca_cert.pem:/etc/nginx/ca.crt:ro
+      - ./web:/usr/share/icfs:ro
 
   icfs-app:
     image: icfs-ruby

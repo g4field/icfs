@@ -36,36 +36,13 @@ es = Faraday.new(cfg['elastic']['base'])
 cache = ICFS::CacheElastic.new(map, es)
 store = ICFS::StoreFs.new(cfg['store']['dir'])
 users = ICFS::UsersFs.new(cfg['users']['dir'])
+api = ICFS::Api.new([], users, cache, store)
 
-# clear out the store
-if File.exists?(cfg['store']['dir'])
-  FileUtils.rm_rf(cfg['store']['dir'])
-  puts "Deleted store directory"
-end
+# create store and users
 FileUtils.mkdir(cfg['store']['dir'])
 puts "Created store directory: %s" % cfg['store']['dir']
-
-# clear out the users
-if File.exists?(cfg['users']['dir'])
-  FileUtils.rm_rf(cfg['users']['dir'])
-  puts "Deleted users directory"
-end
 FileUtils.mkdir(cfg['users']['dir'])
 puts "Created users directory: %s" % cfg['users']['dir']
-
-
-# test
-File.open('/var/lib/icfs/test.txt', 'w'){|fi| fi.write "test\n"}
-
-# delete the indexes
-map.each do |sym, name|
-  resp = es.run_request(:delete, name, '', {})
-  if resp.success?
-    puts 'Deleted index: %s' % name
-  else
-    puts 'Failed to delete index: %s' % name
-  end
-end
 
 # add the users
 cfg['init']['urg'].each do |usr|
@@ -77,7 +54,7 @@ end
 cache.create(ICFS::CacheElastic::Maps)
 puts "Indexes created"
 
-api = ICFS::Api.new([], users, cache, store)
+# set initial user
 api.user = cfg['init']['user']
 
 # add the templates
