@@ -685,11 +685,19 @@ class CacheElastic < Cache
         { 'title.raw' => 'desc' },
         { '_id' => 'desc' },
       ]
-    when 'title_asc', nil
+    when 'title_asc'
       req['sort'] = [
         { 'title.raw' => 'asc' },
         { '_id' => 'desc' },
       ]
+    else
+      # default if not a title/content query
+      if must.empty?
+        req['sort'] = [
+          { 'title.raw' => 'asc' },
+          { '_id' => 'desc' },
+        ]
+      end
     end
 
     # paging
