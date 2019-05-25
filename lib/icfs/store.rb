@@ -220,8 +220,7 @@ class Store
   # Path for case
   #
   def _case(cid, lnum)
-    [
-      @base,
+    @base + [
       cid,
       'c'.freeze,
       '%d.json'.freeze % lnum
@@ -233,8 +232,7 @@ class Store
   # Path for log
   #
   def _log(cid, lnum)
-    [
-      @base,
+    @base + [
       cid,
       'l'.freeze,
       '%d.json'.freeze % lnum
@@ -246,8 +244,7 @@ class Store
   # Path for entry
   #
   def _entry(cid, enum, lnum)
-    [
-      @base,
+    @base + [
       cid,
       'e'.freeze,
       enum.to_s,
@@ -260,8 +257,7 @@ class Store
   # Path for file
   #
   def _file(cid, enum, lnum, fnum)
-    [
-      @base,
+    @base + [
       cid,
       'e'.freeze,
       enum.to_s,
@@ -274,8 +270,7 @@ class Store
   # Filename for action
   #
   def _action(cid, anum, lnum)
-    [
-      @base,
+    @base + [
       cid,
       'a'.freeze,
       anum.to_s,
@@ -288,8 +283,7 @@ class Store
   # Filename for index
   #
   def _index(cid, xnum, lnum)
-    [
-      @base,
+    @base + [
       cid,
       'i'.freeze,
       xnum.to_s,

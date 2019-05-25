@@ -29,7 +29,11 @@ class StoreFs < Store
   # @param base [String] the base directory
   #
   def initialize(base)
-    @base = base.freeze
+    if base[-1] == '/'.freeze
+      @base = base.freeze
+    else
+      @base = (base + '/').freeze
+    end
   end
 
 
