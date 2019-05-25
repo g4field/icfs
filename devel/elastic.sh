@@ -11,7 +11,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 # run elasticsearch
-docker run -d \
+docker run -d --rm \
   -e "discovery.type=single-node" \
   -v icfs-es:/usr/share/elasticsearch/data \
   --network icfs \

@@ -12,7 +12,7 @@
 
 # run minio
 # to debug add -e "MINIO_HTTP_TRACE=/dev/stdout" \
-docker run -d \
+docker run -d --rm \
   -v icfs-obj:/data \
   -p "127.0.0.1:9000:9000" \
   -e "MINIO_ACCESS_KEY=minio_key" \
