@@ -21,9 +21,6 @@ module Web
 ##########################################################################
 # Web Client
 #
-# @todo Improve time handling for web interface
-# @todo Scrub the javascript
-#
 class Client
 
   ###############################################

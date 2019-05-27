@@ -17,8 +17,6 @@ module ICFS
 ##########################################################################
 # Implements {ICFS::Users Users} using Elasticsearch to cache
 # details from another {ICFS::Users Users} instance.
-# 
-# @todo Add logging
 #
 class UsersElastic < Users
 

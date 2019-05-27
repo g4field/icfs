@@ -16,15 +16,11 @@ module ICFS
 ##########################################################################
 # Low level utilities for working directly with ICFS systems.
 #
-# @todo Archive/move case tool written
-#
 module Utils
 
 
 ##########################################################################
 # Check a case for errors
-#
-# @todo Make a function to auto find the last log
 #
 class Check
 
@@ -180,7 +176,7 @@ class Check
             ['index'.freeze, 1].freeze,
             ['log'.freeze, 2].freeze
           ]
-        )  
+        )
         idx_cur.add(xnum)
       end
 

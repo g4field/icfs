@@ -15,8 +15,6 @@ module ICFS
 ##########################################################################
 # Api
 #
-# @todo Add event logging
-#
 class Api
 
   # Validate a size

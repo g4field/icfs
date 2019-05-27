@@ -16,10 +16,7 @@ module ICFS
 ##########################################################################
 # User, Role, Group, and Global Perms
 #
-#
 # @abstract
-#
-# @todo Add cache flush method
 #
 class Users
 
