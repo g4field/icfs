@@ -14,6 +14,7 @@
 docker run -d --rm \
   -e "discovery.type=single-node" \
   -v icfs-es:/usr/share/elasticsearch/data \
+  -p "127.0.0.1:9200:9200" \
   --network icfs \
   --name icfs-elastic \
   docker.elastic.co/elasticsearch/elasticsearch:6.7.2

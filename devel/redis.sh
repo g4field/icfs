@@ -10,9 +10,9 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# run the server
-docker run \
-  -v $1:/icfs \
-  -p "127.0.0.1:80:8080" \
+# run redis
+docker run -d --rm \
   --network icfs \
-  -it --rm icfs-wrk
+  --name icfs-redis \
+  redis:alpine
+# to run the CLI: docker exec -it icfs-redis redis-cli

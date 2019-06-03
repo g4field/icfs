@@ -69,19 +69,31 @@ class Api
     urgp = @users.read(uname)
     raise(Error::NotFound, 'User name not found'.freeze) if !urgp
     raise(Error::Value, 'Not a user'.freeze) if urgp['type'] != 'user'
-    @roles = urgp['roles'].each{|rn| rn.freeze }
-    @groups = urgp['groups'].each{ |gn| gn.freeze }
-    @perms = urgp['perms'].each{|pn| pn.freeze }
+    if urgp['roles']
+      @roles = urgp['roles'].map{|rn| rn.freeze }.freeze
+    else
+      @roles = [].freeze
+    end
+    if urgp['groups']
+      @groups = urgp['groups'].map{ |gn| gn.freeze }.freeze
+    else
+      @groups = [].freeze
+    end
+    if urgp['perms']
+      @perms = urgp['perms'].map{|pn| pn.freeze }.freeze
+    else
+      @perms = [].freeze
+    end
 
     @urg = Set.new
-    @urg.add user
-    @urg.merge roles
-    @urg.merge groups
+    @urg.add @user
+    @urg.merge @roles
+    @urg.merge @groups
     @urg.freeze
 
     @ur = Set.new
-    @ur.add user
-    @ur.merge roles
+    @ur.add @user
+    @ur.merge @roles
     @ur.freeze
 
     reset

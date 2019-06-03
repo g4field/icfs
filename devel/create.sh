@@ -13,4 +13,3 @@
 docker network create icfs
 docker volume create icfs-es
 docker volume create icfs-obj
-docker volume create icfs-dev

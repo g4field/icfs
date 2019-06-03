@@ -16,7 +16,7 @@ RUN apk update && \
     apk upgrade && \
     apk --update add ruby fcgi ruby-json tzdata vim curl git bash && \
     apk --update add --virtual build-deps ruby-dev build-base fcgi-dev && \
-    gem install -N rack webrick etc faraday yard aws-sdk-s3 && \
+    gem install -N rack webrick etc faraday yard aws-sdk-s3 redis && \
     apk del build-deps && \
     rm -rf /var/cache/apk/*
 

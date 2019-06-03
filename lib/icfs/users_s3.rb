@@ -9,36 +9,35 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-require 'tempfile'
-require 'fileutils'
-require 'json'
-
-require_relative 'users'
+require 'aws-sdk-s3'
 
 module ICFS
 
 ##########################################################################
-# Implements {ICFS::Users Users} from a file system
+# Implements {ICFS::Users Users} from AWS S3
 #
-class UsersFs < Users
-
+class UsersS3 < Users
 
   ###############################################
   # New instance
   #
-  # @param path [String] Base directory
+  # @param s3 [Aws::S3::Client] the configured S3 client
+  # @param bucket [String] The bucket name
+  # @param prefix [String] Prefix to use for object keys
   #
-  def initialize(path)
-    @path = path.dup
+  def initialize(s3, bucket, prefix=nil)
+    @s3 = s3
+    @bck = bucket
+    @pre = prefix || ''.freeze
   end
 
 
   ###############################################
-  # Path to store the file
+  # Where to store onfig
   #
-  def _path(urg)
-    File.join(@path, urg + '.json'.freeze)
-  end
+  def _path(user)
+    @pre + user
+  end # def _path()
   private :_path
 
 
@@ -47,13 +46,9 @@ class UsersFs < Users
   #
   def read(urg)
     Items.validate(urg, 'User/Role/Group name'.freeze, Items::FieldUsergrp)
-    json = File.read(_path(urg))
-    obj = Items.parse(json, 'User/Role/Group'.freeze, Users::ValUser)
-    if obj['name'] != urg
-      raise(Error::Values, 'UsersFs user %s name mismatch'.freeze % fn)
-    end
-    return obj
-  rescue Errno::ENOENT
+    json = @s3.get_object( bucket: @bck, key: _path(urg) ).body.read
+    return JSON.parse(json)
+  rescue
     return nil
   end # def read()
 
@@ -64,18 +59,10 @@ class UsersFs < Users
   def write(obj)
     Items.validate(obj, 'User/Role/Group'.freeze, Users::ValUser)
     json = JSON.pretty_generate(obj)
-
-    # write to temp file
-    tmp = Tempfile.new('_tmp'.freeze, @path, :encoding => 'ascii-8bit'.freeze)
-    tmp.write(json)
-    tmp.close
-
-    # move
-    FileUtils.mv(tmp.path, _path(obj['name']))
-    tmp.unlink
+    @s3.put_object( bucket: @bck, key: _path(obj['name']), body: json )
   end # def write()
 
 
-end # class ICFS::UsersFs
+end # class ICFS::UsersS3
 
 end # module ICFS
