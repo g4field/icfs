@@ -10,7 +10,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 Gem::Specification.new do |gs|
-  gs.version = '0.1.1'
+  gs.version = '0.1.2'
 
   gs.name = 'icfs'
   gs.license = 'GPL-3.0'
@@ -31,5 +31,6 @@ Gem::Specification.new do |gs|
     ] +
     Dir['lib/**/*'] +
     Dir['bin/*'] +
-    Dir['data/**/*']
+    Dir['data/**/*'] +
+    Dir['devel/**/*']
 end
