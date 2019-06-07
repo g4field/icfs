@@ -52,7 +52,7 @@ s3 = Aws::S3::Client.new
 redis = Redis.new(host: 'icfs-redis')
 es = Faraday.new('http://icfs-elastic:9200')
 cache = ICFS::CacheElastic.new(map, es)
-store = ICFS::StoreS3.new(s3, 'icfs-data', 'store/')
+store = ICFS::StoreS3.new(s3, 'icfs', 'case/')
 users_base = ICFS::UsersFs.new(ARGV[0])
 users = ICFS::UsersRedis.new(redis, users_base, {
     prefix: 'users/'.freeze,
@@ -64,7 +64,7 @@ cache.create(ICFS::CacheElastic::Maps)
 puts "Indexes created"
 
 # create a bucket
-s3.create_bucket(bucket: 'icfs-data')
+s3.create_bucket(bucket: 'icfs')
 puts "S3 bucket created"
 
 api = ICFS::Api.new([], users, cache, store)

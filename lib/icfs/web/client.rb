@@ -167,6 +167,7 @@ class Client
     when 'case_edit'; return _call_case_edit(env)
     when 'entry_edit'; return _call_entry_edit(env)
     when 'index_edit'; return _call_index_edit(env)
+    when 'config_edit'; return _call_config_edit(env)
 
     # view
     when 'home', ''; return _call_home(env)
@@ -755,6 +756,43 @@ class Client
 
 
   ###############################################
+  # Edit configuration
+  #
+  def _call_config_edit(env)
+    env['icfs.page'] = 'Config Edit'.freeze
+    api = env['icfs']
+    cfg = env['icfs.config']
+    _verb_getpost(env)
+
+    # get the form
+    if env['REQUEST_METHOD'] == 'GET'.freeze
+      parts = [ _form_config(env) ]
+      body = [
+        _div_nav(env),
+        _div_desc('Edit Configuration'.freeze, ''.freeze),
+        _div_form(env, '/config_edit/'.freeze, nil, parts,
+          'Save Config'.freeze),
+      ].join(''.freeze)
+      return _resp_success(env, body)
+
+    # post the form
+    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+      para = _util_post(env)
+      _post_config(env, para).each{|key, val| cfg.set(key,val) }
+      cfg.save
+
+      # display the index
+      body = [
+        _div_nav(env),
+        _div_desc('Edit Configuration'.freeze, 'Settings saved'.freeze),
+        _div_info(env),
+      ].join(''.freeze)
+      return _resp_success(env, body)
+    end
+  end # def _call_config_edit()
+
+
+  ###############################################
   # User Home page
   def _call_home(env)
     env['icfs.page'] = 'Home'.freeze
@@ -1021,6 +1059,7 @@ class Client
             after: Time.now.to_i - 60*60*24*30,
             purpose: 'User Stats - Last 30 days'.freeze,
           }, 'Stats'.freeze),
+        _a_config_edit(env, 'Config'),
         _a_info(env, 'Info'.freeze),
       ]
     end
@@ -1068,7 +1107,7 @@ class Client
   #
   def _div_info(env)
     api = env['icfs']
-    tz = env['icfs.tz']
+    tz = env['icfs.config'].get('tz')
 
     # roles/groups/perms
     roles = api.roles.map{|rol| DivInfoList % Rack::Utils.escape_html(rol)}
@@ -3639,6 +3678,36 @@ class Client
           </div>'.freeze
 
 
+  ###############################################
+  # Config Form
+  #
+  def _form_config(env)
+    cfg = env['icfs.config']
+    tz = cfg.get('tz')
+    return FormConfig % [tz]
+  end # def _form_config()
+
+
+  # Config form
+  FormConfig = '
+    <div class="sect">
+      <div class="sect-main">
+        <div class="sect-label">Config</div>
+        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
+          Configuration settings.
+        </div></div>
+        <div class="sect-fill"> </div>
+      </div>
+      <div class="form-row">
+        <div class="list-label">Timezone:</div>
+        <input class="form-tz" name="cfg-tz" type="text" value="%s">
+        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
+          Timezone to display date/times, format as +/-HH:MM.
+        </div></div>
+      </div>
+    </div>'.freeze
+
+
 ###########################################################
 # Post
 ###########################################################
@@ -3949,6 +4018,17 @@ class Client
   end # def _post_index()
 
 
+  ###############################################
+  # Config edit
+  #
+  def _post_config(env, para)
+    cfg = {
+      'tz' => para['cfg-tz']
+    }
+    return cfg
+  end # def _post_config()
+
+
 ###########################################################
 # Links
 ###########################################################
@@ -4131,6 +4211,17 @@ class Client
 
 
   ###############################################
+  # Link to Config edit
+  #
+  def _a_config_edit(env, txt)
+    '<a href="%s/config_edit">%s</a>'.freeze % [
+      env['SCRIPT_NAME'],
+      Rack::Utils.escape_html(txt)
+    ]
+  end
+
+
+  ###############################################
   # Link to Home
   #
   def _a_home(env, txt)
@@ -4288,7 +4379,8 @@ class Client
   # Epoch time as local
   #
   def _util_time(env, time)
-    Time.at(time).getlocal(env['icfs.tz']).strftime('%F %T'.freeze)
+    tz = env['icfs.config'].get('tz')
+    Time.at(time).getlocal(tz).strftime('%F %T'.freeze)
   end
 
 
@@ -4305,7 +4397,7 @@ class Client
 
     # default use parse
     ma = /[+-]\d{2}:\d{2}$/.match str
-    tstr = ma ? str : str + env['icfs.tz']
+    tstr = ma ? str : str + env['icfs.config'].get('tz')
     time = Time.parse(tstr).to_i
   rescue ArgumentError
     return nil

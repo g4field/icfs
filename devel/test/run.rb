@@ -22,6 +22,8 @@ require_relative '../../lib/icfs/store_s3'
 require_relative '../../lib/icfs/users_fs'
 require_relative '../../lib/icfs/users_redis'
 require_relative '../../lib/icfs/web/client'
+require_relative '../../lib/icfs/web/config_s3'
+require_relative '../../lib/icfs/web/config_redis'
 require_relative '../../lib/icfs/demo/auth'
 require_relative '../../lib/icfs/demo/static'
 
@@ -45,18 +47,28 @@ map = {
   current: 'current',
 }.freeze
 
+# default config
+defaults = {
+  'tz' => '-04:00'
+}
+
 # base items
 s3 = Aws::S3::Client.new
 redis = Redis.new(host: 'icfs-redis')
 es = Faraday.new('http://icfs-elastic:9200')
 cache = ICFS::CacheElastic.new(map, es)
-store = ICFS::StoreS3.new(s3, 'icfs-data', 'store/')
+store = ICFS::StoreS3.new(s3, 'icfs', 'case/')
 users_base = ICFS::UsersFs.new(ARGV[0])
 users = ICFS::UsersRedis.new(redis, users_base, {
     prefix: 'users/'.freeze,
     expires: 60, # one minute cache for testing
   })
 api = ICFS::Api.new([], users, cache, store)
+config_base = ICFS::Web::ConfigS3.new(defaults, s3, 'icfs', 'config/')
+config = ICFS::Web::ConfigRedis.new(redis, config_base, {
+    prefix: 'config/',
+    expires: 60,  # debug, only cache for one minute
+  })
 web = ICFS::Web::Client.new('/static/icfs.css', '/static/icfs.js')
 
 # static files
@@ -72,7 +84,7 @@ static = {
 }
 
 app = Rack::Builder.new do
-  use(ICFS::Demo::Auth, api)
+  use(ICFS::Demo::Auth, api, config)
   use(ICFS::Demo::Static, static)
   run web
 end
