@@ -24,11 +24,13 @@ class AuthSsl
   # @param app [Object] The rack app
   # @param map [Object] Maps DN to user name
   # @param api [ICFS::Api] the Api
+  # @param cfg [ICFS::Web::Config] the config settings
   #
-  def initialize(app, map, api)
+  def initialize(app, map, api, cfg)
     @app = app
     @map = map
     @api = api
+    @cfg = cfg
   end
 
 
@@ -70,6 +72,8 @@ class AuthSsl
       ]
     end
     env['icfs'] = @api
+    @cfg.load(user)
+    env['icfs.config'] = @cfg
     return @app.call(env)
   end # def call()
 
