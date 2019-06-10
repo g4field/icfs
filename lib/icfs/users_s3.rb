@@ -33,10 +33,10 @@ class UsersS3 < Users
 
 
   ###############################################
-  # Where to store onfig
+  # Where to store user
   #
   def _path(user)
-    @pre + user
+    @pre + user + '.json'.freeze
   end # def _path()
   private :_path
 

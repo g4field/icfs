@@ -1,10 +1,6 @@
 Short-term
 -------------------------------------------------------------------
 
-Finish switching to docker-compose based development setup
-  run/init-users.rb
-  run/webrick.rb
-
 Add SSL auth testing system
   nginx container
   run/sslauth.rb
