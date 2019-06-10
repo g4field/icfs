@@ -1,0 +1,61 @@
+#
+# Investigative Case File System
+#
+# Copyright 2019 by Graham A. Field
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3.
+#
+# This program is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+version: '3'
+
+services:
+
+  # Elasticsearch
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
+    environment:
+      discovery.type: single-node
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
+    ports:
+      - "127.0.0.1:9200:9200"
+
+
+  # Minio - S3 compatible object store
+  minio:
+    image: minio/minio
+    volumes:
+      - objects:/data
+    environment:
+      MINIO_ACCESS_KEY: minio_key
+      MINIO_SECRET_KEY: minio_secret
+    ports:
+      - "127.0.0.1:9000:9000"
+    command: ["server", "/data"]
+
+
+  # Redis - cache
+  redis:
+    image: redis:alpine
+    ports:
+      - "127.0.0.1:6347:6379"
+
+
+  # App development
+  # just run a sleep for a week, then connect interactively using:
+  #   docker-compose -f devel-compose.yml exec icfs /bin/sh
+  icfs:
+    image: icfs-wrk
+    build: ./icfs-wrk
+    volumes:
+      - ./icfs:/icfs
+    ports:
+      - "127.0.0.1:8080:8080"
+    command: ["/bin/sleep", "7d"]
+
+volumes:
+  elastic:
+  objects:

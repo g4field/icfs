@@ -878,8 +878,9 @@ class Api
   # @param ent [Hash] the first entry
   # @param cse [Hash] the case
   # @param tid [String] the template name
+  # @param unam [String] the user name if not using the Users API
   #
-  def case_create(ent, cse, tid=nil)
+  def case_create(ent, cse, tid=nil, unam=nil)
 
     ####################
     # Sanity checks
@@ -888,12 +889,14 @@ class Api
     Items.validate(ent, 'entry'.freeze, Items::ItemEntryNew)
     Items.validate(cse, 'case'.freeze, Items::ItemCaseEdit)
 
-    # access users/roles/groups are valid
-    cse["access"].each do |acc|
-      acc["grant"].each do |gnt|
-        urg = @users.read(gnt)
-        if !urg
-          raise(Error::NotFound, 'User/role/group %s not found'.freeze % urg)
+    # access users/roles/groups are valid, unless manually specifying user
+    unless unam
+      cse["access"].each do |acc|
+        acc["grant"].each do |gnt|
+          urg = @users.read(gnt)
+          if !urg
+            raise(Error::NotFound, 'User/role/group %s not found'.freeze % urg)
+          end
         end
       end
     end
@@ -923,6 +926,9 @@ class Api
       raise(Error::Value, 'No Index for a new case entry'.freeze)
     end
 
+    # Allow case creation without a Users system in place
+    user = @user ? @user : unam
+    raise(ArgumentError, 'No user specified'.freeze) if user.nil?
 
     ####################
     # Prep
@@ -941,7 +947,7 @@ class Api
     ent['log'] = 1
     ent['tags'] ||= [ ]
     ent['tags'] << ICFS::TagCase
-    ent['user'] = @user
+    ent['user'] = user
     files, fhash = _pre_files(ent)
 
     # log
@@ -950,7 +956,7 @@ class Api
       'caseid' => cid,
       'log' => 1,
       'prev' => '0'*64,
-      'user' => @user,
+      'user' => user,
       'entry' => {
         'num' => 1,
        },

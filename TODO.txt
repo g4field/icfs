@@ -1,3 +1,19 @@
+Short-term
+-------------------------------------------------------------------
+
+Finish switching to docker-compose based development setup
+  run/init-users.rb
+  run/webrick.rb
+
+Add SSL auth testing system
+  nginx container
+  run/sslauth.rb
+
+
+
+Medium-term
+-------------------------------------------------------------------
+
 Move ICFS::Items code into ICFS
 
 Add event logging to ICFS::Api
@@ -11,3 +27,9 @@ Improve time handling in ICFS::Web::Client
 Scrub javascript in data/icfs.js
 
 Auto find the last log in ICFS::Utils::Check
+
+
+Long-term
+-------------------------------------------------------------------
+
+Email -> Entry system
