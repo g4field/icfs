@@ -20,8 +20,6 @@ Add cache flush to ICFS::Users
 
 Improve time handling in ICFS::Web::Client
 
-Scrub javascript in data/icfs.js
-
 Auto find the last log in ICFS::Utils::Check
 
 
