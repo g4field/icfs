@@ -10,10 +10,6 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# Elasticsearch cache
-# S3 item store
-# S3 & Redis Users
-
 require 'json'
 require 'faraday'
 require 'aws-sdk-s3'

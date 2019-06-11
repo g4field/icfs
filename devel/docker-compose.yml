@@ -38,15 +38,16 @@ services:
 
 
   # Redis - cache
+  # to run the CLI: docker exec -it icfs-redis redis-cli
   redis:
     image: redis:alpine
     ports:
-      - "127.0.0.1:6347:6379"
+      - "127.0.0.1:6379:6379"
 
 
   # App development
   # just run a sleep for a week, then connect interactively using:
-  #   docker-compose -f devel-compose.yml exec icfs /bin/sh
+  #   docker-compose exec icfs /bin/sh
   icfs:
     image: icfs-wrk
     build: ./icfs-wrk
