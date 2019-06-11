@@ -10,7 +10,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 Gem::Specification.new do |gs|
-  gs.version = '0.1.2'
+  gs.version = '0.1.3'
 
   gs.name = 'icfs'
   gs.license = 'GPL-3.0'
