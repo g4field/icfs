@@ -50,6 +50,10 @@ defaults = {
   'tz' => '-04:00'
 }
 
+# the log
+log = Logger.new(STDERR)
+log.level = Logger::INFO
+
 # base items
 s3 = Aws::S3::Client.new
 redis = Redis.new(host: 'redis')
@@ -60,6 +64,7 @@ users_base = ICFS::UsersS3.new(s3, 'icfs'.freeze, 'users/'.freeze)
 users = ICFS::UsersRedis.new(redis, users_base, {
     prefix: 'users/'.freeze,
     expires: 60, # one minute cache for testing
+    log: log,
   })
 api = ICFS::Api.new([], users, cache, store)
 config_base = ICFS::Web::ConfigS3.new(defaults, s3, 'icfs', 'config/')

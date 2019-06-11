@@ -26,12 +26,14 @@ class UsersRedis < Users
   # @param opts [Hash] Options
   # @option opts [String] :prefix Prefix for Redis key
   # @option opts [Integer] :expires Expiration time in seconds
+  # @option opts [Logger] :log Logger which records info about user
   #
   def initialize(redis, base, opts={})
     @redis = redis
     @base = base
     @pre = opts[:prefix] || ''.freeze
     @exp = opts[:expires] || 1*60*60 # 1 hour default
+    @log = opts[:log]
   end
 
 
@@ -50,14 +52,21 @@ class UsersRedis < Users
   def read(urg)
     Validate.check(urg, Items::FieldUsergrp) # FIXME
     key = _key(urg)
+    @log.debug('User/role/group read: %s'.freeze % urg) if @log
 
     # try cache
     json = @redis.get(key)
-    return JSON.parse(json) if json
+    if json
+      @log.debug('User/role/group cache hit: %s'.freeze % urg) if @log
+      return JSON.parse(json)
+    end
 
     # get base object from base store
     bse = @base.read(urg)
-    return nil if !bse
+    if !bse
+      @log.warn('User/role/group not found: %s'.freeze % urg) if @log
+      return nil
+    end
 
     # assemble
     seen = Set.new.add(urg)
@@ -103,11 +112,12 @@ class UsersRedis < Users
     bse['roles'] = roles.to_a unless roles.empty?
     bse['groups'] = grps.to_a unless grps.empty?
     bse['perms'] = perms.to_a unless perms.empty?
-    json = JSON.pretty_generate(bse)
+    json = JSON.generate(bse)
 
     # save to cache
     @redis.set(key, json)
     @redis.expire(key, @exp)
+    @log.info('User/role/group cached: %s %s'.freeze % [urg, json]) if @log
     return bse
   end # def read()
 
@@ -117,7 +127,8 @@ class UsersRedis < Users
   #
   def write(obj)
     json = Items.generate(obj, 'User/Role/Group'.freeze, Users::ValUser)
-    key = _key(obj['name'])
+    key = _key(obj['name'])    
+    @log.info('User/role/group write: %s'.freeze % urg) if @log
     @redis.del(key)
     @base.write(obj)
   end # def write()
