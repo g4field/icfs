@@ -22,7 +22,8 @@ services:
       - elastic:/usr/share/elasticsearch/data
     ports:
       - "127.0.0.1:9200:9200"
-
+      - "127.0.0.1:9300:9300"
+      
 
   # Minio - S3 compatible object store
   minio:
