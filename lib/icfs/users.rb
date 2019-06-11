@@ -57,6 +57,15 @@ class Users
 
 
   ###############################################
+  # Flush a user/role/group from a cache, if any
+  #
+  # @param urg [String] User/Role/Group name
+  # @return [Boolean] if cached
+  #
+  def flush(urg); raise NotImplementedError; end
+
+
+  ###############################################
   # Read a user/role/group
   #
   # @param urg [String] User/Role/Group name

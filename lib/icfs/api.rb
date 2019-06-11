@@ -101,6 +101,14 @@ class Api
 
 
   ###############################################
+  # Flush any user caching
+  def user_flush()
+    @users.flush(@user)
+    self.user = @user
+  end # def user_flush
+
+
+  ###############################################
   # User
   #
   attr_reader :user

@@ -780,6 +780,7 @@ class Client
       para = _util_post(env)
       _post_config(env, para).each{|key, val| cfg.set(key,val) }
       cfg.save
+      api.user_flush()
 
       # display the index
       body = [

@@ -42,6 +42,12 @@ class UsersS3 < Users
 
 
   ###############################################
+  # (see Users#flush)
+  #
+  def flush(urg); false; end
+
+
+  ###############################################
   # (see Users#read)
   #
   def read(urg)

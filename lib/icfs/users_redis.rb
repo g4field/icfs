@@ -47,10 +47,21 @@ class UsersRedis < Users
 
 
   ###############################################
+  # (see Users#flush)
+  #
+  def flush(urg)
+    Items.validate(urg, 'User/role/group name'.freeze, Items::FieldUsergrp)
+    @log.info('User/role/group cache flush: %s'.freeze % urg) if @log
+    @redis.del(_key(urg))
+    return true
+  end # def flush()
+
+
+  ###############################################
   # (see Users#read)
   #
   def read(urg)
-    Validate.check(urg, Items::FieldUsergrp) # FIXME
+    Items.validate(urg, 'User/role/group name'.freeze, Items::FieldUsergrp)
     key = _key(urg)
     @log.debug('User/role/group read: %s'.freeze % urg) if @log
 
@@ -127,7 +138,7 @@ class UsersRedis < Users
   #
   def write(obj)
     json = Items.generate(obj, 'User/Role/Group'.freeze, Users::ValUser)
-    key = _key(obj['name'])    
+    key = _key(obj['name'])
     @log.info('User/role/group write: %s'.freeze % urg) if @log
     @redis.del(key)
     @base.write(obj)

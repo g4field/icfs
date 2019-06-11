@@ -14,8 +14,6 @@ Move ICFS::Items code into ICFS
 
 Add event logging to ICFS::Api
 
-Add cache flush to ICFS::Users
-
 Improve time handling in ICFS::Web::Client
 
 Auto find the last log in ICFS::Utils::Check
