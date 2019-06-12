@@ -411,6 +411,13 @@ module Validate
   }.freeze
 
 
+  # String
+  IsString = {
+    method: :type,
+    type: String,
+  }.freeze
+
+
 end # module ICFS::Validate
 
 end # module ICFS

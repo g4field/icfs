@@ -1,3 +1,4 @@
+-------------------------------------------------------------------
 Short-term
 -------------------------------------------------------------------
 
@@ -5,12 +6,22 @@ Add SSL auth testing system
   nginx container
   run/sslauth.rb
 
+Email Rx, better format for fields parsing
+  ICFS case: (.*)
+  ICFS title: (.*)
+  ICFS tags: list indent below
+  ICFS perms: list indent below
+  ICFS stat: ([+\-]?\d+(\.\d)?) (.*) with grants indent below
+  ICFS content: (.*) Terminator defaults to "END"
+  indexes - think how to support
+  ICFS time: (.*)
+  
 
-
+-------------------------------------------------------------------
 Medium-term
 -------------------------------------------------------------------
 
-Move ICFS::Items code into ICFS
+Email IMAP client
 
 Add event logging to ICFS::Api
 
@@ -19,7 +30,8 @@ Improve time handling in ICFS::Web::Client
 Auto find the last log in ICFS::Utils::Check
 
 
+-------------------------------------------------------------------
 Long-term
 -------------------------------------------------------------------
 
-Email -> Entry system
+Move ICFS::Items code into ICFS
