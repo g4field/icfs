@@ -22,41 +22,10 @@ module Email
 #
 class RxCore
 
-  ###############################################
-  # Valid ICFS email gateway instructions
-  ValFields = {
-    method: :hash,
-    optional: {
-      'case' => Items::FieldCaseid,
-      'title' => Items::FieldTitle,
-      'tags' => {
-        method: :array,
-        min: 1,
-        check: Items::FieldTag
-      }.freeze,
-      'perms' => {
-        method: :array,
-        min: 1,
-        check: Items::FieldPermAny,
-      }.freeze,
-    }.freeze,
-    others: false
-  }.freeze
-
 
   ###############################################
-  # Begin boundary
-  BoundaryBegin = '---ICFS BEGIN---'.freeze
-
-
-  ###############################################
-  # Content boundary
-  BoundaryContent = '---ICFS CONTENT---'.freeze
-
-
-  ###############################################
-  # End boundary
-  BoundaryEnd = '---ICFS END---'.freeze
+  # Fields regex
+  FieldRx = /^ICFS ([^:[:blank:]]*)[[:blank:]]*:[[:blank:]]*(.*)[[:blank:]]*$/.freeze
 
 
   ###############################################
@@ -67,79 +36,48 @@ class RxCore
     # we only work on text/plain version of the email
     txt = env[:msg].text_part
     return :continue if !txt
-    lines = txt.body.decoded.lines
+    lines = txt.decoded.lines
 
-    # scan for the prefix
-    cnt = 0
-    while ln = lines[cnt]
-      cnt += 1
-      break if ln.strip == BoundaryBegin
-    end
-    return :continue if !ln
+    # User specified values
+    lines.each do |ln|
+      next unless ma = FieldRx.match(ln)
 
-    # copy YAML until Content or End boundary
-    yml = []
-    do_content = false
-    while ln = lines[cnt]
-      cnt += 1
-
-      case ln.strip
-      when BoundaryContent
-        do_content = true
-        break
-      when BoundaryEnd
-        do_content = false
-        break
-      else
-        yml << ln
+      fn = ma[1].downcase
+      val = ma[2].strip
+    
+      case fn
+      when 'case'
+        env[:caseid] = val
+      when 'title'
+        env[:title] = val
       end
+
     end
-    return :continue if !ln
-    yml = yml.join(''.freeze)
 
-    # copy content until End boundary
-    cont = []
-    if do_content
-      while ln = lines[cnt]
-        cnt += 1
-        break if ln.strip == BoundaryEnd
-        cont << ln
-      end
-      return :continue if !ln
+    # time defaults to message date
+    unless env[:time]
+      env[:time] = env[:msg].date.to_time.to_i
     end
-    cont = cont.join(''.freeze)
 
-    # parse YAML
-    begin
-      fields = YAML.safe_load(yml)
-    rescue
-      return :continue
-    end
-    err = Validate.check(fields, ValFields)
-    return :continue if err
-
-    # caseid, tags, perms
-    env[:caseid] = fields['case'] if fields['case']
-    env[:tags] = fields['tags'] if fields['tags']
-    env[:perms] = fields['perms'] if fields['perms']
-    env[:content] = cont unless cont.empty?
-
-    # time
-    env[:time] = env[:msg].date.to_time.to_i
-
-    # title specified
-    if fields['title']
-      env[:title] = fields['title']
-
-    # valid subject line
-    else
+    # title defaults to subject if okay
+    unless env[:title]
       # check the subject time
       title = env[:msg].subject
       err = Validate.check(title, Items::FieldTitle)
       env[:title] = title unless err
     end
 
-    # add all attachments as files
+    # save the edited email defaults to yes
+    unless env.key?(:save_msg)
+      env[:save_msg] = true
+    end
+
+    # save the raw email defaults to no
+    unless env.key?(:save_raw)
+      env[:save_raw] = false
+    end
+
+    # save attachments as files
     cnt = 0
     env[:msg].attachments.each do |att|
       type = att.header[:content_disposition].disposition_type
@@ -152,7 +90,6 @@ class RxCore
       end
       env[:files] << { name: name, content: att.decoded }
     end
-    env[:save_msg] = true
 
     return :continue
   end # def receive()

@@ -1,0 +1,14 @@
+
+ca:
+  cn: "/OU=org/OU=example/CN=Test Root CA"
+
+server:
+  cn: "/OU=org/OU=example/OU=Test Server/CN=localhost"
+  email: "server@example.org"
+
+clients:
+  - cn: "/OU=org/OU=example/OU=Test Client/CN=client 1"
+    email: "client1@example.org"
+
+  - cn: "/OU=org/OU=example/OU=Test Client/CN=client 2"
+    email: "client2example.org"

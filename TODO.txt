@@ -2,20 +2,20 @@
 Short-term
 -------------------------------------------------------------------
 
+Switch to frozen string pragma comment
+
 Add SSL auth testing system
   nginx container
   run/sslauth.rb
 
-Email Rx, better format for fields parsing
-  ICFS case: (.*)
-  ICFS title: (.*)
+Email Rx, Field parsing
   ICFS tags: list indent below
   ICFS perms: list indent below
   ICFS stat: ([+\-]?\d+(\.\d)?) (.*) with grants indent below
   ICFS content: (.*) Terminator defaults to "END"
   indexes - think how to support
   ICFS time: (.*)
-  
+
 
 -------------------------------------------------------------------
 Medium-term
