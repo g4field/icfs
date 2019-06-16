@@ -7,10 +7,6 @@ Add SSL auth testing system
   run/sslauth.rb
 
 Email Rx, Field parsing
-  ICFS tags: list indent below
-  ICFS perms: list indent below
-  ICFS stat: ([+\-]?\d+(\.\d)?) (.*) with grants indent below
-  ICFS content: (.*) Terminator defaults to "END"
   indexes - think how to support
   ICFS time: (.*)
 

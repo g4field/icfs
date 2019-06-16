@@ -24,10 +24,29 @@ module Email
 #
 class RxCore
 
+  ###############################################
+  # Strip regex
+  StripRx = /^[^[:graph:]]*([[:graph:]].*[[:graph:]])[^[:graph:]]*$/.freeze
+
+  ###############################################
+  # Strip spaces from collected lines
+  #
+  def _strip(collect)
+    collect.map{ |lr|
+      ma = StripRx.match(lr) # include wierd UNICODE spaces
+      ma ? ma[1] : nil
+    }.compact
+  end # def _strip()
+
 
   ###############################################
   # Fields regex
   FieldRx = /^ICFS ([^:[:blank:]]*)[[:blank:]]*:[[:blank:]]*(.*)[[:blank:]]*$/.freeze
+
+
+  ###############################################
+  # Regex for stat
+  StatRx = /^([+\-]?\d+(\.\d*)?)[^[:graph:]]+([[:graph:]].*[[:graph:]])$/.freeze
 
 
   ###############################################
@@ -41,17 +60,85 @@ class RxCore
     lines = txt.decoded.lines
 
     # User specified values
+    collect = nil
+    term = nil
+    state = nil
+    stat_name = nil
+    stat_value = nil
     lines.each do |ln|
+      # collecting lines
+      if collect
+        if ln.start_with?(term)
+          case state
+
+          when :tags
+            tags = _strip(collect)
+            env[:tags] = tags unless tags.empty?
+            collect = nil
+
+          when :perms
+            perms = _strip(collect)
+            env[:perms] = perms unless perms.empty?
+            collect = nil
+
+          when :stat
+            credit = _strip(collect)
+            env[:stats] ||= []
+            env[:stats] << {
+              'name' => stat_name,
+              'value' => stat_value,
+              'credit' => credit
+            }
+            collect = nil
+
+          when :content
+            cont = collect.map{|lr| lr.delete("\r")}.join('')
+            env[:content] = cont unless cont.empty?
+            collect = nil
+
+          else
+            raise NotImplementedError
+          end
+        else
+          collect << ln
+          next
+        end
+      end
+
       next unless ma = FieldRx.match(ln)
 
       fn = ma[1].downcase
-      val = ma[2].strip
 
       case fn
       when 'case'
-        env[:caseid] = val
+        env[:caseid] = ma[2].strip
+
       when 'title'
-        env[:title] = val
+        env[:title] = ma[2].strip
+
+      when 'tags'
+        collect = []
+        state = :tags
+        term = 'ICFS'
+
+      when 'perms'
+        collect = []
+        state = :perms
+        term = 'ICFS'
+
+      when 'stat'
+        next unless pm = StatRx.match(ma[2].strip)
+        stat_name = pm[3]
+        stat_value = pm[1].to_f
+        collect = []
+        state = :stat
+        term = 'ICFS'
+
+      when 'content'
+        collect = []
+        state = :content
+        term = ma[2].strip
+        term = 'ICFS' if term.empty?
       end
 
     end

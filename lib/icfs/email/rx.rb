@@ -64,6 +64,23 @@ class Rx
         method: :array,
         check: Items::FieldPermAny,
       }.freeze,
+      stats: {                         # stats to apply
+        method: :array,
+        min: 1,
+        check: {
+          method: :hash,
+          required: {
+            "name" => Items::FieldStat,
+            "value" => Validate::IsFloat,
+            "credit" => {
+              method: :array,
+              min: 1,
+              max: 32,
+              check: Items::FieldUsergrp
+            }.freeze
+          }.freeze
+        }.freeze
+      }.freeze,
       save_raw: Validate::IsBoolean,   # save the raw email as a File
       save_msg: Validate::IsBoolean,   # save the processed message w/o attach
     }.freeze,
@@ -159,6 +176,7 @@ class Rx
     ent['content'] = env[:content] || DefaultContent
     ent['tags'] = env[:tags].uniq if env[:tags]
     ent['perms'] = env[:perms].uniq if env[:perms]
+    ent['stats'] = env[:stats] if env[:stats]
 
     # files
     files = env[:files].map do |fd|
