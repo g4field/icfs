@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 #
 module ICFS
 
@@ -42,15 +44,15 @@ class Check
   #
   def _item(title, read, read_args, hist, hash, val, con)
 
-    @log.debug('ICFS check: %s'.freeze % title)
+    @log.debug('ICFS check: %s' % title)
 
     # read
     json = @store.send(read, *read_args)
     if !json
       if hist
-        @log.warn('ICFS check: %s is missing and historical'.freeze % title)
+        @log.warn('ICFS check: %s is missing and historical' % title)
       else
-        @log.error('ICFS check: %s is missing and current'.freeze % title)
+        @log.error('ICFS check: %s is missing and current' % title)
       end
       return nil
     end
@@ -58,24 +60,24 @@ class Check
     # hash
     if hash
       if hash != ICFS.hash(json)
-        @log.error('ICFS check: %s hash bad'.freeze % title)
+        @log.error('ICFS check: %s hash bad' % title)
       end
     else
-      @log.warn('ICFS check: %s hash unverified'.freeze % title)
+      @log.warn('ICFS check: %s hash unverified' % title)
     end
 
     # parse
     obj = JSON.parse(json)
     err = Validate.check(obj, val)
     if err
-      @log.error('ICFS check: %s bad format'.freeze % title)
+      @log.error('ICFS check: %s bad format' % title)
       return nil
     end
 
     # inconsistent
     con.each do |name, num|
       if obj[name] != read_args[num]
-        @log.error('ICFS check: %s inconsistent'.freeze % title)
+        @log.error('ICFS check: %s inconsistent' % title)
         return nil
       end
     end
@@ -83,7 +85,7 @@ class Check
     return obj
 
   rescue JSON::ParserError
-    @log.error('ICFS check: %s bad JSON'.freeze % title)
+    @log.error('ICFS check: %s bad JSON' % title)
     return nil
   end # def _item()
   private :_item
@@ -96,7 +98,7 @@ class Check
   # @param cur_hash [String] The hash of the last log
   #
   def check(cid, cur_log, cur_hash, opts={})
-    @log.info('ICFS check: case %s'.freeze % cid)
+    @log.info('ICFS check: case %s' % cid)
 
     ent_cur = Set.new
     cse_cur = false
@@ -113,15 +115,15 @@ class Check
 
       # log
       log = _item(
-        'log %d'.freeze % lnum,
+        'log %d' % lnum,
         :log_read,
         [cid, lnum],
         false,
         hash_log,
         Items::ItemLog,
         [
-          ['caseid'.freeze, 0].freeze,
-          ['log'.freeze, 1].freeze
+          ['caseid', 0].freeze,
+          ['log', 1].freeze
         ].freeze,
       )
       if !log
@@ -132,7 +134,7 @@ class Check
 
       # check that time decreases
       if log['time'] > time_log
-        @log.warn('ICFS check: log %d time inconsistent'.freeze % lnum)
+        @log.warn('ICFS check: log %d time inconsistent' % lnum)
       end
 
       # entry
@@ -145,9 +147,9 @@ class Check
         log['entry']['hash'],
         Items::ItemEntry,
         [
-          ['caseid'.freeze, 0].freeze,
-          ['entry'.freeze, 1].freeze,
-          ['log'.freeze, 2].freeze
+          ['caseid', 0].freeze,
+          ['entry', 1].freeze,
+          ['log', 2].freeze
         ].freeze,
       )
 
@@ -156,7 +158,7 @@ class Check
         ent_cur.add(enum)
         if ent['files']
           ent['files'].each do |fd|
-            file_cur.add( '%d-%d-%d'.freeze % [enum, fd['num'], fd['log']] )
+            file_cur.add( '%d-%d-%d' % [enum, fd['num'], fd['log']] )
           end
         end
       end
@@ -172,9 +174,9 @@ class Check
           log['index']['hash'],
           Items::ItemIndex,
           [
-            ['caseid'.freeze, 0].freeze,
-            ['index'.freeze, 1].freeze,
-            ['log'.freeze, 2].freeze
+            ['caseid', 0].freeze,
+            ['index', 1].freeze,
+            ['log', 2].freeze
           ]
         )
         idx_cur.add(xnum)
@@ -184,16 +186,16 @@ class Check
       if log['action']
         anum = log['action']['num']
         act = _item(
-          'action %d-%d'.freeze % [anum, lnum],
+          'action %d-%d' % [anum, lnum],
           :action_read,
           [cid, anum, lnum],
           act_cur.include?(anum),
           log['action']['hash'],
           Items::ItemAction,
           [
-            ['caseid'.freeze, 0].freeze,
-            ['action'.freeze, 1].freeze,
-            ['log'.freeze, 2].freeze
+            ['caseid', 0].freeze,
+            ['action', 1].freeze,
+            ['log', 2].freeze
           ]
         )
         act_cur.add(anum)
@@ -202,15 +204,15 @@ class Check
       # case
       if log['case_hash']
         cse = _item(
-          'case %d'.freeze % lnum,
+          'case %d' % lnum,
           :case_read,
           [cid, lnum],
           cse_cur,
           log['case_hash'],
           Items::ItemCase,
           [
-            ['caseid'.freeze, 0].freeze,
-            ['log'.freeze, 1].freeze
+            ['caseid', 0].freeze,
+            ['log', 1].freeze
           ]
         )
         cse_cur = true
@@ -221,11 +223,11 @@ class Check
         fnum = 0
         log['files_hash'].each do |hash|
           fnum = fnum + 1
-          fn = '%d-%d-%d'.freeze % [enum, fnum, lnum]
+          fn = '%d-%d-%d' % [enum, fnum, lnum]
           cur = file_cur.include?(fn)
           file_cur.delete(fn) if cur
 
-          @log.debug('ICFS check: file %s'.freeze % fn)
+          @log.debug('ICFS check: file %s' % fn)
 
           # read/size
           if opts[:hash_all] || (cur && opts[:hash_current])
@@ -239,10 +241,10 @@ class Check
           # missing
           if !fi
             if cur
-              @log.error('ICFS check: file %s missing and current'.freeze %
+              @log.error('ICFS check: file %s missing and current' %
                 fn)
             else
-              @log.warn('ICFS check: file %s missing and historical'.freeze %
+              @log.warn('ICFS check: file %s missing and historical' %
                 fn)
             end
           end
@@ -251,7 +253,7 @@ class Check
           if fi.is_a?(File)
             # check
             if hash != ICFS.hash_temp(fi)
-              @log.error('ICFS check: file %s hash bad'.freeze % fn)
+              @log.error('ICFS check: file %s hash bad' % fn)
             end
 
             # close
@@ -272,11 +274,11 @@ class Check
     # check for any non-existant current files
     unless file_cur.empty?
       file_cur.each do |fn|
-        @log.error('ICFS check: file %s current but not logged'.freeze % fn)
+        @log.error('ICFS check: file %s current but not logged' % fn)
       end
     end
 
-    @log.debug('ICFS check: case %s complete'.freeze % cid)
+    @log.debug('ICFS check: case %s complete' % cid)
   end # def check()
 
 

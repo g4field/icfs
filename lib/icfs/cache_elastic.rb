@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'json'
 require 'socket'
 require_relative 'elastic'
@@ -42,7 +44,7 @@ class CacheElastic < Cache
       "grant": { "type": "keyword" }
     }}}
   }}}
-}'.freeze,
+}',
 
     :log => '{
   "mappings": { "_doc": { "properties": {
@@ -67,7 +69,7 @@ class CacheElastic < Cache
     "case_hash": { "enabled": false },
     "files_hash": { "enabled": false }
   }}}
-}'.freeze,
+}',
 
     :entry => '{
   "mappings": { "_doc": { "properties": {
@@ -94,7 +96,7 @@ class CacheElastic < Cache
       "name": { "type": "text" }
     }}
   }}}
-}'.freeze,
+}',
 
     :action => '{
   "mappings": { "_doc": { "properties": {
@@ -111,7 +113,7 @@ class CacheElastic < Cache
       "tags": { "type": "keyword" }
     }}
   }}}
-}'.freeze,
+}',
 
     :index => '{
   "mappings": { "_doc": { "properties": {
@@ -126,19 +128,19 @@ class CacheElastic < Cache
     "content": { "type": "text" },
     "tags": { "type": "keyword" }
   }}}
-}'.freeze,
+}',
 
     :current => '{
   "mappings": {"_doc": {
     "enabled": false
   }}
-}'.freeze,
+}',
 
     :lock => '{
   "mappings": { "_doc": {
     "enabled": false
   }}
-}'.freeze,
+}',
   }.freeze
 
 
@@ -171,9 +173,9 @@ class CacheElastic < Cache
   #
   def lock_take(cid)
 
-    json = '{"client":"%s"}'.freeze % @name
-    url = '%s/_doc/%s/_create'.freeze % [@map[:lock], CGI.escape(cid)]
-    head = {'Content-Type'.freeze => 'application/json'.freeze}.freeze
+    json = '{"client":"%s"}' % @name
+    url = '%s/_doc/%s/_create' % [@map[:lock], CGI.escape(cid)]
+    head = {'Content-Type' => 'application/json'}.freeze
 
     # try to take
     tries = 5
@@ -185,7 +187,7 @@ class CacheElastic < Cache
     end
 
     # failed to take lock
-    raise('Elasticsearch lock take failed: %s'.freeze % cid)
+    raise('Elasticsearch lock take failed: %s' % cid)
   end
 
 
@@ -193,10 +195,10 @@ class CacheElastic < Cache
   # (see Cache#lock_release)
   #
   def lock_release(cid)
-    url = '%s/_doc/%s'.freeze % [@map[:lock], CGI.escape(cid)]
+    url = '%s/_doc/%s' % [@map[:lock], CGI.escape(cid)]
     resp = @es.run_request(:delete, url, '', {})
     if !resp.success?
-      raise('Elasticsearch lock release failed: %s'.freeze % cid)
+      raise('Elasticsearch lock release failed: %s' % cid)
     end
   end
 
@@ -257,20 +259,20 @@ class CacheElastic < Cache
 
     # build the query
     must = [
-      _query_match('title'.freeze, query[:title]),
+      _query_match('title', query[:title]),
     ].compact
     filter = [
-      _query_term('tags'.freeze, query[:tags]),
-      _query_term('status'.freeze, query[:status]),
-      _query_term('template'.freeze, query[:template]),
+      _query_term('tags', query[:tags]),
+      _query_term('status', query[:status]),
+      _query_term('template', query[:template]),
     ].compact
     access = [
-      _query_term('access.grant'.freeze, query[:grantee]),
-      _query_term('access.perm'.freeze, query[:perm]),
+      _query_term('access.grant', query[:grantee]),
+      _query_term('access.perm', query[:perm]),
     ].compact
     unless access.empty?
       qu = (access.size == 1) ? access[0] : _query_bool(nil, access, nil, nil)
-      filter << _query_nested('access'.freeze, qu)
+      filter << _query_nested('access', qu)
     end
     req = { 'query' => _query_bool(must, filter, nil, nil) }
 
@@ -288,7 +290,7 @@ class CacheElastic < Cache
     _page(query, req)
 
     # run the search
-    url = @map[:case] + '/_search'.freeze
+    url = @map[:case] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -300,11 +302,11 @@ class CacheElastic < Cache
 
   # the Case results fields
   ResultsCase = {
-    caseid: 'caseid'.freeze,
-    template: 'template'.freeze,
-    status: 'status'.freeze,
-    title: 'title'.freeze,
-    tags: 'tags'.freeze,
+    caseid: 'caseid',
+    template: 'template',
+    status: 'status',
+    title: 'title',
+    tags: 'tags',
   }.freeze
 
 
@@ -337,7 +339,7 @@ class CacheElastic < Cache
       hl = hh['highlight']
 
       if hl
-        snip = ''
+        snip = String.new
         hl.each{|fn, ary| ary.each{|ht| snip << ht}}
       else
         snip = nil
@@ -371,7 +373,7 @@ class CacheElastic < Cache
               obj[aa] = val.nil? ? [] : val
 
             else
-              raise(ArgumentError, 'Not a valid field option'.freeze)
+              raise(ArgumentError, 'Not a valid field option')
             end
           else
             obj[aa] = src[bb]
@@ -428,7 +430,7 @@ class CacheElastic < Cache
   # (see Cache#entry_read)
   #
   def entry_read(cid, enum)
-    _read(:entry, '%s.%d'.freeze % [cid, enum])
+    _read(:entry, '%s.%d' % [cid, enum])
   end
 
 
@@ -436,7 +438,7 @@ class CacheElastic < Cache
   # (see Cache#entry_write)
   #
   def entry_write(cid, enum, item)
-    _write(:entry, '%s.%d'.freeze % [cid, enum], item)
+    _write(:entry, '%s.%d' % [cid, enum], item)
   end
 
 
@@ -460,23 +462,23 @@ class CacheElastic < Cache
 
     # build the query
     must = [
-      _query_match('title'.freeze, query[:title]),
-      _query_match('content'.freeze, query[:content]),
+      _query_match('title', query[:title]),
+      _query_match('content', query[:content]),
     ].compact
     filter = [
-      _query_term('tags'.freeze, query[:tags]),
-      _query_term('caseid'.freeze, query[:caseid]),
-      _query_times('time'.freeze, query[:after], query[:before]),
-      _query_term('action'.freeze, query[:action]),
-      _query_term('index'.freeze, query[:index]),
+      _query_term('tags', query[:tags]),
+      _query_term('caseid', query[:caseid]),
+      _query_times('time', query[:after], query[:before]),
+      _query_term('action', query[:action]),
+      _query_term('index', query[:index]),
     ].compact
     stats = [
-      _query_term('stats.name'.freeze, query[:stat]),
-      _query_term('stats.credit'.freeze, query[:credit]),
+      _query_term('stats.name', query[:stat]),
+      _query_term('stats.credit', query[:credit]),
     ].compact
     unless stats.empty?
       qu = (stats.size == 1) ? stats[0] : _query_bool(nil, stats, nil, nil)
-      filter << _query_nested('stats'.freeze, qu)
+      filter << _query_nested('stats', qu)
     end
     req = { 'query' => _query_bool(must, filter, nil, nil) }
 
@@ -511,7 +513,7 @@ class CacheElastic < Cache
     _page(query, req)
 
     # run the search
-    url = @map[:entry] + '/_search'.freeze
+    url = @map[:entry] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -523,16 +525,16 @@ class CacheElastic < Cache
 
   # Entry search results fields
   ResultsEntry = {
-    caseid: 'caseid'.freeze,
-    entry: 'entry'.freeze,
-    time: 'time'.freeze,
-    title: 'title'.freeze,
-    tags: 'tags'.freeze,
-    perms: ['perms'.freeze, :empty],
-    action: ['action'.freeze, :zero],
-    index: ['index'.freeze, :size],
-    files: ['files'.freeze, :size],
-    stats: ['stats'.freeze, :size],
+    caseid: 'caseid',
+    entry: 'entry',
+    time: 'time',
+    title: 'title',
+    tags: 'tags',
+    perms: ['perms', :empty],
+    action: ['action', :zero],
+    index: ['index', :size],
+    files: ['files', :size],
+    stats: ['stats', :size],
   }.freeze
 
 
@@ -541,7 +543,7 @@ class CacheElastic < Cache
   # (see Cache#action_read)
   #
   def action_read(cid, anum)
-    _read(:action, '%s.%d'.freeze % [cid, anum])
+    _read(:action, '%s.%d' % [cid, anum])
   end
 
 
@@ -549,7 +551,7 @@ class CacheElastic < Cache
   # (see Cache#action_write)
   #
   def action_write(cid, anum, item)
-    _write(:action, '%s.%d'.freeze % [cid, anum], item)
+    _write(:action, '%s.%d' % [cid, anum], item)
   end
 
 
@@ -560,23 +562,23 @@ class CacheElastic < Cache
 
     # build the query
     task_must = [
-      _query_match('tasks.title'.freeze, query[:title])
+      _query_match('tasks.title', query[:title])
     ].compact
     task_filter = [
-      _query_term('tasks.assigned'.freeze, query[:assigned]),
-      _query_term('tasks.status'.freeze, query[:status]),
-      _query_term('tasks.flag'.freeze, query[:flag]),
-      _query_times('tasks.time'.freeze, query[:after], query[:before]),
-      _query_term('tasks.tags'.freeze, query[:tags]),
+      _query_term('tasks.assigned', query[:assigned]),
+      _query_term('tasks.status', query[:status]),
+      _query_term('tasks.flag', query[:flag]),
+      _query_times('tasks.time', query[:after], query[:before]),
+      _query_term('tasks.tags', query[:tags]),
     ].compact
     must = [
       _query_nested(
-        'tasks'.freeze,
+        'tasks',
         _query_bool(task_must, task_filter, nil, nil)
       )
     ]
     filter = [
-      _query_term('caseid'.freeze, query[:caseid])
+      _query_term('caseid', query[:caseid])
     ].compact
     req = { 'query' => _query_bool(must, filter, nil, nil) }
 
@@ -595,9 +597,9 @@ class CacheElastic < Cache
           'tasks.time' => {
             'order' => srt,
             'nested' => {
-              'path' => 'tasks'.freeze,
+              'path' => 'tasks',
               'filter' => _query_term(
-                'tasks.assigned'.freeze, query[:assigned])
+                'tasks.assigned', query[:assigned])
             }
           }
         },
@@ -609,7 +611,7 @@ class CacheElastic < Cache
     _page(query, req)
 
     # run the search
-    url = @map[:action] + '/_search'.freeze
+    url = @map[:action] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -634,7 +636,7 @@ class CacheElastic < Cache
   # (see Cache#index_write)
   #
   def index_write(cid, xnum, item)
-    _write(:index, '%s.%d'.freeze % [cid, xnum], item)
+    _write(:index, '%s.%d' % [cid, xnum], item)
   end
 
 
@@ -642,7 +644,7 @@ class CacheElastic < Cache
   # (see Cache#index_read)
   #
   def index_read(cid, xnum)
-    _read(:index, '%s.%d'.freeze % [cid, xnum])
+    _read(:index, '%s.%d' % [cid, xnum])
   end
 
 
@@ -652,13 +654,13 @@ class CacheElastic < Cache
 
     # build the query
     must = [
-      _query_match('title'.freeze, query[:title]),
-      _query_match('content'.freeze, query[:content]),
+      _query_match('title', query[:title]),
+      _query_match('content', query[:content]),
     ].compact
     filter = [
-      _query_term('caseid'.freeze, query[:caseid]),
-      _query_term('tags'.freeze, query[:tags]),
-      _query_prefix('title.raw'.freeze, query[:prefix]),
+      _query_term('caseid', query[:caseid]),
+      _query_term('tags', query[:tags]),
+      _query_prefix('title.raw', query[:prefix]),
     ].compact
     req = { 'query' => _query_bool(must, filter, nil, nil) }
 
@@ -704,7 +706,7 @@ class CacheElastic < Cache
     _page(query, req)
 
     # run the search
-    url = @map[:index] + '/_search'.freeze
+    url = @map[:index] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -716,10 +718,10 @@ class CacheElastic < Cache
 
   # Index search results fields
   ResultsIndex = {
-    caseid: 'caseid'.freeze,
-    index: 'index'.freeze,
-    title: 'title'.freeze,
-    tags: 'tags'.freeze,
+    caseid: 'caseid',
+    index: 'index',
+    title: 'title',
+    tags: 'tags',
   }.freeze
 
 
@@ -729,8 +731,8 @@ class CacheElastic < Cache
   def index_tags(query)
 
     # build the query
-    ag = _agg_terms('tags'.freeze, 'tags'.freeze, nil)
-    qu = _query_term('caseid'.freeze, query[:caseid])
+    ag = _agg_terms('tags', 'tags', nil)
+    qu = _query_term('caseid', query[:caseid])
     qu = _query_constant(qu)
     req = {
       'query' => qu,
@@ -739,11 +741,11 @@ class CacheElastic < Cache
     }
 
     # run the search
-    url = @map[:index] + '/_search'.freeze
+    url = @map[:index] + '/_search'
     body = JSON.generate(req)
-    head = { 'Content-Type' => 'application/json'.freeze }
+    head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
-    raise 'search failed'.freeze if !resp.success?
+    raise 'search failed' if !resp.success?
 
     # extract tags
     rh = JSON.parse(resp.body)
@@ -769,7 +771,7 @@ class CacheElastic < Cache
   # (see Cache#log_read)
   #
   def log_read(cid, lnum)
-    _read(:log, '%s.%d'.freeze % [cid, lnum])
+    _read(:log, '%s.%d' % [cid, lnum])
   end
 
 
@@ -777,20 +779,20 @@ class CacheElastic < Cache
   # (see Cache#log_write)
   #
   def log_write(cid, lnum, item)
-    _write(:log, '%s.%d'.freeze % [cid, lnum], item)
+    _write(:log, '%s.%d' % [cid, lnum], item)
   end
 
 
   # Log search results fields
   ResultsLog = {
-    caseid: 'caseid'.freeze,
-    log: 'log'.freeze,
-    time: 'time'.freeze,
-    user: 'user'.freeze,
-    entry: ['entry'.freeze, :sub, 'num'.freeze].freeze,
-    index: ['index'.freeze, :sub, 'num'.freeze].freeze,
-    action: ['action'.freeze, :sub, 'num'.freeze].freeze,
-    files: ['files_hash'.freeze, :size].freeze,
+    caseid: 'caseid',
+    log: 'log',
+    time: 'time',
+    user: 'user',
+    entry: ['entry', :sub, 'num'].freeze,
+    index: ['index', :sub, 'num'].freeze,
+    action: ['action', :sub, 'num'].freeze,
+    files: ['files_hash', :size].freeze,
   }.freeze
 
 
@@ -801,12 +803,12 @@ class CacheElastic < Cache
 
     # build the query
     filter = [
-      _query_term('caseid'.freeze, query[:caseid]),
-      _query_times('times'.freeze, query[:after], query[:before]),
-      _query_term('user'.freeze, query[:user]),
-      _query_term('entry.num'.freeze, query[:entry]),
-      _query_term('index.num'.freeze, query[:index]),
-      _query_term('action.num'.freeze, query[:action]),
+      _query_term('caseid', query[:caseid]),
+      _query_times('times', query[:after], query[:before]),
+      _query_term('user', query[:user]),
+      _query_term('entry.num', query[:entry]),
+      _query_term('index.num', query[:index]),
+      _query_term('action.num', query[:action]),
     ].compact
     req = { 'query' => _query_bool(nil, filter, nil, nil) }
 
@@ -828,7 +830,7 @@ class CacheElastic < Cache
     _page(query, req)
 
     # run the search
-    url = @map[:log] + '/_search'.freeze
+    url = @map[:log] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -948,18 +950,18 @@ class CacheElastic < Cache
   def stats(query)
 
     # aggs
-    ag = _agg_stats('vals'.freeze, 'stats.value'.freeze)
-    ag = _agg_terms('stats'.freeze, 'stats.name'.freeze, ag)
+    ag = _agg_stats('vals', 'stats.value')
+    ag = _agg_terms('stats', 'stats.name', ag)
     if query[:credit]
-      cd = _query_term('stats.credit'.freeze, query[:credit])
-      ag = _agg_filter('credit'.freeze, cd, ag)
+      cd = _query_term('stats.credit', query[:credit])
+      ag = _agg_filter('credit', cd, ag)
     end
-    ag = _agg_nested('nested'.freeze, 'stats'.freeze, ag)
+    ag = _agg_nested('nested', 'stats', ag)
 
     # build the query
     filt = [
-      _query_term('caseid'.freeze, query[:caseid]),
-      _query_times('time'.freeze, query[:after], query[:before]),
+      _query_term('caseid', query[:caseid]),
+      _query_times('time', query[:after], query[:before]),
     ].compact
     qu = _query_bool(nil, filt, nil, nil)
 
@@ -971,7 +973,7 @@ class CacheElastic < Cache
     }
 
     # run the search
-    url = @map[:entry] + '/_search'.freeze
+    url = @map[:entry] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -1018,8 +1020,8 @@ class CacheElastic < Cache
   def entry_tags(query)
 
     # build the query
-    ag = _agg_terms('tags'.freeze, 'tags'.freeze, nil)
-    qu = _query_term('caseid'.freeze, query[:caseid])
+    ag = _agg_terms('tags', 'tags', nil)
+    qu = _query_term('caseid', query[:caseid])
     qu = _query_constant(qu)
     req = {
       'query' => qu,
@@ -1028,7 +1030,7 @@ class CacheElastic < Cache
     }
 
     # run the search
-    url = @map[:entry] + '/_search'.freeze
+    url = @map[:entry] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -1061,19 +1063,19 @@ class CacheElastic < Cache
 
     # build the query
     filter = [
-      _query_term('status'.freeze, query[:status]),
-      _query_term('template'.freeze, query[:template]),
+      _query_term('status', query[:status]),
+      _query_term('template', query[:template]),
     ].compact
     access = [
-      _query_term('access.grant'.freeze, query[:grantee]),
-      _query_term('access.perm'.freeze, query[:perm]),
+      _query_term('access.grant', query[:grantee]),
+      _query_term('access.perm', query[:perm]),
     ].compact
     unless access.empty?
       qu = (access.size == 1) ? access[0] : _query_bool(nil, access, nil, nil)
-      filter << _query_nested('access'.freeze, qu)
+      filter << _query_nested('access', qu)
     end
     qu = _query_bool(nil, filter, nil, nil)
-    ag = _agg_terms('tags'.freeze, 'tags'.freeze, nil)
+    ag = _agg_terms('tags', 'tags', nil)
     req = {
       'query' => qu,
       'aggs' => ag,
@@ -1081,7 +1083,7 @@ class CacheElastic < Cache
     }
 
     # run the search
-    url = @map[:case] + '/_search'.freeze
+    url = @map[:case] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)
@@ -1113,17 +1115,17 @@ class CacheElastic < Cache
 
     # build the query
     task_filter = [
-      _query_term('tasks.assigned'.freeze, query[:assigned]),
-      _query_term('tasks.status'.freeze, query[:status]),
-      _query_term('tasks.flag'.freeze, query[:flag]),
-      _query_times('tasks.time'.freeze, query[:after], query[:before]),
+      _query_term('tasks.assigned', query[:assigned]),
+      _query_term('tasks.status', query[:status]),
+      _query_term('tasks.flag', query[:flag]),
+      _query_times('tasks.time', query[:after], query[:before]),
     ].compact
     qu_filt = _query_bool(nil, task_filter, nil, nil)
-    ag = _agg_terms('tags'.freeze, 'tasks.tags'.freeze, nil)
-    ag = _agg_filter('filt'.freeze, qu_filt, ag)
-    ag = _agg_nested('nest'.freeze, 'tasks'.freeze, ag)
+    ag = _agg_terms('tags', 'tasks.tags', nil)
+    ag = _agg_filter('filt', qu_filt, ag)
+    ag = _agg_nested('nest', 'tasks', ag)
     if query[:caseid]
-      qu = _query_term('caseid'.freeze, query[:caseid])
+      qu = _query_term('caseid', query[:caseid])
     else
       qu = _query_all()
     end
@@ -1134,7 +1136,7 @@ class CacheElastic < Cache
     }
 
     # run the search
-    url = @map[:action] + '/_search'.freeze
+    url = @map[:action] + '/_search'
     body = JSON.generate(req)
     head = { 'Content-Type' => 'application/json' }
     resp = @es.run_request(:get, url, body, head)

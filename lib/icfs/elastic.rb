@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 #
 module ICFS
 
@@ -28,12 +30,12 @@ module Elastic
   # @return [String] JSON encoded object
   #
   def _read(ix, id)
-    url = '%s/_doc/%s/_source'.freeze % [ @map[ix], CGI.escape(id)]
-    resp = @es.run_request(:get, url, ''.freeze, {})
+    url = '%s/_doc/%s/_source' % [ @map[ix], CGI.escape(id)]
+    resp = @es.run_request(:get, url, '', {})
     if resp.status == 404
       return nil
     elsif !resp.success?
-      raise('Elasticsearch read failed'.freeze)
+      raise('Elasticsearch read failed')
     end
     return resp.body
   end # def _read()
@@ -47,11 +49,11 @@ module Elastic
   # @param item [String] JSON encoded object to write
   #
   def _write(ix, id, item)
-    url = '%s/_doc/%s'.freeze % [ @map[ix], CGI.escape(id)]
-    head = {'Content-Type'.freeze => 'application/json'.freeze}.freeze
+    url = '%s/_doc/%s' % [ @map[ix], CGI.escape(id)]
+    head = {'Content-Type' => 'application/json'}.freeze
     resp = @es.run_request(:put, url, item, head)
     if !resp.success?
-      raise('Elasticsearch index failed'.freeze)
+      raise('Elasticsearch index failed')
     end
   end # def _write()
 
@@ -64,7 +66,7 @@ module Elastic
   # @param maps [Hash] symbol to Elasticsearch mapping
   #
   def create(maps)
-    head = {'Content-Type'.freeze => 'application/json'.freeze}.freeze
+    head = {'Content-Type' => 'application/json'}.freeze
     maps.each do |ix, map|
       url = @map[ix]
       resp = @es.run_request(:put, url, map, head)
@@ -72,7 +74,7 @@ module Elastic
         puts 'URL: %s' % url
         puts map
         puts resp.body
-        raise('Elasticsearch index create failed: %s'.freeze % ix.to_s)
+        raise('Elasticsearch index create failed: %s' % ix.to_s)
       end
     end
   end # def create()

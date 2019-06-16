@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'fileutils'
 require 'tempfile'
 
@@ -29,7 +31,7 @@ class StoreFs < Store
   # @param base [String] the base directory
   #
   def initialize(base)
-    if base[-1] == '/'.freeze
+    if base[-1] == '/'
       @base = base.freeze
     else
       @base = (base + '/').freeze
@@ -75,7 +77,7 @@ class StoreFs < Store
   # (see Store#tempfile)
   #
   def tempfile
-    Tempfile.new('tmp'.freeze, @base, :encoding => 'ascii-8bit'.freeze)
+    Tempfile.new('tmp', @base, :encoding => 'ascii-8bit')
   end
 
 
@@ -86,7 +88,7 @@ class StoreFs < Store
   # Read an item
   #
   def _read(fnam)
-    return File.read(fnam, encoding: 'utf-8'.freeze)
+    return File.read(fnam, encoding: 'utf-8')
   rescue Errno::ENOENT
     return nil
   end
@@ -96,12 +98,12 @@ class StoreFs < Store
   # Write an item
   #
   def _write(fnam, item)
-    File.open(fnam, 'w'.freeze, encoding: 'utf-8'.freeze) do |fi|
+    File.open(fnam, 'w', encoding: 'utf-8') do |fi|
       fi.write(item)
     end
   rescue Errno::ENOENT
     FileUtils.mkdir_p(File.dirname(fnam))
-    File.open(fnam, 'w'.freeze, encoding: 'utf-8'.freeze) do |fi|
+    File.open(fnam, 'w', encoding: 'utf-8') do |fi|
       fi.write(item)
     end
   end

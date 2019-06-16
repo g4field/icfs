@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 #
 module ICFS
 
@@ -67,8 +69,8 @@ class Api
   def user=(uname)
     @user = uname.dup.freeze
     urgp = @users.read(uname)
-    raise(Error::NotFound, 'User name not found'.freeze) if !urgp
-    raise(Error::Value, 'Not a user'.freeze) if urgp['type'] != 'user'
+    raise(Error::NotFound, 'User name not found') if !urgp
+    raise(Error::Value, 'Not a user') if urgp['type'] != 'user'
     if urgp['roles']
       @roles = urgp['roles'].map{|rn| rn.freeze }.freeze
     else
@@ -213,7 +215,7 @@ class Api
   ###############################################
   # See if we are tasked
   def tasked?(cid, anum)
-    id = '%s.%d'.freeze % [cid, anum]
+    id = '%s.%d' % [cid, anum]
     unless @tasked.key?(id)
       act = _action_read(cid, anum)
 
@@ -283,12 +285,12 @@ class Api
   def case_read(cid, lnum=0)
     if lnum != 0
       json = @store.case_read(cid, lnum)
-      return Items.parse(json, 'case'.freeze, Items::ItemCase)
+      return Items.parse(json, 'case', Items::ItemCase)
     end
 
     if !@cases.key?(cid)
       json = @cache.case_read(cid)
-      cur = Items.parse(json, 'case'.freeze, Items::ItemCase)
+      cur = Items.parse(json, 'case', Items::ItemCase)
       @cases[cid] = cur
     end
     return @cases[cid]
@@ -308,12 +310,12 @@ class Api
     # get access list
     al = access_list(cid)
     if !al.include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead)
     end
 
     # read
     json = @cache.log_read(cid, lnum)
-    return Items.parse(json, 'log'.freeze, Items::ItemLog)
+    return Items.parse(json, 'log', Items::ItemLog)
   end # def log_read()
 
 
@@ -331,7 +333,7 @@ class Api
     # get access list and current entry
     al = access_list(cid)
     json = @cache.entry_read(cid, enum)
-    ec = Items.parse(json, 'entry'.freeze, Items::ItemEntry)
+    ec = Items.parse(json, 'entry', Items::ItemEntry)
 
     # see if we can read the entry
     need = Set.new
@@ -339,7 +341,7 @@ class Api
     need.merge(ec['perms']) if ec['perms']
     need.subtract(al)
     unless need.empty?
-      raise(Error::Perms, 'missing perms: %s'.freeze %
+      raise(Error::Perms, 'missing perms: %s' %
         need.to_a.sort.join(', ') )
     end
 
@@ -348,7 +350,7 @@ class Api
       return ec
     else
       json = @store.entry_read(cid, enum, lnum)
-      return Items.parse(json, 'entry'.freeze, Items::ItemEntry)
+      return Items.parse(json, 'entry', Items::ItemEntry)
     end
   end # def entry_read()
 
@@ -366,7 +368,7 @@ class Api
   def file_read(cid, enum, lnum, fnum)
     entry_read(cid, enum)
     fi = @store.file_read(cid, enum, lnum, fnum)
-    raise(Error::NotFound, 'file not found'.freeze) if !fi
+    raise(Error::NotFound, 'file not found') if !fi
     return fi
   end # def file_read()
 
@@ -377,10 +379,10 @@ class Api
   # Internal version.
   #
   def _action_read(cid, anum)
-    id = '%s.%d'.freeze % [cid, anum]
+    id = '%s.%d' % [cid, anum]
     unless @actions.key?(id)
       json = @cache.action_read(cid, anum)
-      act = Items.parse(json, 'action'.freeze, Items::ItemAction)
+      act = Items.parse(json, 'action', Items::ItemAction)
       @actions[id] = act
     end
     return @actions[id]
@@ -405,7 +407,7 @@ class Api
 
     # see if we can read the action
     unless _can_read?(cid, anum)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead )
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead )
     end
 
     # return the requested version
@@ -413,7 +415,7 @@ class Api
       return ac
     else
       json = @store.action_read( cid, anum, lnum)
-      return Items.parse(json, 'action'.freeze, Items::ItemAction)
+      return Items.parse(json, 'action', Items::ItemAction)
     end
   end # def action_read()
 
@@ -432,19 +434,19 @@ class Api
     # get access list
     al = access_list(cid)
     if !al.include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead )
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead )
     end
 
     # read curent index
     json = @cache.index_read(cid, xnum)
-    xc = Items.parse(json, 'index'.freeze, Items::ItemIndex)
+    xc = Items.parse(json, 'index', Items::ItemIndex)
 
     # return the requested version
     if( lnum == 0 || xc['log'] == lnum )
       return xc
     else
       json = @store.index_read(cid, xnum, lnum)
-      return Items.parse(json, 'index'.freeze, Items::ItemIndex)
+      return Items.parse(json, 'index', Items::ItemIndex)
     end
   end # def index_read()
 
@@ -458,11 +460,11 @@ class Api
 
     al = access_list(cid)
     if !al.include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead)
     end
 
     json = @cache.current_read(cid)
-    return Items.parse(json, 'current'.freeze, Items::ItemCurrent)
+    return Items.parse(json, 'current', Items::ItemCurrent)
   end # end def current_read()
 
 
@@ -494,7 +496,7 @@ class Api
   # @param query [Hash] a query
   #
   def case_search(query)
-    Items.validate(query, 'Case Search'.freeze, ValCaseSearch)
+    Items.validate(query, 'Case Search', ValCaseSearch)
     @cache.case_search(query)
   end
 
@@ -516,8 +518,8 @@ class Api
       sort: {
         method: :string,
         allowed: Set[
-          'time_desc'.freeze,
-          'time_asc'.freeze,
+          'time_desc',
+          'time_asc',
         ].freeze,
         whitelist: true,
       }.freeze
@@ -531,7 +533,7 @@ class Api
   # @param query [Hash] a query
   #
   def log_search(query)
-    Items.validate(query, 'Log Search'.freeze, ValLogSearch)
+    Items.validate(query, 'Log Search', ValLogSearch)
     @cache.log_search(query)
   end
 
@@ -556,8 +558,8 @@ class Api
       sort: {
         method: :string,
         allowed: Set[
-          'time_desc'.freeze,
-          'time_asc'.freeze,
+          'time_desc',
+          'time_asc',
         ].freeze,
         whitelist: true,
       }.freeze
@@ -570,14 +572,14 @@ class Api
   # Search for entries
   #
   def entry_search(query)
-    Items.validate(query, 'Entry Search'.freeze, ValEntrySearch)
+    Items.validate(query, 'Entry Search', ValEntrySearch)
 
     # check permissions
     # - have global search permissions / read access to the case
     # - are searching for an action they can read
     unless( _search?(query) || (query[:caseid] &&
         query[:action] && tasked?(query[:caseid], query[:action])))
-      raise(Error::Perms, 'Does not have permission to search'.freeze)
+      raise(Error::Perms, 'Does not have permission to search')
     end
 
     # run the query
@@ -645,8 +647,8 @@ class Api
       sort: {
         method: :string,
         allowed: Set[
-          'time_desc'.freeze,
-          'time_asc'.freeze,
+          'time_desc',
+          'time_asc',
         ].freeze,
         whitelist: true,
       }.freeze
@@ -658,7 +660,7 @@ class Api
   # Search for actions
   #
   def action_search(query)
-    Items.validate(query, 'Action Search'.freeze, ValActionSearch)
+    Items.validate(query, 'Action Search', ValActionSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
@@ -666,7 +668,7 @@ class Api
     unless( _search?(query) || @ur.include?(query[:assigned]) ||
        (query[:assigned] == ICFS::UserCase && query[:caseid] &&
         access_list(query[:caseid]).include?(ICFS::PermAction) ))
-      raise(Error::Perms, 'Does not have permission to search'.freeze)
+      raise(Error::Perms, 'Does not have permission to search')
     end
 
     # run the search
@@ -689,10 +691,10 @@ class Api
       sort: {
         method: :string,
         allowed: Set[
-          'title_desc'.freeze,
-          'title_asc'.freeze,
-          'index_desc'.freeze,
-          'index_asc'.freeze,
+          'title_desc',
+          'title_asc',
+          'index_desc',
+          'index_asc',
         ].freeze,
         whitelist: true,
       }.freeze
@@ -704,12 +706,12 @@ class Api
   # Search for indexes
   #
   def index_search(query)
-    Items.validate(query, 'Index Search'.freeze, ValIndexSearch)
+    Items.validate(query, 'Index Search', ValIndexSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
     unless _search?(query)
-      raise(Error::Perms, 'Do not have permission to search'.freeze)
+      raise(Error::Perms, 'Do not have permission to search')
     end
 
     # run the query
@@ -746,13 +748,13 @@ class Api
   # Analyze stats
   #
   def stats(query)
-    Items.validate(query, 'Stats Search'.freeze, ValStatsSearch)
+    Items.validate(query, 'Stats Search', ValStatsSearch)
 
     # permissions check
     # - have global search permissions / read access to the case
     # - are searching for a user/role/group you have
     unless _search?(query) || (query[:credit] && @urg.include?(query[:credit]))
-      raise(Error::Perms, 'Do not have permissions to search'.freeze)
+      raise(Error::Perms, 'Do not have permissions to search')
     end
 
     @cache.stats(query)
@@ -775,7 +777,7 @@ class Api
   # Get case tags
   #
   def case_tags(query)
-    Items.validate(query, 'Case Tags Search'.freeze, ValCaseTags)
+    Items.validate(query, 'Case Tags Search', ValCaseTags)
     return @cache.case_tags(query)
   end # def case_tags()
 
@@ -796,12 +798,12 @@ class Api
   # Get entry tags
   #
   def entry_tags(query)
-    Items.validate(query, 'Entry Tags Search'.freeze, ValEntryTags)
+    Items.validate(query, 'Entry Tags Search', ValEntryTags)
 
     # permissions
     # - read access to case
     unless access_list(query[:caseid]).include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead)
     end
     return @cache.entry_tags(query)
   end # def entry_tags()
@@ -837,13 +839,13 @@ class Api
   # Get action tags
   #
   def action_tags(query)
-    Items.validate(query, 'Task Tags Search'.freeze, ValActionTags)
+    Items.validate(query, 'Task Tags Search', ValActionTags)
 
     # only allow searches for user/roles you have
     unless @ur.include?(query[:assigned]) ||
        (query[:assigned] == ICFS::UserCase && query[:caseid] &&
           access_list(query[:caseid]).include?(ICFS::PermAction) )
-      raise(Error::Perms, 'May not search for other\'s tasks'.freeze)
+      raise(Error::Perms, 'May not search for other\'s tasks')
     end
 
     # run the search
@@ -867,9 +869,9 @@ class Api
   # Get index tags
   #
   def index_tags(query)
-    Items.validate(query, 'Index Tags'.freeze, ValIndexTags)
+    Items.validate(query, 'Index Tags', ValIndexTags)
     unless access_list(query[:caseid]).include?(ICFS::PermRead)
-      raise(Error::Perms, 'missing perms: %s'.freeze % ICFS::PermRead)
+      raise(Error::Perms, 'missing perms: %s' % ICFS::PermRead)
     end
     return @cache.index_tags(query)
   end
@@ -894,8 +896,8 @@ class Api
     # Sanity checks
 
     # form & values
-    Items.validate(ent, 'entry'.freeze, Items::ItemEntryNew)
-    Items.validate(cse, 'case'.freeze, Items::ItemCaseEdit)
+    Items.validate(ent, 'entry', Items::ItemEntryNew)
+    Items.validate(cse, 'case', Items::ItemCaseEdit)
 
     # access users/roles/groups are valid, unless manually specifying user
     unless unam
@@ -903,7 +905,7 @@ class Api
         acc["grant"].each do |gnt|
           urg = @users.read(gnt)
           if !urg
-            raise(Error::NotFound, 'User/role/group %s not found'.freeze % urg)
+            raise(Error::NotFound, 'User/role/group %s not found' % urg)
           end
         end
       end
@@ -917,26 +919,26 @@ class Api
     if tid
       tmpl = case_read(tid)
       unless tmpl['template']
-        raise(Error::Perms, 'Not a template'.freeze)
+        raise(Error::Perms, 'Not a template')
       end
 
       al = access_list(tid)
       unless al.include?(ICFS::PermManage)
-        raise(Error::Perms, 'May not create cases from this template'.freeze)
+        raise(Error::Perms, 'May not create cases from this template')
       end
     end
 
     # no action/indexes
     if ent['action']
-      raise(Error::Value, 'No Action for a new case entry'.freeze)
+      raise(Error::Value, 'No Action for a new case entry')
     end
     if ent['index']
-      raise(Error::Value, 'No Index for a new case entry'.freeze)
+      raise(Error::Value, 'No Index for a new case entry')
     end
 
     # Allow case creation without a Users system in place
     user = @user ? @user : unam
-    raise(ArgumentError, 'No user specified'.freeze) if user.nil?
+    raise(ArgumentError, 'No user specified') if user.nil?
 
     ####################
     # Prep
@@ -947,7 +949,7 @@ class Api
     cse['caseid'] = cid
     cse['log'] = 1
     cse['tags'] ||= [ ICFS::TagNone ]
-    citem = Items.generate(cse, 'case'.freeze, Items::ItemCase)
+    citem = Items.generate(cse, 'case', Items::ItemCase)
 
     # entry
     ent['icfs'] = 1
@@ -989,7 +991,7 @@ class Api
     @cache.lock_take(cid)
     begin
       if @cache.case_read(cid)
-        raise(Error::Conflict, 'Case already exists'.freeze)
+        raise(Error::Conflict, 'Case already exists')
       end
 
       now = Time.now.to_i
@@ -997,12 +999,12 @@ class Api
       # finish items
       ent['time'] ||= now
       ent['files'].each{|fi| fi['log'] ||= 1 } if ent['files']
-      eitem = Items.generate(ent, 'entry'.freeze, Items::ItemEntry)
+      eitem = Items.generate(ent, 'entry', Items::ItemEntry)
       log['time'] = now
       log['entry']['hash'] = ICFS.hash(eitem)
-      litem = Items.generate(log, 'log'.freeze, Items::ItemLog)
+      litem = Items.generate(log, 'log', Items::ItemLog)
       cur['hash'] = ICFS.hash(litem)
-      nitem = Items.generate(cur, 'current'.freeze, Items::ItemCurrent)
+      nitem = Items.generate(cur, 'current', Items::ItemCurrent)
 
       # write to cache
       @cache.entry_write(cid, 1, eitem)
@@ -1041,22 +1043,22 @@ class Api
 
     # form & content
     if idx || cse
-      Items.validate(ent, 'New Entry'.freeze, Items::ItemEntryNew)
+      Items.validate(ent, 'New Entry', Items::ItemEntryNew)
     else
-      Items.validate(ent, 'Editable Entry'.freeze, Items::ItemEntryEdit)
+      Items.validate(ent, 'Editable Entry', Items::ItemEntryEdit)
     end
-    Items.validate(act, 'action'.freeze, Items::ItemActionEdit) if act
-    Items.validate(idx, 'index'.freeze, Items::ItemIndexEdit) if idx
-    Items.validate(cse, 'case'.freeze, Items::ItemCaseEdit) if cse
+    Items.validate(act, 'action', Items::ItemActionEdit) if act
+    Items.validate(idx, 'index', Items::ItemIndexEdit) if idx
+    Items.validate(cse, 'case', Items::ItemCaseEdit) if cse
 
     # edit index OR case, not both
     if idx && cse
-      raise(Error::Value, 'May not edit both case and index at once'.freeze)
+      raise(Error::Value, 'May not edit both case and index at once')
     end
 
     # no changing the action
     if act && ent['action'] && act['action'] && act['action'] != ent['action']
-      raise(Error::Conflict, 'May not change entry\'s action'.freeze)
+      raise(Error::Conflict, 'May not change entry\'s action')
     end
 
     # access users/roles/groups are valid
@@ -1065,7 +1067,7 @@ class Api
         acc['grant'].each do |gnt|
           urg = @users.read(gnt)
           if !urg
-            raise(Error::NotFound, 'User/role/group %s not found'.freeze % gnt)
+            raise(Error::NotFound, 'User/role/group %s not found' % gnt)
           end
         end
       end
@@ -1078,12 +1080,12 @@ class Api
         tsk = act['tasks'][ix]
         ur = @users.read(tsk['assigned'])
         if !ur
-          raise(Error::NotFound, 'User/role %s not found'.freeze %
+          raise(Error::NotFound, 'User/role %s not found' %
              tsk['assigned'])
         end
         type = ur['type']
         if type != 'user' && type != 'role'
-          raise(Error::Values, 'Not a user or role: %s'.freeze %
+          raise(Error::Values, 'Not a user or role: %s' %
              tsk['assigned'])
         end
       end
@@ -1157,13 +1159,13 @@ class Api
 
       # current
       json = @cache.current_read(cid)
-      cur = Items.parse(json, 'current'.freeze, Items::ItemCurrent)
+      cur = Items.parse(json, 'current', Items::ItemCurrent)
 
       # entry
       if ent['entry']
         enum = ent['entry']
         json = @cache.entry_read(cid, enum)
-        ent_pri = Items.parse(json, 'entry'.freeze, Items::ItemEntry)
+        ent_pri = Items.parse(json, 'entry', Items::ItemEntry)
         nxt['entry'] = cur['entry']
       else
         enum = cur['entry'] + 1
@@ -1180,7 +1182,7 @@ class Api
       end
       if anum
         json = @cache.action_read(cid, anum)
-        act_pri = Items.parse(json, 'action'.freeze, Items::ItemAction)
+        act_pri = Items.parse(json, 'action', Items::ItemAction)
         nxt['action'] = cur['action']
       elsif act
         anum = cur['action'] + 1
@@ -1225,7 +1227,7 @@ class Api
 
         # may not change action
         if ent_pri['action'] && (ent['action'] != ent_pri['action'])
-          raise(Error::Conflict, 'May not change entry\'s action'.freeze)
+          raise(Error::Conflict, 'May not change entry\'s action')
         end
 
         # may not remove or add action, index, case tags
@@ -1235,7 +1237,7 @@ class Api
                  ent['tags'].include?(ICFS::TagIndex) ) ||
             (ent_pri['tags'].include?(ICFS::TagCase) !=
                  ent['tags'].include?(ICFS::TagCase) ) )
-          raise(Error::Conflict, 'May not change entry\'s special tags'.freeze)
+          raise(Error::Conflict, 'May not change entry\'s special tags')
         end
       end
 
@@ -1247,7 +1249,7 @@ class Api
 
         # not allowed to delete tasks
         if pri_tsk.size > cur_tsk.size
-          raise(Error::Conflict, 'May not delete tasks'.freeze)
+          raise(Error::Conflict, 'May not delete tasks')
         end
 
         # check each task
@@ -1259,17 +1261,17 @@ class Api
 
           # may not delete a tasking
           if pt && pt['assigned'] != ct['assigned']
-            raise(Error::Conflict, 'May not delete task'.freeze)
+            raise(Error::Conflict, 'May not delete task')
           end
 
           # new taskings require action to be open
           if !pt && !act_open
-            raise(Error::Value, 'New tasks require the action be open'.freeze)
+            raise(Error::Value, 'New tasks require the action be open')
           end
 
           # may not have a task open if action is closed
           if ct['status'] && !act_open
-            raise(Error::Value, 'Open tasks on closed action'.freeze)
+            raise(Error::Value, 'Open tasks on closed action')
           end
 
           # can set any values for our tasks
@@ -1280,7 +1282,7 @@ class Api
 
           # must be flagged if new tasking or re-opening
           if !ct['flag'] && (!pt || (ct['status'] && !pt['status']))
-            raise(Error::Value, 'New or re-opened taskings must flag'.freeze)
+            raise(Error::Value, 'New or re-opened taskings must flag')
           end
 
           # no changing other's taskings, no deflagging, and no
@@ -1289,7 +1291,7 @@ class Api
              (pt['title'] != ct['title']) || (pt['time'] != ct['time']) ||
              (pt['tags'] != ct['tags']) || (pt['flag'] && !ct['flag']) ||
              (pt['status'] && !ct['status'] && !perm_act) )
-            raise(Error::Value, 'May not change other\'s tasks'.freeze)
+            raise(Error::Value, 'May not change other\'s tasks')
           end
         end
 
@@ -1306,7 +1308,7 @@ class Api
       if cse
         # no changing template
         unless cse['template'] == cse_pri['template']
-          raise(Error::Conflict, 'May not change template status'.freeze)
+          raise(Error::Conflict, 'May not change template status')
         end
 
         # manage required
@@ -1321,7 +1323,7 @@ class Api
       # permissions
       perms_miss = perms - al
       unless perms_miss.empty?
-        raise(Error::Perms, 'Missing perms: %s'.freeze %
+        raise(Error::Perms, 'Missing perms: %s' %
           perms_miss.to_a.sort.join(', ') )
       end
 
@@ -1342,7 +1344,7 @@ class Api
         end
       end
       ent['files'].each{|fi| fi['log'] ||= lnum } if ent['files']
-      eitem = Items.generate(ent, 'entry'.freeze, Items::ItemEntry)
+      eitem = Items.generate(ent, 'entry', Items::ItemEntry)
       log['entry'] = {
         'num' => enum,
         'hash' => ICFS.hash(eitem)
@@ -1352,7 +1354,7 @@ class Api
       if act
         act['action'] = anum
         act['log'] = lnum
-        aitem = Items.generate(act, 'action'.freeze, Items::ItemAction)
+        aitem = Items.generate(act, 'action', Items::ItemAction)
         log['action'] = {
           'num' => anum,
           'hash' => ICFS.hash(aitem)
@@ -1363,7 +1365,7 @@ class Api
       if idx
         idx['index'] = xnum
         idx['log'] = lnum
-        xitem = Items.generate(idx, 'index'.freeze, Items::ItemIndex)
+        xitem = Items.generate(idx, 'index', Items::ItemIndex)
         log['index'] = {
           'num' => xnum,
           'hash' => ICFS.hash(xitem)
@@ -1373,7 +1375,7 @@ class Api
       # case
       if cse
         cse['log'] = lnum
-        citem = Items.generate(cse, 'case'.freeze, Items::ItemCase)
+        citem = Items.generate(cse, 'case', Items::ItemCase)
         log['case_hash'] = ICFS.hash(citem)
       end
 
@@ -1381,11 +1383,11 @@ class Api
       log['log'] = lnum
       log['prev'] = cur['hash']
       log['time'] = now
-      litem = Items.generate(log, 'log'.freeze, Items::ItemLog)
+      litem = Items.generate(log, 'log', Items::ItemLog)
       nxt['hash'] = ICFS.hash(litem)
 
       # next
-      nitem = Items.generate(nxt, 'current'.freeze, Items::ItemCurrent)
+      nitem = Items.generate(nxt, 'current', Items::ItemCurrent)
 
 
       ####################

@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 #
 module ICFS
 
@@ -222,9 +224,9 @@ class Store
   def _case(cid, lnum)
     @base + [
       cid,
-      'c'.freeze,
-      '%d.json'.freeze % lnum
-    ].join('/'.freeze)
+      'c',
+      '%d.json' % lnum
+    ].join('/')
   end
 
 
@@ -234,9 +236,9 @@ class Store
   def _log(cid, lnum)
     @base + [
       cid,
-      'l'.freeze,
-      '%d.json'.freeze % lnum
-    ].join('/'.freeze)
+      'l',
+      '%d.json' % lnum
+    ].join('/')
   end
 
 
@@ -246,10 +248,10 @@ class Store
   def _entry(cid, enum, lnum)
     @base + [
       cid,
-      'e'.freeze,
+      'e',
       enum.to_s,
-      '%d.json'.freeze % lnum
-    ].join('/'.freeze)
+      '%d.json' % lnum
+    ].join('/')
   end
 
 
@@ -259,10 +261,10 @@ class Store
   def _file(cid, enum, lnum, fnum)
     @base + [
       cid,
-      'e'.freeze,
+      'e',
       enum.to_s,
-      '%d-%d.bin'.freeze % [lnum, fnum]
-    ].join('/'.freeze)
+      '%d-%d.bin' % [lnum, fnum]
+    ].join('/')
   end
 
 
@@ -272,10 +274,10 @@ class Store
   def _action(cid, anum, lnum)
     @base + [
       cid,
-      'a'.freeze,
+      'a',
       anum.to_s,
-      lnum.to_s + '.json'.freeze
-    ].join('/'.freeze)
+      lnum.to_s + '.json'
+    ].join('/')
   end
 
 
@@ -285,10 +287,10 @@ class Store
   def _index(cid, xnum, lnum)
     @base + [
       cid,
-      'i'.freeze,
+      'i',
       xnum.to_s,
-      lnum.to_s + '.json'.freeze
-    ].join('/'.freeze)
+      lnum.to_s + '.json'
+    ].join('/')
   end
 
 

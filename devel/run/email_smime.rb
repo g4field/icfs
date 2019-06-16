@@ -12,6 +12,8 @@
 
 # <app> <srv_cert.pem> <srv_key.pem> <ca.pem> < <email.eml>
 
+# frozen_string_literal: true
+
 require 'faraday'
 require 'aws-sdk-s3'
 require 'redis'
@@ -53,10 +55,10 @@ s3 = Aws::S3::Client.new
 redis = Redis.new(host: 'redis')
 es = Faraday.new('http://elastic:9200')
 cache = ICFS::CacheElastic.new(map, es)
-store = ICFS::StoreS3.new(s3, 'icfs'.freeze, 'case/'.freeze)
-users_base = ICFS::UsersS3.new(s3, 'icfs'.freeze, 'users/'.freeze)
+store = ICFS::StoreS3.new(s3, 'icfs', 'case/')
+users_base = ICFS::UsersS3.new(s3, 'icfs', 'users/')
 users = ICFS::UsersRedis.new(redis, users_base, {
-    prefix: 'users/'.freeze,
+    prefix: 'users/',
     expires: 60, # one minute cache for testing
     log: log,
   })

@@ -9,9 +9,10 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require_relative '../store_fs'
 
-#
 module ICFS
 
 module Utils
@@ -40,12 +41,12 @@ class Backup
   # Copy an item
   #
   def _copy_item(dest, title, read, write, args, val=nil)
-    @log.debug('ICFS copy: %s'.freeze % title)
+    @log.debug('ICFS copy: %s' % title)
 
     # read the item
     json = @store.send(read, *args)
     if !json
-      @log.warn('ICFS copy: %s is missing'.freeze % title)
+      @log.warn('ICFS copy: %s is missing' % title)
       return nil
     end
 
@@ -54,7 +55,7 @@ class Backup
       obj = JSON.parse(json)
       err = Validate.check(obj, val)
       if err
-        @log.error('ICFS copy: %s bad format'.freeze % title)
+        @log.error('ICFS copy: %s bad format' % title)
         return nil
       end
     end
@@ -64,7 +65,7 @@ class Backup
     return obj
 
   rescue JSON::ParserError
-    @log.error('ICFS copy: %s bad JSON'.freeze % title)
+    @log.error('ICFS copy: %s bad JSON' % title)
     return nil
   end # def _item
   private :_copy_item
@@ -79,17 +80,17 @@ class Backup
   # @param lnum_min [Integer] The lowest log
   #
   def copy(cid, dest, lnum_min=1, lnum_max=0)
-    @log.info('ICFS copy: %s %d-%d'.freeze % [cid, lnum_min, lnum_max])
+    @log.info('ICFS copy: %s %d-%d' % [cid, lnum_min, lnum_max])
 
     # if no max specified, pull from current
     if lnum_max == 0
       json = @cache.current_read(cid)
-      cur = Items.parse(json, 'current'.freeze, Items::ItemCurrent)
+      cur = Items.parse(json, 'current', Items::ItemCurrent)
       lnum_max = cur['log']
     end
 
     if lnum_min > lnum_max
-      raise ArgumentError, 'ICFS copy, log num min is larger than max'.freeze
+      raise ArgumentError, 'ICFS copy, log num min is larger than max'
     end
 
     # each log
@@ -98,7 +99,7 @@ class Backup
 
       # copy the log
       log = _copy_item(dest,
-        'log %d'.freeze % lnum,
+        'log %d' % lnum,
         :log_read,
         :log_write,
         [cid, lnum],
@@ -112,7 +113,7 @@ class Backup
       # entry
       enum = log['entry']['num']
       _copy_item(dest,
-        'entry %d-%d'.freeze % [enum, lnum],
+        'entry %d-%d' % [enum, lnum],
         :entry_read,
         :entry_write,
         [cid, enum, lnum]
@@ -122,7 +123,7 @@ class Backup
       if log['index']
         xnum = log['index']['num']
         _copy_item(dest,
-          'index %d-%d'.freeze % [xnum, lnum],
+          'index %d-%d' % [xnum, lnum],
           :index_read,
           :index_write,
           [cid, xnum, lnum]
@@ -133,7 +134,7 @@ class Backup
       if log['action']
         anum = log['action']['num']
         _copy_item(dest,
-          'action %d-%d'.freeze % [anum, lnum],
+          'action %d-%d' % [anum, lnum],
           :action_read,
           :action_write,
           [cid, anum, lnum]
@@ -143,7 +144,7 @@ class Backup
       # case
       if log['case_hash']
         _copy_item(dest,
-          'case %d'.freeze % lnum,
+          'case %d' % lnum,
           :case_read,
           :case_write,
           [cid, lnum]
@@ -155,12 +156,12 @@ class Backup
         log['files_hash'].each_index do |fraw|
           fnum = fraw + 1
 
-          @log.debug('ICFS copy: file %d-%d-%d'.freeze % [enum, lnum, fnum])
+          @log.debug('ICFS copy: file %d-%d-%d' % [enum, lnum, fnum])
 
           # read
           fi = @store.file_read(cid, enum, lnum, fnum)
           if !fi
-            @log.warn('ICFS copy: file %d-%d-%d missing'.freeze %
+            @log.warn('ICFS copy: file %d-%d-%d missing' %
                 [enum, lnum, fnum])
             next
           end
@@ -185,12 +186,12 @@ class Backup
   # Restore an item
   #
   def _restore_item(src, title, read, write, args_st, args_ca, val=nil)
-    @log.debug('ICFS restore: %s'.freeze % title)
+    @log.debug('ICFS restore: %s' % title)
 
     # read the item
     json = src.send(read, *args_st)
     if !json
-      @log.warn('ICFS restore: %s is missing'.freeze % title)
+      @log.warn('ICFS restore: %s is missing' % title)
       return nil
     end
 
@@ -199,7 +200,7 @@ class Backup
       obj = JSON.parse(json)
       err = Validate.check(obj, val)
       if err
-        @log.error('ICFS restore: %s bad format'.freeze % title)
+        @log.error('ICFS restore: %s bad format' % title)
         return nil
       end
     end
@@ -222,7 +223,7 @@ class Backup
   # @param lnum_min [Integer] The lowest log
   #
   def restore(cid, src, lnum_min=0, lnum_max=0)
-    @log.info('ICFS restore: %s %d-%d'.freeze % [cid, lnum_min, lnum_max])
+    @log.info('ICFS restore: %s %d-%d' % [cid, lnum_min, lnum_max])
 
     # take lock
     @cache.lock_take(cid)
@@ -231,7 +232,7 @@ class Backup
       # read current
       json = @cache.current_read(cid)
       if json
-        cur = Items.parse(json, 'current'.freeze, Items::ItemCurrent)
+        cur = Items.parse(json, 'current', Items::ItemCurrent)
       else
         cur = {
           'icfs' => 1,
@@ -248,7 +249,7 @@ class Backup
 
       # sanity check min & max
       if (lnum_min > lnum_max) && (lnum_max != 0)
-        raise ArgumentError: 'ICFS restore, log min is larger than max'.freeze
+        raise ArgumentError: 'ICFS restore, log min is larger than max'
       end
 
       # max entry, action, index
@@ -263,7 +264,7 @@ class Backup
 
         # copy the log
         log, litem = _restore_item(src,
-          'log %d'.freeze % lnum,
+          'log %d' % lnum,
           :log_read,
           :log_write,
           [cid, lnum],
@@ -281,7 +282,7 @@ class Backup
         # entry
         enum = log['entry']['num']
         _restore_item(src,
-          'entry %d-%d'.freeze % [enum, lnum],
+          'entry %d-%d' % [enum, lnum],
           :entry_read,
           :entry_write,
           [cid, enum, lnum],
@@ -293,7 +294,7 @@ class Backup
         if log['index']
           xnum = log['index']['num']
           _restore_item(src,
-            'index %d-%d'.freeze % [xnum, lnum],
+            'index %d-%d' % [xnum, lnum],
             :index_read,
             :index_write,
             [cid, xnum, lnum],
@@ -306,7 +307,7 @@ class Backup
         if log['action']
           anum = log['action']['num']
           _restore_item(src,
-            'action %d-%d'.freeze % [anum, lnum],
+            'action %d-%d' % [anum, lnum],
             :action_read,
             :action_write,
             [cid, anum, lnum],
@@ -318,7 +319,7 @@ class Backup
         # case
         if log['case_hash']
           _restore_item(src,
-            'case %d'.freeze % lnum,
+            'case %d' % lnum,
             :case_read,
             :case_write,
             [cid, lnum],
@@ -331,12 +332,12 @@ class Backup
           log['files_hash'].each_index do |fraw|
             fnum = fraw + 1
 
-            @log.debug('ICFS restore: file %d-%d-%d'.freeze % [enum, lnum, fnum])
+            @log.debug('ICFS restore: file %d-%d-%d' % [enum, lnum, fnum])
 
             # read
             fi = src.file_read(cid, enum, lnum, fnum)
             if !fi
-              @log.warn('ICFS restore: file %d-%d-%d missing'.freeze %
+              @log.warn('ICFS restore: file %d-%d-%d missing' %
                 [enum, lnum, fnum])
               next
             end
@@ -364,7 +365,7 @@ class Backup
         'index' => imax,
         'hash' => ICFS.hash(llast)
       }
-      nitem = Items.generate(cur, 'current'.freeze, Items::ItemCurrent)
+      nitem = Items.generate(cur, 'current', Items::ItemCurrent)
       @cache.current_write(cid, nitem)
 
     ensure

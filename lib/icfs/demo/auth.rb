@@ -8,6 +8,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'rack'
 
 module ICFS
@@ -42,7 +44,7 @@ class Auth
   def call(env)
 
     # login
-    if env['PATH_INFO'] == '/login'.freeze
+    if env['PATH_INFO'] == '/login'
       user = env['QUERY_STRING']
       body = 'User set'
 
@@ -59,7 +61,7 @@ class Auth
     cookies = Rack::Request.new(env).cookies
     user = cookies['icfs-user']
     if !user
-      return [400, {'Content-Type' => 'text/plain'}, ['Login first'.freeze]]
+      return [400, {'Content-Type' => 'text/plain'}, ['Login first']]
     end
 
     # set up for the call

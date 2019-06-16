@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'digest/sha2'
 
 require_relative 'icfs/validate'
@@ -20,36 +22,36 @@ module ICFS
 
 
   # no tags
-  TagNone = '[none]'.freeze
+  TagNone = '[none]'
 
   # edits an action
-  TagAction = '[action]'.freeze
+  TagAction = '[action]'
 
   # edits an index
-  TagIndex = '[index]'.freeze
+  TagIndex = '[index]'
 
   # edits the case
-  TagCase = '[case]'.freeze
+  TagCase = '[case]'
 
 
   # permission to read case
-  PermRead = '[read]'.freeze
+  PermRead = '[read]'
 
   # permission to write case
-  PermWrite = '[write]'.freeze
+  PermWrite = '[write]'
 
   # permission to manage case
-  PermManage = '[manage]'.freeze
+  PermManage = '[manage]'
 
   # permission to manage actions
-  PermAction = '[action]'.freeze
+  PermAction = '[action]'
 
   # global permission to search
-  PermSearch = '{[search]}'.freeze
+  PermSearch = '{[search]}'
 
 
   # user group
-  UserCase = '[case]'.freeze
+  UserCase = '[case]'
 
 
   ###############################################

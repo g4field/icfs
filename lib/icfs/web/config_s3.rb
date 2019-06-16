@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require_relative 'config'
 
 module ICFS
@@ -32,7 +34,7 @@ class ConfigS3 < Config
     super(defaults)
     @s3 = s3
     @bck = bucket
-    @pre = prefix || ''.freeze
+    @pre = prefix || ''
   end
 
 
@@ -40,10 +42,10 @@ class ConfigS3 < Config
   # (see Config#load)
   #
   def load(unam)
-    Items.validate(unam, 'User/Role/Group name'.freeze, Items::FieldUsergrp)
+    Items.validate(unam, 'User/Role/Group name', Items::FieldUsergrp)
     @unam = unam.dup
     json = @s3.get_object( bucket: @bck, key: _key(unam) ).body.read
-    @data = Items.parse(json, 'Config values'.freeze, Config::ValConfig)
+    @data = Items.parse(json, 'Config values', Config::ValConfig)
     return true
   rescue
     @data = {}
@@ -55,8 +57,8 @@ class ConfigS3 < Config
   # (see Config#save)
   #
   def save()
-    raise(RuntimeError, 'Save requires a user name'.freeze) if !@unam
-    json = Items.generate(@data, 'Config values'.freeze, Config::ValConfig)
+    raise(RuntimeError, 'Save requires a user name') if !@unam
+    json = Items.generate(@data, 'Config values', Config::ValConfig)
     @s3.put_object( bucket: @bck, key: _key(@unam), body: json )
   end # def save()
 

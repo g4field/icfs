@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'json'
 
 
@@ -34,12 +36,12 @@ module Items
     #
     def self.parse(json, name, val)
       if json.nil?
-        raise(Error::NotFound, '%s not found'.freeze % name)
+        raise(Error::NotFound, '%s not found' % name)
       end
       begin
         itm = JSON.parse(json)
       rescue
-        raise(Error::Value, 'JSON parsing failed'.freeze)
+        raise(Error::Value, 'JSON parsing failed')
       end
       Items.validate(itm, name, val)
       return itm
@@ -74,7 +76,7 @@ module Items
     def self.validate(obj, name, val)
       err = Validate.check(obj, val)
       if err
-        raise(Error::Value, '%s has bad values: %s'.freeze %
+        raise(Error::Value, '%s has bad values: %s' %
           [name, err.inspect])
       end
     end

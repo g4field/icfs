@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'tempfile'
 require 'fileutils'
 require 'json'
@@ -37,7 +39,7 @@ class UsersFs < Users
   # Path to store the file
   #
   def _path(urg)
-    File.join(@path, urg + '.json'.freeze)
+    File.join(@path, urg + '.json')
   end
   private :_path
 
@@ -52,11 +54,11 @@ class UsersFs < Users
   # (see Users#read)
   #
   def read(urg)
-    Items.validate(urg, 'User/Role/Group name'.freeze, Items::FieldUsergrp)
+    Items.validate(urg, 'User/Role/Group name', Items::FieldUsergrp)
     json = File.read(_path(urg))
-    obj = Items.parse(json, 'User/Role/Group'.freeze, Users::ValUser)
+    obj = Items.parse(json, 'User/Role/Group', Users::ValUser)
     if obj['name'] != urg
-      raise(Error::Values, 'UsersFs user %s name mismatch'.freeze % fn)
+      raise(Error::Values, 'UsersFs user %s name mismatch' % fn)
     end
     return obj
   rescue Errno::ENOENT
@@ -68,11 +70,11 @@ class UsersFs < Users
   # (see Users#write)
   #
   def write(obj)
-    Items.validate(obj, 'User/Role/Group'.freeze, Users::ValUser)
+    Items.validate(obj, 'User/Role/Group', Users::ValUser)
     json = JSON.pretty_generate(obj)
 
     # write to temp file
-    tmp = Tempfile.new('_tmp'.freeze, @path, :encoding => 'ascii-8bit'.freeze)
+    tmp = Tempfile.new('_tmp', @path, :encoding => 'ascii-8bit')
     tmp.write(json)
     tmp.close
 

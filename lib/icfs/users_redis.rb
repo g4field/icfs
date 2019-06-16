@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'redis'
 
 module ICFS
@@ -31,7 +33,7 @@ class UsersRedis < Users
   def initialize(redis, base, opts={})
     @redis = redis
     @base = base
-    @pre = opts[:prefix] || ''.freeze
+    @pre = opts[:prefix] || ''
     @exp = opts[:expires] || 1*60*60 # 1 hour default
     @log = opts[:log]
   end
@@ -50,8 +52,8 @@ class UsersRedis < Users
   # (see Users#flush)
   #
   def flush(urg)
-    Items.validate(urg, 'User/role/group name'.freeze, Items::FieldUsergrp)
-    @log.info('User/role/group cache flush: %s'.freeze % urg) if @log
+    Items.validate(urg, 'User/role/group name', Items::FieldUsergrp)
+    @log.info('User/role/group cache flush: %s' % urg) if @log
     @redis.del(_key(urg))
     return true
   end # def flush()
@@ -61,21 +63,21 @@ class UsersRedis < Users
   # (see Users#read)
   #
   def read(urg)
-    Items.validate(urg, 'User/role/group name'.freeze, Items::FieldUsergrp)
+    Items.validate(urg, 'User/role/group name', Items::FieldUsergrp)
     key = _key(urg)
-    @log.debug('User/role/group read: %s'.freeze % urg) if @log
+    @log.debug('User/role/group read: %s' % urg) if @log
 
     # try cache
     json = @redis.get(key)
     if json
-      @log.debug('User/role/group cache hit: %s'.freeze % urg) if @log
+      @log.debug('User/role/group cache hit: %s' % urg) if @log
       return JSON.parse(json)
     end
 
     # get base object from base store
     bse = @base.read(urg)
     if !bse
-      @log.warn('User/role/group not found: %s'.freeze % urg) if @log
+      @log.warn('User/role/group not found: %s' % urg) if @log
       return nil
     end
 
@@ -128,7 +130,7 @@ class UsersRedis < Users
     # save to cache
     @redis.set(key, json)
     @redis.expire(key, @exp)
-    @log.info('User/role/group cached: %s %s'.freeze % [urg, json]) if @log
+    @log.info('User/role/group cached: %s %s' % [urg, json]) if @log
     return bse
   end # def read()
 
@@ -137,9 +139,9 @@ class UsersRedis < Users
   # (see Users#write)
   #
   def write(obj)
-    json = Items.generate(obj, 'User/Role/Group'.freeze, Users::ValUser)
+    json = Items.generate(obj, 'User/Role/Group', Users::ValUser)
     key = _key(obj['name'])
-    @log.info('User/role/group write: %s'.freeze % urg) if @log
+    @log.info('User/role/group write: %s' % urg) if @log
     @redis.del(key)
     @base.write(obj)
   end # def write()

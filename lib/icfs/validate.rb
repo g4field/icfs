@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'set'
 require 'tempfile'
 
@@ -107,7 +109,7 @@ module Validate
     if val[:check] == obj
       return nil
     else
-      return 'not equal'.freeze
+      return 'not equal'
     end
   end # def self.equals()
 
@@ -123,14 +125,14 @@ module Validate
   #
   #
   def self.integer(obj, val)
-    return 'not an Integer'.freeze unless obj.is_a?(Integer)
+    return 'not an Integer' unless obj.is_a?(Integer)
 
     if val[:min] && obj < val[:min]
-      return 'too small: %d < %d'.freeze % [obj, val[:min]]
+      return 'too small: %d < %d' % [obj, val[:min]]
     end
 
     if val[:max] && obj > val[:max]
-      return 'too large: %d > %d '.freeze % [obj, val[:max]]
+      return 'too large: %d > %d ' % [obj, val[:max]]
     end
 
     return nil
@@ -147,14 +149,14 @@ module Validate
   # @return [String,NilClass] error descriptions
   #
   def self.float(obj, val)
-    return 'not a Float'.freeze unless obj.is_a?(Float)
+    return 'not a Float' unless obj.is_a?(Float)
 
     if val[:min] && obj < val[:min]
-      return 'too small: %f < %f'.freeze % [obj, val[:min]]
+      return 'too small: %f < %f' % [obj, val[:min]]
     end
 
     if val[:max] && obj > val[:max]
-      return 'too large: %f > %f'.freeze % [obj, val[:max]]
+      return 'too large: %f > %f' % [obj, val[:max]]
     end
 
     return nil
@@ -173,10 +175,10 @@ module Validate
     if val[:type]
       if val[:type].is_a?(Array)
         val[:type].each{|cl| return nil if obj.is_a?(cl) }
-        return 'not a listed type'.freeze
+        return 'not a listed type'
       else
         if !obj.is_a?(val[:type])
-          return 'not a %s'.freeze % val[:type].name
+          return 'not a %s' % val[:type].name
         end
       end
     end
@@ -200,7 +202,7 @@ module Validate
   def self.string(obj, val)
 
     # type
-    return 'not a String'.freeze unless obj.is_a?(String)
+    return 'not a String' unless obj.is_a?(String)
 
     errors = {}
 
@@ -212,7 +214,7 @@ module Validate
 
     # if whitelisting
     if val[:whitelist]
-      errors[:whitelist] = 'Value was not whitelisted'.freeze
+      errors[:whitelist] = 'Value was not whitelisted'
     end
 
     # min length
@@ -250,7 +252,7 @@ module Validate
   def self.array(obj, val)
 
     # type
-    return 'not an Array'.freeze unless obj.is_a?(Array)
+    return 'not an Array' unless obj.is_a?(Array)
 
     errors = {}
 
@@ -316,7 +318,7 @@ module Validate
   def self.hash(obj, val)
 
     # type
-    return 'not a Hash'.freeze unless obj.is_a?(Hash)
+    return 'not a Hash' unless obj.is_a?(Hash)
 
     ary = obj.to_a
     chk = Array.new(ary.size)
@@ -331,7 +333,7 @@ module Validate
 
         # missing required key
         if ix.nil?
-          errors[key] = 'missing'.freeze
+          errors[key] = 'missing'
           next
         end
 
@@ -361,7 +363,7 @@ module Validate
     if !val[:others]
       chk.each_index do |ix|
         next if chk[ix]
-        errors[ary[ix][0]] = 'not allowed'.freeze
+        errors[ary[ix][0]] = 'not allowed'
       end
     end
 

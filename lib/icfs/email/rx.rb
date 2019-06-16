@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'mail'
 
 module ICFS
@@ -71,22 +73,22 @@ class Rx
 
   ###############################################
   # Default title
-  DefaultTitle = 'Email gateway default title'.freeze
+  DefaultTitle = 'Email gateway default title'
 
 
   ###############################################
   # Default content
-  DefaultContent = 'Entry generated via email gateway with no content.'.freeze
+  DefaultContent = 'Entry generated via email gateway with no content.'
 
 
   ###############################################
   # Filename for raw content
-  DefaultRaw = 'email_raw.eml'.freeze
+  DefaultRaw = 'email_raw.eml'
 
 
   ###############################################
   # Filename for processed content without attachments
-  DefaultMsg = 'email.eml'.freeze
+  DefaultMsg = 'email.eml'
 
 
   ###############################################

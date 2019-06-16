@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'aws-sdk-s3'
 
 module ICFS
@@ -28,7 +30,7 @@ class UsersS3 < Users
   def initialize(s3, bucket, prefix=nil)
     @s3 = s3
     @bck = bucket
-    @pre = prefix || ''.freeze
+    @pre = prefix || ''
   end
 
 
@@ -36,7 +38,7 @@ class UsersS3 < Users
   # Where to store user
   #
   def _path(user)
-    @pre + user + '.json'.freeze
+    @pre + user + '.json'
   end # def _path()
   private :_path
 
@@ -51,7 +53,7 @@ class UsersS3 < Users
   # (see Users#read)
   #
   def read(urg)
-    Items.validate(urg, 'User/Role/Group name'.freeze, Items::FieldUsergrp)
+    Items.validate(urg, 'User/Role/Group name', Items::FieldUsergrp)
     json = @s3.get_object( bucket: @bck, key: _path(urg) ).body.read
     return JSON.parse(json)
   rescue
@@ -63,7 +65,7 @@ class UsersS3 < Users
   # (see Users#write)
   #
   def write(obj)
-    Items.validate(obj, 'User/Role/Group'.freeze, Users::ValUser)
+    Items.validate(obj, 'User/Role/Group', Users::ValUser)
     json = JSON.pretty_generate(obj)
     @s3.put_object( bucket: @bck, key: _path(obj['name']), body: json )
   end # def write()

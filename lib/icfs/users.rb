@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'set'
 
 module ICFS
@@ -30,9 +32,9 @@ class Users
       'type' => {
         method: :string,
         allowed: Set[
-          'user'.freeze,
-          'role'.freeze,
-          'group'.freeze,
+          'user',
+          'role',
+          'group',
         ].freeze
       }.freeze
     }.freeze,

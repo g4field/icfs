@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 #
 module ICFS
 module Web
@@ -46,8 +48,8 @@ class AuthSsl
     unless env['SSL_CLIENT_VERIFY'] == 'SUCCESS'
       return [
         400,
-        {'Content-Type' => 'text/plain'.freeze},
-        ['Client certificate required.'.freeze]
+        {'Content-Type' => 'text/plain'},
+        ['Client certificate required.']
       ]
     end
 
@@ -56,7 +58,7 @@ class AuthSsl
     if user.nil?
       return [
         400,
-        {'Content-Type' => 'text/plain'.freeze},
+        {'Content-Type' => 'text/plain'},
         ['%s: No User' % env['SSL_CLIENT_S_DN']]
       ]
     end
@@ -67,7 +69,7 @@ class AuthSsl
     rescue Error::NotFound, Error::Value => err
       return [
         400,
-        {'Content-Type' => 'text/plain'.freeze},
+        {'Content-Type' => 'text/plain'},
         ['%s: %s' % [err.message, env['SSL_CLIENT_S_DN']]]
       ]
     end

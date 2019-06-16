@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require_relative 'config'
 
 module ICFS
@@ -33,7 +35,7 @@ class ConfigRedis < Config
     super(base.defaults)
     @redis = redis
     @base = base
-    @pre = opts[:prefix] || ''.freeze
+    @pre = opts[:prefix] || ''
     @exp = opts[:expires] || 1*60*60 # 1 hour default
   end
 
@@ -42,14 +44,14 @@ class ConfigRedis < Config
   # (see Config#load)
   #
   def load(unam)
-    Items.validate(unam, 'User/Role/Group name'.freeze, Items::FieldUsergrp)
+    Items.validate(unam, 'User/Role/Group name', Items::FieldUsergrp)
     @unam = unam.dup
     key = _key(unam)
 
     # try cache
     json = @redis.get(key)
     if json
-      @data = Items.parse(json, 'Config values'.freeze, Config::ValConfig)
+      @data = Items.parse(json, 'Config values', Config::ValConfig)
       return true
     end
 
@@ -64,8 +66,8 @@ class ConfigRedis < Config
   # (see Config#save)
   #
   def save()
-    raise(RuntimeError, 'Save requires a user name'.freeze) if !@unam
-    json = Items.generate(@data, 'Config values'.freeze, Config::ValConfig)
+    raise(RuntimeError, 'Save requires a user name') if !@unam
+    json = Items.generate(@data, 'Config values', Config::ValConfig)
     @redis.del(_key(@unam))
     @base.data = @data
     @base.save

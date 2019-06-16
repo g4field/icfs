@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require_relative 'rx'
 
 module ICFS
@@ -44,7 +46,7 @@ class RxCore
 
       fn = ma[1].downcase
       val = ma[2].strip
-    
+
       case fn
       when 'case'
         env[:caseid] = val
@@ -81,12 +83,12 @@ class RxCore
     cnt = 0
     env[:msg].attachments.each do |att|
       type = att.header[:content_disposition].disposition_type
-      next if type == 'inline'.freeze
+      next if type == 'inline'
       cnt += 1
       name = att.filename
       if !name
         ext = MIME::Types[att.content_type].first.extensions.first
-        name = 'unnamed_%d.%s'.freeze % [cnt, ext]
+        name = 'unnamed_%d.%s' % [cnt, ext]
       end
       env[:files] << { name: name, content: att.decoded }
     end

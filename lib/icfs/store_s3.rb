@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'aws-sdk-s3'
 require 'tempfile'
 
@@ -30,7 +32,7 @@ class StoreS3 < Store
   def initialize(client, bucket, prefix=nil)
     @s3 = client
     @bck = bucket
-    @base = prefix || ''.freeze
+    @base = prefix || ''
   end # def initialize()
 
 
@@ -79,7 +81,7 @@ class StoreS3 < Store
   # (see Store#tempfile)
   #
   def tempfile
-    Tempfile.new('tmp'.freeze, encoding: 'ascii-8bit'.freeze)
+    Tempfile.new('tmp', encoding: 'ascii-8bit')
   end
 
 

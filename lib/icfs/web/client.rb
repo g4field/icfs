@@ -9,6 +9,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# frozen_string_literal: true
+
 require 'rack'
 
 module ICFS
@@ -47,7 +49,7 @@ class Client
     if path.empty?
       cmps = ['']
     else
-      cmps = path.split('/'.freeze, -1)
+      cmps = path.split('/', -1)
       cmps.shift if cmps[0].empty?
       cmps = [''] if cmps.empty?
     end
@@ -61,8 +63,8 @@ class Client
     # search
     when 'case_search'
       return _call_search(env,
-        'Case Search'.freeze,
-        'Case Search'.freeze,
+        'Case Search',
+        'Case Search',
         QueryCase,
         ListCase,
         :case_search,
@@ -71,8 +73,8 @@ class Client
 
     when 'entry_search'
       return _call_search(env,
-        'Entry Search'.freeze,
-        'Entry Search'.freeze,
+        'Entry Search',
+        'Entry Search',
         QueryEntry,
         ListEntry,
         :entry_search,
@@ -81,8 +83,8 @@ class Client
 
     when 'log_search'
       return _call_search(env,
-        'Log Search'.freeze,
-        'Log Search'.freeze,
+        'Log Search',
+        'Log Search',
         QueryLog,
         ListLog,
         :log_search,
@@ -91,8 +93,8 @@ class Client
 
     when 'action_search'
       return _call_search(env,
-        'Action Search'.freeze,
-        'Action Search'.freeze,
+        'Action Search',
+        'Action Search',
         QueryAction,
         ListAction,
         :action_search,
@@ -101,8 +103,8 @@ class Client
 
     when 'index_search'
       return _call_search(env,
-        'Index Search'.freeze,
-        'Index Search'.freeze,
+        'Index Search',
+        'Index Search',
         QueryIndex,
         ListIndex,
         :index_search,
@@ -114,8 +116,8 @@ class Client
     # aggregations
     when 'stats'
       return _call_search(env,
-        'Stats Search'.freeze,
-        'Stats Search'.freeze,
+        'Stats Search',
+        'Stats Search',
         QueryStats,
         ListStats,
         :stats,
@@ -124,8 +126,8 @@ class Client
 
     when 'case_tags'
       return _call_search(env,
-        'Case Tags'.freeze,
-        'Case Tags Search'.freeze,
+        'Case Tags',
+        'Case Tags Search',
         QueryCaseTags,
         ListCaseTags,
         :case_tags,
@@ -134,8 +136,8 @@ class Client
 
     when 'entry_tags'
       return _call_search(env,
-        'Entry Tags'.freeze,
-        'Entry Tag Search'.freeze,
+        'Entry Tags',
+        'Entry Tag Search',
         QueryEntryTags,
         ListEntryTags,
         :entry_tags,
@@ -144,8 +146,8 @@ class Client
 
     when 'action_tags'
       return _call_search(env,
-        'Action Tags'.freeze,
-        'Action Tag Search'.freeze,
+        'Action Tags',
+        'Action Tag Search',
         QueryActionTags,
         ListActionTags,
         :action_tags,
@@ -154,8 +156,8 @@ class Client
 
     when 'index_tags'
       return _call_search(env,
-        'Index Tags'.freeze,
-        'Index Tag Search'.freeze,
+        'Index Tags',
+        'Index Tag Search',
         QueryIndexTags,
         ListIndexTags,
         :index_tags,
@@ -183,24 +185,24 @@ class Client
 
     # not supported path
     else
-      env['icfs.page'] = 'Invalid'.freeze
-      raise(Error::NotFound, 'Invalid request'.freeze)
+      env['icfs.page'] = 'Invalid'
+      raise(Error::NotFound, 'Invalid request')
     end
 
   rescue Error::NotFound => e
-    return _resp_notfound( env, 'Not found: %s'.freeze %
+    return _resp_notfound( env, 'Not found: %s' %
       Rack::Utils.escape_html(e.message) )
 
   rescue Error::Perms => e
-    return _resp_forbidden( env, 'Forbidden: %s'.freeze %
+    return _resp_forbidden( env, 'Forbidden: %s' %
       Rack::Utils.escape_html(e.message) )
 
   rescue Error::Conflict => e
-    return _resp_conflict( env, 'Conflict: %s'.freeze %
+    return _resp_conflict( env, 'Conflict: %s' %
       Rack::Utils.escape_html(e.message) )
 
   rescue Error::Value => e
-    return _resp_badreq( env, 'Invalid values: %s'.freeze %
+    return _resp_badreq( env, 'Invalid values: %s' %
       Rack::Utils.escape_html(e.message) )
 
   rescue Error::Interface => e
@@ -218,14 +220,14 @@ class Client
   ###############################################
   # Info page
   def _call_info(env)
-    env['icfs.page'] = 'Info'.freeze
+    env['icfs.page'] = 'Info'
     api = env['icfs']
     _verb_get(env)
     body = [
       _div_nav(env),
-      _div_desc('Info'.freeze, ''.freeze),
+      _div_desc('Info', ''),
       _div_info(env)
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_info()
 
@@ -238,13 +240,13 @@ class Client
     env['icfs.page'] = page
     api = env['icfs']
     _verb_get(env)
-    act = '%s/%s'.freeze % [env['SCRIPT_NAME'], env['icfs.cmps'][0]]
+    act = '%s/%s' % [env['SCRIPT_NAME'], env['icfs.cmps'][0]]
 
     # form
     if env['QUERY_STRING'].empty?
       body = [
         _div_nav(env),
-        _div_desc(type, ''.freeze),
+        _div_desc(type, ''),
         _form_query(env, query_get, {}, act, true)
       ]
 
@@ -266,7 +268,7 @@ class Client
       end
     end
 
-    return _resp_success(env, body.join(''.freeze))
+    return _resp_success(env, body.join(''))
   end # def _call_search()
 
 
@@ -274,15 +276,15 @@ class Client
 
   # Case query options
   QueryCase = [
-    ['title'.freeze, :title, :string].freeze,
-    ['tags'.freeze, :tags, :string].freeze,
-    ['status'.freeze, :status, :boolean].freeze,
-    ['template'.freeze, :template, :boolean].freeze,
-    ['grantee'.freeze, :grantee, :string].freeze,
-    ['perm'.freeze, :perm, :string].freeze,
-    ['size'.freeze, :size, :integer].freeze,
-    ['page'.freeze, :page, :integer].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['title', :title, :string].freeze,
+    ['tags', :tags, :string].freeze,
+    ['status', :status, :boolean].freeze,
+    ['template', :template, :boolean].freeze,
+    ['grantee', :grantee, :string].freeze,
+    ['perm', :perm, :string].freeze,
+    ['size', :size, :integer].freeze,
+    ['page', :page, :integer].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -297,19 +299,19 @@ class Client
 
   # Entry query options
   QueryEntry = [
-    ['title'.freeze, :title, :string].freeze,
-    ['content'.freeze, :content, :string].freeze,
-    ['tags'.freeze, :tags, :string].freeze,
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['action'.freeze, :action, :integer].freeze,
-    ['after'.freeze, :after, :time].freeze,
-    ['before'.freeze, :before, :time].freeze,
-    ['stat'.freeze, :stat, :string].freeze,
-    ['credit'.freeze, :credit, :string].freeze,
-    ['size'.freeze, :size, :integer].freeze,
-    ['page'.freeze, :page, :integer].freeze,
-    ['sort'.freeze, :sort, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['title', :title, :string].freeze,
+    ['content', :content, :string].freeze,
+    ['tags', :tags, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['action', :action, :integer].freeze,
+    ['after', :after, :time].freeze,
+    ['before', :before, :time].freeze,
+    ['stat', :stat, :string].freeze,
+    ['credit', :credit, :string].freeze,
+    ['size', :size, :integer].freeze,
+    ['page', :page, :integer].freeze,
+    ['sort', :sort, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -330,17 +332,17 @@ class Client
 
   # Log query options
   QueryLog = [
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['after'.freeze, :after, :time].freeze,
-    ['before'.freeze, :before, :time].freeze,
-    ['user'.freeze, :user, :string].freeze,
-    ['entry'.freeze, :entry, :integer].freeze,
-    ['index'.freeze, :index, :integer].freeze,
-    ['action'.freeze, :action, :integer].freeze,
-    ['size'.freeze, :size, :integer].freeze,
-    ['page'.freeze, :page, :integer].freeze,
-    ['sort'.freeze, :sort, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['after', :after, :time].freeze,
+    ['before', :before, :time].freeze,
+    ['user', :user, :string].freeze,
+    ['entry', :entry, :integer].freeze,
+    ['index', :index, :integer].freeze,
+    ['action', :action, :integer].freeze,
+    ['size', :size, :integer].freeze,
+    ['page', :page, :integer].freeze,
+    ['sort', :sort, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -358,18 +360,18 @@ class Client
 
   # Task query options
   QueryAction = [
-    ['assigned'.freeze, :assigned, :string].freeze,
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['title'.freeze, :title, :string].freeze,
-    ['status'.freeze, :status, :boolean].freeze,
-    ['flag'.freeze, :flag, :boolean].freeze,
-    ['before'.freeze, :before, :time].freeze,
-    ['after'.freeze, :after, :time].freeze,
-    ['tags'.freeze, :tags, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
-    ['size'.freeze, :size, :integer].freeze,
-    ['page'.freeze, :page, :integer].freeze,
-    ['sort'.freeze, :sort, :string].freeze,
+    ['assigned', :assigned, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['title', :title, :string].freeze,
+    ['status', :status, :boolean].freeze,
+    ['flag', :flag, :boolean].freeze,
+    ['before', :before, :time].freeze,
+    ['after', :after, :time].freeze,
+    ['tags', :tags, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
+    ['size', :size, :integer].freeze,
+    ['page', :page, :integer].freeze,
+    ['sort', :sort, :string].freeze,
   ].freeze
 
 
@@ -388,13 +390,13 @@ class Client
   # Do an index lookup
   #
   def _call_index_lookup(env)
-    env['icfs.page'] = 'Index Lookup'.freeze
+    env['icfs.page'] = 'Index Lookup'
     api = env['icfs']
     _verb_get(env)
 
     # query required
     if env['QUERY_STRING'].empty?
-      raise(Error::Interface, 'Query string required'.freeze)
+      raise(Error::Interface, 'Query string required')
     end
 
     # do the query
@@ -415,7 +417,7 @@ class Client
     end
     body = JSON.generate(body)
     head = {
-      'Content-Type' => 'application/json'.freeze,
+      'Content-Type' => 'application/json',
       'Content-Length' => body.bytesize.to_s
     }
     return [200, head, [body]]
@@ -424,15 +426,15 @@ class Client
 
   # Index query options
   QueryIndex = [
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['title'.freeze, :title, :string].freeze,
-    ['prefix'.freeze, :prefix, :string].freeze,
-    ['content'.freeze, :content, :string].freeze,
-    ['tags'.freeze, :tags, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
-    ['size'.freeze, :size, :integer].freeze,
-    ['page'.freeze, :page, :integer].freeze,
-    ['sort'.freeze, :sort, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['title', :title, :string].freeze,
+    ['prefix', :prefix, :string].freeze,
+    ['content', :content, :string].freeze,
+    ['tags', :tags, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
+    ['size', :size, :integer].freeze,
+    ['page', :page, :integer].freeze,
+    ['sort', :sort, :string].freeze,
   ].freeze
 
 
@@ -447,11 +449,11 @@ class Client
 
   # Stats query options
   QueryStats = [
-    ['credit'.freeze, :credit, :string].freeze,
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['before'.freeze, :before, :time].freeze,
-    ['after'.freeze, :after, :time].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['credit', :credit, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['before', :before, :time].freeze,
+    ['after', :after, :time].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
   # Stats list options
@@ -464,10 +466,10 @@ class Client
 
   # Query for case tags
   QueryCaseTags = [
-    ['status'.freeze, :status, :boolean].freeze,
-    ['template'.freeze, :template, :boolean].freeze,
-    ['grantee'.freeze, :grantee, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['status', :status, :boolean].freeze,
+    ['template', :template, :boolean].freeze,
+    ['grantee', :grantee, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -480,8 +482,8 @@ class Client
 
   # Entry tags query options
   QueryEntryTags = [
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -494,13 +496,13 @@ class Client
 
   # Action Tag query
   QueryActionTags = [
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['assigned'.freeze, :assigned, :string].freeze,
-    ['status'.freeze, :status, :boolean].freeze,
-    ['flag'.freeze, :flag, :boolean].freeze,
-    ['before'.freeze, :before, :time].freeze,
-    ['after'.freeze, :after, :time].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['assigned', :assigned, :string].freeze,
+    ['status', :status, :boolean].freeze,
+    ['flag', :flag, :boolean].freeze,
+    ['before', :before, :time].freeze,
+    ['after', :after, :time].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -513,8 +515,8 @@ class Client
 
   # Index tags query
   QueryIndexTags = [
-    ['caseid'.freeze, :caseid, :string].freeze,
-    ['purpose'.freeze, :purpose, :string].freeze,
+    ['caseid', :caseid, :string].freeze,
+    ['purpose', :purpose, :string].freeze,
   ].freeze
 
 
@@ -529,15 +531,15 @@ class Client
   # Create a new case
   #
   def _call_case_create(env)
-    env['icfs.page'] = 'Case Create'.freeze
+    env['icfs.page'] = 'Case Create'
     api = env['icfs']
     tid = _util_case(env)
     _verb_getpost(env)
 
     # get the form
-    if env['REQUEST_METHOD'] == 'GET'.freeze
+    if env['REQUEST_METHOD'] == 'GET'
       tpl = api.case_read(tid)
-      tpl['title'] = ''.freeze
+      tpl['title'] = ''
       parts = [
         _form_entry(env, tid, nil),
         _form_create(env),
@@ -546,25 +548,25 @@ class Client
       body = [
         _div_nav(env),
         _div_desc(
-          'Create New Case'.freeze,
-          '<i>template:</i> %s'.freeze % Rack::Utils.escape_html(tid),
+          'Create New Case',
+          '<i>template:</i> %s' % Rack::Utils.escape_html(tid),
         ),
-        _div_form(env, '/case_create/'.freeze, tid, parts, 'Create Case'.freeze)
-      ].join(''.freeze)
+        _div_form(env, '/case_create/', tid, parts, 'Create Case')
+      ].join('')
       return _resp_success(env, body)
 
     # post the form
-    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+    elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
 
       # process
       cse = _post_case(env, para)
       cid =  para['create_cid']
-      cse['template'] = (para['create_tmpl'] == 'true'.freeze) ? true : false
+      cse['template'] = (para['create_tmpl'] == 'true') ? true : false
 
       # process entry
       ent = _post_entry(env, para)
-      Items.validate(tid, 'Template ID'.freeze, Items::FieldCaseid)
+      Items.validate(tid, 'Template ID', Items::FieldCaseid)
       ent['caseid'] = cid
 
       # create
@@ -582,13 +584,13 @@ class Client
   # Edit a case
   #
   def _call_case_edit(env)
-    env['icfs.page'] = 'Case Edit'.freeze
+    env['icfs.page'] = 'Case Edit'
     cid = _util_case(env)
     api = env['icfs']
     _verb_getpost(env)
 
     # get the form
-    if env['REQUEST_METHOD'] == 'GET'.freeze
+    if env['REQUEST_METHOD'] == 'GET'
       cse = api.case_read(cid)
       parts = [
         _form_entry(env, cid, nil),
@@ -596,13 +598,13 @@ class Client
       ]
       body = [
         _div_nav(env),
-        _div_desc('Edit Case'.freeze, ''.freeze),
-        _div_form(env, '/case_edit/'.freeze, cid, parts, 'Record Case'.freeze),
-      ].join(''.freeze)
+        _div_desc('Edit Case', ''),
+        _div_form(env, '/case_edit/', cid, parts, 'Record Case'),
+      ].join('')
       return _resp_success(env, body)
 
     # post the form
-    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+    elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
 
       # process
@@ -629,32 +631,32 @@ class Client
   # Edit an entry
   #
   def _call_entry_edit(env)
-    env['icfs.page'] = 'Entry Edit'.freeze
+    env['icfs.page'] = 'Entry Edit'
     api = env['icfs']
     _verb_getpost(env)
 
     cid = _util_case(env)
 
     # get the form
-    if env['REQUEST_METHOD'] == 'GET'.freeze
+    if env['REQUEST_METHOD'] == 'GET'
       enum = _util_num(env, 2)
       anum = _util_num(env, 3)
 
       # entry or action specified
       if enum != 0
-        desc = 'Edit Entry'.freeze
+        desc = 'Edit Entry'
         ent = api.entry_read(cid, enum)
       elsif anum != 0
-        desc = 'New Entry in Action'.freeze
+        desc = 'New Entry in Action'
         act = api.action_read(cid, anum)
       else
-        desc = 'New Entry'.freeze
+        desc = 'New Entry'
       end
 
       # see if editing is possible
       unless( api.access_list(cid).include?(ICFS::PermWrite) || (
         (anum != 0) && api.tasked?(cid, anum)))
-        raise(Error::Perms, 'Not able to edit this entry.'.freeze)
+        raise(Error::Perms, 'Not able to edit this entry.')
       end
 
       # build form
@@ -665,14 +667,14 @@ class Client
       end
       body = [
         _div_nav(env),
-        _div_desc(desc, ''.freeze),
-        _div_form(env, '/entry_edit/'.freeze, cid, parts,
-          'Record Entry'.freeze),
-      ].join(''.freeze)
+        _div_desc(desc, ''),
+        _div_form(env, '/entry_edit/', cid, parts,
+          'Record Entry'),
+      ].join('')
       return _resp_success(env, body)
 
     # post the form
-    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+    elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
 
       # process
@@ -691,7 +693,7 @@ class Client
         _div_entry(env, ent)
       ]
       body << _div_action(env, act) if act
-      return _resp_success(env, body.join(''.freeze))
+      return _resp_success(env, body.join(''))
     end
   end # def _call_entry_edit()
 
@@ -700,18 +702,18 @@ class Client
   # Edit an Index
   #
   def _call_index_edit(env)
-    env['icfs.page'] = 'Index Edit'.freeze
+    env['icfs.page'] = 'Index Edit'
     api = env['icfs']
     _verb_getpost(env)
 
     cid = _util_case(env)
 
     # get the form
-    if env['REQUEST_METHOD'] == 'GET'.freeze
+    if env['REQUEST_METHOD'] == 'GET'
 
       # see if editing is possible
       unless api.access_list(cid).include?(ICFS::PermWrite)
-        raise(Error::Perms, 'Not able to edit this index.'.freeze)
+        raise(Error::Perms, 'Not able to edit this index.')
       end
 
       xnum = _util_num(env, 2)
@@ -720,17 +722,17 @@ class Client
         _form_entry(env, cid, nil),
         _form_index(env, cid, idx),
       ]
-      desc = idx ? 'Edit Index'.freeze : 'New Index'.freeze
+      desc = idx ? 'Edit Index' : 'New Index'
       body = [
         _div_nav(env),
-        _div_desc(desc, ''.freeze),
-        _div_form(env, '/index_edit/'.freeze, cid, parts,
-          'Record Index'.freeze),
-      ].join(''.freeze)
+        _div_desc(desc, ''),
+        _div_form(env, '/index_edit/', cid, parts,
+          'Record Index'),
+      ].join('')
       return _resp_success(env, body)
 
     # post the form
-    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+    elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
 
       # process
@@ -749,7 +751,7 @@ class Client
         _div_nav(env),
         _div_entry(env, ent),
         _div_index(env, idx)
-      ].join(''.freeze)
+      ].join('')
       return _resp_success(env, body)
     end
   end # def _call_index_edit()
@@ -759,24 +761,24 @@ class Client
   # Edit configuration
   #
   def _call_config_edit(env)
-    env['icfs.page'] = 'Config Edit'.freeze
+    env['icfs.page'] = 'Config Edit'
     api = env['icfs']
     cfg = env['icfs.config']
     _verb_getpost(env)
 
     # get the form
-    if env['REQUEST_METHOD'] == 'GET'.freeze
+    if env['REQUEST_METHOD'] == 'GET'
       parts = [ _form_config(env) ]
       body = [
         _div_nav(env),
-        _div_desc('Edit Configuration'.freeze, ''.freeze),
-        _div_form(env, '/config_edit/'.freeze, nil, parts,
-          'Save Config'.freeze),
-      ].join(''.freeze)
+        _div_desc('Edit Configuration', ''),
+        _div_form(env, '/config_edit/', nil, parts,
+          'Save Config'),
+      ].join('')
       return _resp_success(env, body)
 
     # post the form
-    elsif env['REQUEST_METHOD'] == 'POST'.freeze
+    elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
       _post_config(env, para).each{|key, val| cfg.set(key,val) }
       cfg.save
@@ -785,9 +787,9 @@ class Client
       # display the index
       body = [
         _div_nav(env),
-        _div_desc('Edit Configuration'.freeze, 'Settings saved'.freeze),
+        _div_desc('Edit Configuration', 'Settings saved'),
         _div_info(env),
-      ].join(''.freeze)
+      ].join('')
       return _resp_success(env, body)
     end
   end # def _call_config_edit()
@@ -796,13 +798,13 @@ class Client
   ###############################################
   # User Home page
   def _call_home(env)
-    env['icfs.page'] = 'Home'.freeze
+    env['icfs.page'] = 'Home'
     _verb_get(env)
     body = [
       _div_nav(env),
-      _div_desc('User Home'.freeze, ''.freeze),
+      _div_desc('User Home', ''),
       _div_home(env),
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_home()
 
@@ -811,22 +813,22 @@ class Client
   # Display a Case
   #
   def _call_case(env)
-    env['icfs.page'] = 'Case View'.freeze
+    env['icfs.page'] = 'Case View'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
     lnum = _util_num(env, 2)
     cse = api.case_read(cid, lnum)
     if lnum != 0
-      msg = 'This is a historical version of this Case'.freeze
+      msg = 'This is a historical version of this Case'
     else
-      msg = ''.freeze
+      msg = ''
     end
     body = [
       _div_nav(env),
-      _div_desc('Case Information'.freeze, msg),
+      _div_desc('Case Information', msg),
       _div_case(env, cse),
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_case()
 
@@ -835,24 +837,24 @@ class Client
   # Display an Entry
   #
   def _call_entry(env)
-    env['icfs.page'] = 'Entry View'.freeze
+    env['icfs.page'] = 'Entry View'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
     enum = _util_num(env, 2)
     lnum = _util_num(env, 3)
-    raise(Error::Interface, 'No Entry requested'.freeze) if enum == 0
+    raise(Error::Interface, 'No Entry requested') if enum == 0
     ent = api.entry_read(cid, enum, lnum)
     if lnum != 0
-      msg = 'This is a historical version of this Entry'.freeze
+      msg = 'This is a historical version of this Entry'
     else
-      msg = ''.freeze
+      msg = ''
     end
     body = [
       _div_nav(env),
-      _div_desc('View Entry'.freeze, msg),
+      _div_desc('View Entry', msg),
       _div_entry(env, ent),
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_entry()
 
@@ -861,18 +863,18 @@ class Client
   # Display a Log
   #
   def _call_log(env)
-    env['icfs.page'] = 'Log View'.freeze
+    env['icfs.page'] = 'Log View'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
     lnum = _util_num(env, 2)
-    raise(Error::Interface, 'No log requested'.freeze) if lnum == 0
+    raise(Error::Interface, 'No log requested') if lnum == 0
     log = api.log_read(cid, lnum)
     body = [
       _div_nav(env),
-      _div_desc('View Log'.freeze, ''.freeze),
+      _div_desc('View Log', ''),
       _div_log(env, log)
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_log()
 
@@ -881,38 +883,38 @@ class Client
   # Display an Action
   #
   def _call_action(env)
-    env['icfs.page'] = 'Action View'.freeze
+    env['icfs.page'] = 'Action View'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
     anum = _util_num(env, 2)
     lnum = _util_num(env, 3)
-    raise(Error::Interface, 'No Action requested'.freeze) if anum == 0
+    raise(Error::Interface, 'No Action requested') if anum == 0
 
     # get the action
     act = api.action_read(cid, anum, lnum)
     if lnum != 0
-      msg = 'This is a historical version of this Action'.freeze
+      msg = 'This is a historical version of this Action'
     else
-      msg = ''.freeze
+      msg = ''
     end
 
     # get the entries
     query = {
       caseid: cid,
       action: anum,
-      purpose: 'Action Entries'.freeze,
+      purpose: 'Action Entries',
     }
     resp = api.entry_search(query)
 
     # display
     body = [
       _div_nav(env),
-      _div_desc('View Action'.freeze, msg),
+      _div_desc('View Action', msg),
       _div_action(env, act),
       _div_list(env, resp, ListEntry),
       _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)},
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_action()
 
@@ -921,20 +923,20 @@ class Client
   # Display an Index
   #
   def _call_index(env)
-    env['icfs.page'] = 'Index View'.freeze
+    env['icfs.page'] = 'Index View'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
     xnum = _util_num(env, 2)
     lnum = _util_num(env, 3)
-    raise(Error::Interface, 'No Index requested'.freeze) if xnum == 0
+    raise(Error::Interface, 'No Index requested') if xnum == 0
 
     # get the index
     idx = api.index_read(cid, xnum, lnum)
     if lnum != 0
-      msg = 'This is a historical version of this Index'.freeze
+      msg = 'This is a historical version of this Index'
     else
-      msg = ''.freeze
+      msg = ''
     end
 
     # get the entries
@@ -947,11 +949,11 @@ class Client
     # display
     body = [
       _div_nav(env) +
-      _div_desc('View Index'.freeze, msg),
+      _div_desc('View Index', msg),
       _div_index(env, idx),
       _div_list(env, resp, ListEntry),
       _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)},
-    ].join(''.freeze)
+    ].join('')
     return _resp_success(env, body)
   end # def _call_index()
 
@@ -959,7 +961,7 @@ class Client
   ###############################################
   # Get a file
   def _call_file(env)
-    env['icfs.page'] = 'File Download'.freeze
+    env['icfs.page'] = 'File Download'
     api = env['icfs']
     _verb_get(env)
     cid = _util_case(env)
@@ -967,21 +969,21 @@ class Client
     # get filename
     cmps = env['icfs.cmps']
     if cmps.size < 3 || cmps[2].empty?
-      raise(Error::Interface, 'No file specified in the URL'.freeze)
+      raise(Error::Interface, 'No file specified in the URL')
     end
     fnam = Rack::Utils.unescape(cmps[2])
     ma = /^(\d+)-(\d+)-(\d+)-(.+)$/.match fnam
     if !ma
-      raise(Error::Interface, 'File not properly specified in URL'.freeze)
+      raise(Error::Interface, 'File not properly specified in URL')
     end
     enum = ma[1].to_i
     lnum = ma[2].to_i
     fnum = ma[3].to_i
-    ext = ma[4].rpartition('.'.freeze)[2]
+    ext = ma[4].rpartition('.')[2]
 
     # get MIME-type by extension
     if ext.empty?
-      mime = 'application/octet-stream'.freeze
+      mime = 'application/octet-stream'
     else
       mime = Rack::Mime.mime_type('.' + ext)
     end
@@ -992,7 +994,7 @@ class Client
     headers = {
       'Content-Length' => file.size.to_s,
       'Content-Type' => mime,
-      'Content-Disposition' => 'attachment'.freeze,
+      'Content-Disposition' => 'attachment',
     }
     return [200, headers, fr]
 
@@ -1017,59 +1019,59 @@ class Client
       tabs = [
         _a_entry_search(env, {
             caseid: cid,
-            purpose: 'Case Entries'.freeze,
-          }, 'Entries'.freeze),
+            purpose: 'Case Entries',
+          }, 'Entries'),
         _a_index_search(env, {
             caseid: cid,
-            purpose: 'Case Indexes'.freeze,
-          }, 'Indexes'.freeze),
+            purpose: 'Case Indexes',
+          }, 'Indexes'),
         _a_stats(env, {
             caseid: cid,
-            purpose: 'Case Stats'.freeze,
-          }, 'Stats'.freeze),
+            purpose: 'Case Stats',
+          }, 'Stats'),
         _a_entry_tags(env, {
             caseid: cid,
-            purpose: 'Entry Tags'.freeze,
-          }, 'Entry Tags'.freeze),
+            purpose: 'Entry Tags',
+          }, 'Entry Tags'),
         _a_index_tags(env, {
             caseid: cid,
-            purpose: 'Index Tags'.freeze,
-          }, 'Index Tags'.freeze),
-        _a_entry_edit(env, cid, 0, 0, 'New Entry'.freeze),
-        _a_index_edit(env, cid, 0, 'New Index'.freeze),
+            purpose: 'Index Tags',
+          }, 'Index Tags'),
+        _a_entry_edit(env, cid, 0, 0, 'New Entry'),
+        _a_index_edit(env, cid, 0, 'New Index'),
       ]
 
     # no case
     else
-      tc = ''.freeze
+      tc = ''
       tabs = [
         _a_action_search(env, {
             assigned: unam,
             status: true,
             flag: true,
-            purpose: 'Flagged Actions'.freeze,
-          }, 'Actions'.freeze),
+            purpose: 'Flagged Actions',
+          }, 'Actions'),
         _a_case_search(env, {
             grantee: unam,
             status: true,
             template: false,
-            purpose: 'Open Cases'.freeze,
-          }, 'Cases'.freeze),
+            purpose: 'Open Cases',
+          }, 'Cases'),
         _a_stats(env, {
             credit: unam,
             after: Time.now.to_i - 60*60*24*30,
-            purpose: 'User Stats - Last 30 days'.freeze,
-          }, 'Stats'.freeze),
+            purpose: 'User Stats - Last 30 days',
+          }, 'Stats'),
         _a_config_edit(env, 'Config'),
-        _a_info(env, 'Info'.freeze),
+        _a_info(env, 'Info'),
       ]
     end
 
     # tab divs
-    tabs = tabs.map{|aa| DivNavTab % aa}.join(''.freeze)
+    tabs = tabs.map{|aa| DivNavTab % aa}.join('')
 
     return DivNav % [
-      _a_home(env, 'ICFS'.freeze),
+      _a_home(env, 'ICFS'),
       tc,
       tabs
     ]
@@ -1081,12 +1083,12 @@ class Client
   <div class="nav">
     <div class="nav-icfs">%s</div>
     <div class="nav-case">%s</div>%s
-  </div>'.freeze
+  </div>'
 
 
   # navbar tab
   DivNavTab = '
-    <div class="nav-tab">%s</div>'.freeze
+    <div class="nav-tab">%s</div>'
 
 
   ###############################################
@@ -1100,7 +1102,7 @@ class Client
   # message div
   DivMsg = '
   <div class="message">%s
-  </div>'.freeze
+  </div>'
 
 
   ###############################################
@@ -1121,10 +1123,10 @@ class Client
     return DivInfo % [
       Rack::Utils.escape_html(tz),
       Rack::Utils.escape_html(api.user),
-      roles.join(''.freeze),
-      grps.join(''.freeze),
-      perms.join(''.freeze),
-      gstats.join(''.freeze),
+      roles.join(''),
+      grps.join(''),
+      perms.join(''),
+      gstats.join(''),
     ]
   end # def _div_info()
 
@@ -1162,31 +1164,31 @@ class Client
         </div>
       </div>
     </div>
-  </div>'.freeze
+  </div>'
 
 
   # List items in the info div
   DivInfoList = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # Column classes by symbol
   ListColClass = {
-    entry: 'list-int'.freeze,
-    action: 'list-int'.freeze,
-    index: 'list-int'.freeze,
-    log: 'list-int'.freeze,
-    tags: 'list-int'.freeze,
-    tag: 'list-tag'.freeze,
-    stats: 'list-int'.freeze,
-    time: 'list-time'.freeze,
-    title: 'list-title'.freeze,
-    caseid: 'list-caseid'.freeze,
-    stat: 'list-stat'.freeze,
-    sum: 'list-float'.freeze,
-    count: 'list-int'.freeze,
-    files: 'list-int'.freeze,
-    user: 'list-usergrp'.freeze,
+    entry: 'list-int',
+    action: 'list-int',
+    index: 'list-int',
+    log: 'list-int',
+    tags: 'list-int',
+    tag: 'list-tag',
+    stats: 'list-int',
+    time: 'list-time',
+    title: 'list-title',
+    caseid: 'list-caseid',
+    stat: 'list-stat',
+    sum: 'list-float',
+    count: 'list-int',
+    files: 'list-int',
+    user: 'list-usergrp',
   }.freeze
 
 
@@ -1198,7 +1200,7 @@ class Client
   # @param list [Array] List of object items to display and how
   #
   def _div_list(env, resp, list)
-    return _div_msg(env, 'No results found'.freeze) if resp[:list].size == 0
+    return _div_msg(env, 'No results found') if resp[:list].size == 0
 
     # did we query with caseid?
     qcid = resp[:query].key?(:caseid)
@@ -1209,12 +1211,12 @@ class Client
     # header row
     hcols = list.map do |sym, opt|
       if sym == :caseid && qcid
-        ''.freeze
+        ''
       else
         DivListHeadItems[sym]
       end
     end
-    head = DivListHead % hcols.join(''.freeze)
+    head = DivListHead % hcols.join('')
 
     # search results into rows
     rows = resp[:list].map do |sr|
@@ -1228,14 +1230,14 @@ class Client
         # snippets are special non-column, not in the object itself
         if sym == :snippet
           if sr[:snippet]
-            next( DivListItem % ['list-snip'.freeze, sr[:snippet]])
+            next( DivListItem % ['list-snip', sr[:snippet]])
           else
-            next(''.freeze)
+            next('')
           end
 
         # redacted result
         elsif it.nil?
-          next( DivListItem % [cc, '&mdash;'.freeze])
+          next( DivListItem % [cc, '&mdash;'])
         end
 
         # normal result
@@ -1264,29 +1266,29 @@ class Client
         when :action
           case opt
           when :current
-            cd = (it == 0) ? ''.freeze :  _a_action(env, cid, it, 0, it.to_s)
+            cd = (it == 0) ? '' :  _a_action(env, cid, it, 0, it.to_s)
           when :log
             if it != 0
               cd = _a_action(env, cid, it, obj[:log], it.to_s)
             else
-              cd = ''.freeze
+              cd = ''
             end
           else
-            cd = it == 0 ? ''.freeze : it.to_s
+            cd = it == 0 ? '' : it.to_s
           end
 
         # index
         when :index
           case opt
           when :entry
-            cd = (it == 0) ? ''.freeze : it.to_s
+            cd = (it == 0) ? '' : it.to_s
           when :current
             cd = _a_index(env, cid, it, 0, it.to_s)
           when :log
             if it != 0
               cd = _a_index(env, cid, it, obj[:log], it.to_s)
             else
-              cd = ''.freeze
+              cd = ''
             end
           else
             cd = it.to_s
@@ -1304,7 +1306,7 @@ class Client
         # tags
         when :tags
           if it.size == 1 && it[0] == ICFS::TagNone
-            cd = ''.freeze
+            cd = ''
           else
             cd = it.size.to_s
           end
@@ -1315,16 +1317,16 @@ class Client
 
           case opt
           when :entry
-            qu[:purpose] = 'Entry Tag Search'.freeze
+            qu[:purpose] = 'Entry Tag Search'
             cd = _a_entry_search(env, qu, it)
           when :index
-            qu[:purpose] = 'Index Tag Search'.freeze
+            qu[:purpose] = 'Index Tag Search'
             cd = _a_index_search(env, qu, it)
           when :case
-            qu[:purpose] = 'Case Tag Search'.freeze
+            qu[:purpose] = 'Case Tag Search'
             cd = _a_case_search(env, qu, it)
           when :action
-            qu[:purpose] = 'Action Tag Search'.freeze
+            qu[:purpose] = 'Action Tag Search'
             cd = _a_action_search(env, qu, it)
           end
 
@@ -1370,7 +1372,7 @@ class Client
         # stat - only on stats aggregation
         when :stat
           qu[:stat] = it
-          qu[:purpose] = 'Entry Stat Search'.freeze
+          qu[:purpose] = 'Entry Stat Search'
           cd = _a_entry_search(env, qu, it)
 
         # sum - only on stats aggregation
@@ -1383,7 +1385,7 @@ class Client
 
         # files
         when :files
-          cd = it == 0 ? ''.freeze : it.to_s
+          cd = it == 0 ? '' : it.to_s
 
         # user
         when :user
@@ -1391,20 +1393,20 @@ class Client
 
         # stats
         when :stats
-          cd = it == 0 ? ''.freeze : it.to_s
+          cd = it == 0 ? '' : it.to_s
 
         # huh?
         else
           raise NotImplementedError, sym.to_s
         end
 
-        cd ? (DivListItem % [cc, cd]) : ''.freeze
+        cd ? (DivListItem % [cc, cd]) : ''
       end
 
-      DivListRow % cols.join(''.freeze)
+      DivListRow % cols.join('')
     end
 
-    return DivList % [head, rows.join(''.freeze)]
+    return DivList % [head, rows.join('')]
 
   end # def _div_list()
 
@@ -1412,56 +1414,56 @@ class Client
   # Search results list
   DivList = '
   <div class="list">%s%s
-  </div>'.freeze
+  </div>'
 
   # Search results row
   DivListRow = '
     <div class="list-row">%s
-    </div>'.freeze
+    </div>'
 
   # Search results header
   DivListHead = '
     <div class="list-head">%s
-    </div>'.freeze
+    </div>'
 
   # Search results header items
   DivListHeadItems = {
     tags: '
-      <div class="list-int">Tags</div>'.freeze,
+      <div class="list-int">Tags</div>',
     tag: '
-      <div class="list-tag">Tag</div>'.freeze,
+      <div class="list-tag">Tag</div>',
     entry: '
-      <div class="list-int">Entry</div>'.freeze,
+      <div class="list-int">Entry</div>',
     index: '
-      <div class="list-int">Index</div>'.freeze,
+      <div class="list-int">Index</div>',
     action: '
-      <div class="list-int">Action</div>'.freeze,
+      <div class="list-int">Action</div>',
     log: '
-      <div class="list-int">Log</div>'.freeze,
+      <div class="list-int">Log</div>',
     title: '
-      <div class="list-title">Title</div>'.freeze,
+      <div class="list-title">Title</div>',
     caseid: '
-      <div class="list-caseid">Case ID</div>'.freeze,
+      <div class="list-caseid">Case ID</div>',
     stats: '
-      <div class="list-int">Stats</div>'.freeze,
+      <div class="list-int">Stats</div>',
     time: '
-      <div class="list-time">Date/Time</div>'.freeze,
+      <div class="list-time">Date/Time</div>',
     stat: '
-      <div class="list-stat">Stat Name</div>'.freeze,
+      <div class="list-stat">Stat Name</div>',
     sum: '
-      <div class="list-float">Total</div>'.freeze,
+      <div class="list-float">Total</div>',
     count: '
-      <div class="list-int">Count</div>'.freeze,
+      <div class="list-int">Count</div>',
     files: '
-      <div class="list-int">Files</div>'.freeze,
+      <div class="list-int">Files</div>',
     user: '
-      <div class="list-usergrp">User</div>'.freeze,
-    snippet: ''.freeze
+      <div class="list-usergrp">User</div>',
+    snippet: ''
   }.freeze
 
   # search results item
   DivListItem = '
-      <div class="%s">%s</div>'.freeze
+      <div class="%s">%s</div>'
 
 
   ###############################################
@@ -1476,7 +1478,7 @@ class Client
   <div class="desc">
     <div class="desc-head">%s</div>
     %s
-  </div>'.freeze
+  </div>'
 
 
   ###############################################
@@ -1512,7 +1514,7 @@ class Client
     disp_pages.times do |pg|
       page = pg + 1
       if page == cur
-        ary << '<b>%d</b>'.freeze % page
+        ary << '<b>%d</b>' % page
       else
         query[:page] = page
         if pr
@@ -1526,30 +1528,30 @@ class Client
 
     # previous
     if cur == 1
-      prev_page = ''.freeze
+      prev_page = ''
     else
       query[:page] = cur - 1
       if pr
-        prev_page = pr.call(query, '(Prev)'.freeze)
+        prev_page = pr.call(query, '(Prev)')
       else
-        prev_page = yield(query, '(Prev)'.freeze)
+        prev_page = yield(query, '(Prev)')
       end
     end
 
     # next
     if cur == disp_pages
-      next_page = ''.freeze
+      next_page = ''
     else
       query[:page] = cur + 1
       if pr
-        next_page = pr.call(query, '(Next)'.freeze)
+        next_page = pr.call(query, '(Next)')
       else
-        next_page = yield(query, '(Next)'.freeze)
+        next_page = yield(query, '(Next)')
       end
     end
 
     return DivPage % [
-      prev_page, ary.join(' '.freeze), next_page,
+      prev_page, ary.join(' '), next_page,
       hits, tot_pages
     ]
   end # def _div_page()
@@ -1560,7 +1562,7 @@ class Client
   <div class="pagenav">
     &lt;&lt; %s %s %s &gt;&gt;<br>
     Hits: %d Pages: %d
-  </div>'.freeze
+  </div>'
 
 
   ###############################################
@@ -1581,61 +1583,61 @@ class Client
             grantee: ug,
             status: true,
             template: false,
-            purpose: 'Open Cases'.freeze
-          }, 'open'.freeze),
+            purpose: 'Open Cases'
+          }, 'open'),
         _a_case_search(env, {
             grantee: ug,
             status: false,
             template: false,
-            purpose: 'Closed Cases'.freeze
-          }, 'closed'.freeze),
+            purpose: 'Closed Cases'
+          }, 'closed'),
         _a_case_search(env, {
               grantee: ug,
               perm: ICFS::PermAction,
               status: true,
               template: false,
-              purpose: 'Action Manager Cases'.freeze
-            }, 'action mgr'.freeze),
+              purpose: 'Action Manager Cases'
+            }, 'action mgr'),
         _a_case_tags(env, {
             grantee: ug,
             status: true,
             template: false,
-            purpose: 'Open Case Tags'.freeze
-          }, 'tags'.freeze),
-      ].map{|lk| DivHomeLink % lk }.join(''.freeze)
+            purpose: 'Open Case Tags'
+          }, 'tags'),
+      ].map{|lk| DivHomeLink % lk }.join('')
 
       al = [
         _a_action_search(env, {
             assigned: ug,
             status: true,
             flag: true,
-            purpose: 'Flagged Actions'.freeze
-          }, 'flagged'.freeze),
+            purpose: 'Flagged Actions'
+          }, 'flagged'),
         _a_action_search(env, {
             assigned: ug,
             status: true,
             before: now,
-            sort: 'time_asc'.freeze,
-            purpose: 'Actions - Past Date'.freeze,
-          }, 'past'.freeze),
+            sort: 'time_asc',
+            purpose: 'Actions - Past Date',
+          }, 'past'),
         _a_action_search(env, {
             assigned: ug,
             status: true,
             after: now,
-            sort: 'time_desc'.freeze,
-            purpose: 'Actions - Future Date'.freeze,
-          }, 'future'.freeze),
+            sort: 'time_desc',
+            purpose: 'Actions - Future Date',
+          }, 'future'),
         _a_action_search(env, {
             assigned: ug,
             status: true,
-            purpose: 'Open Actions'.freeze
-          }, 'all open'.freeze),
+            purpose: 'Open Actions'
+          }, 'all open'),
         _a_action_tags(env, {
             assigned: ug,
             status: true,
-            purpose: 'Open Action Tags'.freeze
-          }, 'tags'.freeze),
-      ].map{|lk| DivHomeLink % lk }.join(''.freeze)
+            purpose: 'Open Action Tags'
+          }, 'tags'),
+      ].map{|lk| DivHomeLink % lk }.join('')
 
       ol = [
         _a_case_search(env, {
@@ -1643,27 +1645,27 @@ class Client
           perm: ICFS::PermManage,
           status: true,
           template: false,
-          purpose: 'Managed Cases'.freeze,
-          }, 'managed'.freeze),
+          purpose: 'Managed Cases',
+          }, 'managed'),
         _a_case_search(env, {
             grantee: ug,
             perm: ICFS::PermManage,
             status: true,
             template: true,
-            purpose: 'Templates'.freeze,
-          }, 'templates'.freeze),
+            purpose: 'Templates',
+          }, 'templates'),
         _a_stats(env, {
             credit: ug,
             after: Time.now.to_i - 60*60*24*30,
-            purpose: 'User/Role Stats - 30 days'.freeze,
-          }, '30-day stats'.freeze),
-      ].map{|lk| DivHomeLink % lk }.join(''.freeze)
+            purpose: 'User/Role Stats - 30 days',
+          }, '30-day stats'),
+      ].map{|lk| DivHomeLink % lk }.join('')
 
 
       DivHomeUr % [Rack::Utils.escape_html(ug), al, cl, ol ]
     end
 
-    DivHome % useract.join(''.freeze)
+    DivHome % useract.join('')
   end # def _div_home()
 
 
@@ -1676,7 +1678,7 @@ class Client
       <div class="list-text-s">Cases</div>
       <div class="list-text-s">Other</div>
     </div>%s
-  </div>'.freeze
+  </div>'
 
 
   # Home user/role
@@ -1689,19 +1691,19 @@ class Client
       </div>
       <div class="links-list">%s
       </div>
-    </div>'.freeze
+    </div>'
 
 
   # Home Link
   DivHomeLink = '
-        <div class="list-text-s">%s</div>'.freeze
+        <div class="list-text-s">%s</div>'
 
 
   ###############################################
   # Case Create Form
   #
   def _form_create(env)
-    [ FormCaseCreate, ''.freeze ]
+    [ FormCaseCreate, '' ]
   end # def _form_create()
 
 
@@ -1732,7 +1734,7 @@ class Client
           when making new cases.
         </div></div>
       </div>
-    </div>'.freeze
+    </div>'
 
 
   ###############################################
@@ -1748,7 +1750,7 @@ class Client
     spath += Rack::Utils.escape(cid) if cid
     return DivForm % [
       spath,
-      parts.join(''.freeze),
+      parts.join(''),
       button,
     ]
   end # def _div_form()
@@ -1759,7 +1761,7 @@ class Client
       enctype="multipart/form-data" accept-charset="utf-8">
 %s
     <input class="submit" type="submit" value="%s">
-  </form></div>'.freeze
+  </form></div>'
 
 
 
@@ -1772,17 +1774,17 @@ class Client
     cid = cse['caseid']
     al = api.access_list(cid)
 
-    status = cse['status'] ? 'Open'.freeze : 'Closed'.freeze
-    template = cse['template'] ? 'Yes'.freeze : 'No'.freeze
+    status = cse['status'] ? 'Open' : 'Closed'
+    template = cse['template'] ? 'Yes' : 'No'
 
     # case links
     links = [
-      _a_log_search(env, {caseid: cid}, 'History of Case'.freeze),
+      _a_log_search(env, {caseid: cid}, 'History of Case'),
     ]
     if al.include?(ICFS::PermManage)
-      links << _a_case_edit(env, cid, 'Edit This Case'.freeze)
+      links << _a_case_edit(env, cid, 'Edit This Case')
       if cse['template']
-        links << _a_case_create(env, cid, 'Create New Case'.freeze)
+        links << _a_case_create(env, cid, 'Create New Case')
       end
     end
     links.map!{|aa| DivCaseLink % aa}
@@ -1796,40 +1798,40 @@ class Client
             assigned: ICFS::UserCase,
             status: true,
             flag: true,
-            purpose: 'Flagged Actions'.freeze,
-          }, 'flagged'.freeze),
+            purpose: 'Flagged Actions',
+          }, 'flagged'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
             before: now,
-            sort: 'time_asc'.freeze,
-            purpose: 'Actions - Past Date'.freeze,
-          }, 'past'.freeze),
+            sort: 'time_asc',
+            purpose: 'Actions - Past Date',
+          }, 'past'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
             after: now,
-            sort: 'time_desc'.freeze,
-            purpose: 'Actions - Future Date'.freeze,
-          }, 'future'.freeze),
+            sort: 'time_desc',
+            purpose: 'Actions - Future Date',
+          }, 'future'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
-            purpose: 'Open Actions'.freeze,
-          }, 'all open'.freeze),
+            purpose: 'Open Actions',
+          }, 'all open'),
         _a_action_tags(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
-            purpose: 'Open Action Tags'.freeze,
-          }, 'tags'.freeze),
+            purpose: 'Open Action Tags',
+          }, 'tags'),
       ].map{|lk| DivCaseLink % lk}
-      actions = DivCaseActions % actions.join(''.freeze)
+      actions = DivCaseActions % actions.join('')
     else
-      actions = ''.freeze
+      actions = ''
     end
 
     # tags
@@ -1844,19 +1846,19 @@ class Client
       ugl = ac['grant'].map do |ug|
         DivCaseGrant % Rack::Utils.escape_html(ug)
       end
-      DivCaseAccess % [ pm, ugl.join(''.freeze) ]
+      DivCaseAccess % [ pm, ugl.join('') ]
     end
 
     # stats
     if cse['stats']
       stats = cse['stats'].map do |st|
         DivCaseStatEach % _a_entry_search(env, { caseid: cid, stat: st,
-          purpose: 'Entries with Stat'.freeze },
+          purpose: 'Entries with Stat' },
           Rack::Utils.escape_html(st) )
       end
-      stats = DivCaseStats % stats.join(''.freeze)
+      stats = DivCaseStats % stats.join('')
     else
-      stats = ''.freeze
+      stats = ''
     end
 
     return DivCase % [
@@ -1864,10 +1866,10 @@ class Client
       _a_log(env, cid, cse['log'], cse['log'].to_s),
       status,
       template,
-      links.join(''.freeze),
+      links.join(''),
       Rack::Utils.escape_html(cse['title']),
-      acc.join(''.freeze),
-      tags.join(''.freeze),
+      acc.join(''),
+      tags.join(''),
       stats,
       actions,
     ]
@@ -1914,19 +1916,19 @@ class Client
         <div class="sect-head">Tags</div>%s
       </div>%s%s
     </div>
-  </div>'.freeze
+  </div>'
 
 
   # Case div action links
   DivCaseActions = '
       <div class="sect">
         <div class="sect-head">Actions</div>%s
-      </div>'.freeze
+      </div>'
 
 
   # Case div links
   DivCaseLink = '
-        <div>%s</div>'.freeze
+        <div>%s</div>'
 
   # Case div each access
   DivCaseAccess = '
@@ -1934,17 +1936,17 @@ class Client
             <div class="list-perm">%s</div>
             <div class="list-vert list-usergrp">%s
             </div>
-          </div>'.freeze
+          </div>'
 
 
   # Case div each grant
   DivCaseGrant = '
-            <div>%s</div>'.freeze
+            <div>%s</div>'
 
 
   # Case div each tag
   DivCaseTag = '
-        <div class="item-tag">%s</div>'.freeze
+        <div class="item-tag">%s</div>'
 
 
   # Case div stats section
@@ -1953,12 +1955,12 @@ class Client
         <div class="sect-head">Stats</div>
         <div class="list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # Case div each stat
   DivCaseStatEach = '
-          <div class="list-perm">%s</div>'.freeze
+          <div class="list-perm">%s</div>'
 
 
   ###############################################
@@ -1971,21 +1973,21 @@ class Client
     links = []
 
     enum = ent['entry']
-    links << _a_entry_edit(env, cid, enum, 0, 'Edit This Entry'.freeze)
+    links << _a_entry_edit(env, cid, enum, 0, 'Edit This Entry')
 
     lnum = ent['log']
     links << _a_log_search(env, {
           'caseid' => cid,
           'entry' => enum,
-          'purpose' => 'History of Entry'.freeze,
-        }, 'History of Entry'.freeze)
+          'purpose' => 'History of Entry',
+        }, 'History of Entry')
 
     if ent['action']
       anum = ent['action']
       action = DivEntryAction % _a_action(env, cid, anum, 0, anum.to_s)
-      links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action'.freeze)
+      links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action')
     else
-      action = ''.freeze
+      action = ''
     end
 
     if ent['index']
@@ -1993,16 +1995,16 @@ class Client
         idx = api.index_read(cid, xnum)
         DivEntryIndexEach % _a_index(env, cid, xnum, 0, idx['title'])
       end
-      index = DivEntryIndex % indexes.join(''.freeze)
+      index = DivEntryIndex % indexes.join('')
     else
-      index = ''.freeze
+      index = ''
     end
 
     tags = ent['tags'].map do |tag|
       DivEntryTag % _a_entry_search(env, {
           'caseid' => cid,
           'tags' => tag,
-          'purpose' => 'Tag Entries'.freeze,
+          'purpose' => 'Tag Entries',
         }, tag)
     end
 
@@ -2010,9 +2012,9 @@ class Client
       pa = ent['perms'].map do |pm|
         DivEntryPermEach % Rack::Utils.escape_html(pm)
       end
-      perms = DivEntryPerms % pa.join("\n".freeze)
+      perms = DivEntryPerms % pa.join("\n")
     else
-      perms = ''.freeze
+      perms = ''
     end
 
     if ent['stats']
@@ -2023,12 +2025,12 @@ class Client
         DivEntryStatEach % [
           Rack::Utils.escape_html(st['name']),
           st['value'],
-          ca.join(', '.freeze)
+          ca.join(', ')
         ]
       end
-      stats = DivEntryStats % sa.join("\n".freeze)
+      stats = DivEntryStats % sa.join("\n")
     else
-      stats = ''.freeze
+      stats = ''
     end
 
     if ent['files']
@@ -2036,9 +2038,9 @@ class Client
         DivEntryFileEach % _a_file(env, cid, enum, fd['log'],
           fd['num'], fd['name'], fd['name'])
       end
-      files = DivEntryFiles % fa.join("\n".freeze)
+      files = DivEntryFiles % fa.join("\n")
     else
-      files = ''.freeze
+      files = ''
     end
 
     return DivEntry % [
@@ -2047,11 +2049,11 @@ class Client
       _a_log(env, cid, lnum, lnum.to_s),
       Rack::Utils.escape_html(ent['user']),
       action,
-      links.map{|lk| DivEntryLink % lk }.join(''.freeze),
+      links.map{|lk| DivEntryLink % lk }.join(''),
       Rack::Utils.escape_html(ent['title']),
       _util_time(env, ent['time']),
       Rack::Utils.escape_html(ent['content']),
-      tags.join("\n".freeze),
+      tags.join("\n"),
       index,
       perms,
       stats,
@@ -2096,17 +2098,17 @@ class Client
         </div>
       </div>%s%s%s%s
     </div>
-  </div>'.freeze
+  </div>'
 
 
   # entry tag each
   DivEntryTag = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # entry link each
   DivEntryLink = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # entry action
@@ -2114,7 +2116,7 @@ class Client
       <div class="list-row">
         <div class="list-label">Action:</div>
         <div class="list-int">%s</div>
-      </div>'.freeze
+      </div>'
 
 
   # entry index
@@ -2123,12 +2125,12 @@ class Client
         <div class="sect-head">Indexes</div>
         <div class="index-list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # entry index each
   DivEntryIndexEach = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # entry perms
@@ -2137,12 +2139,12 @@ class Client
         <div class="sect-head">Permissions</div>
         <div class="perms-list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # entry perm each
   DivEntryPermEach = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # entry stats
@@ -2151,12 +2153,12 @@ class Client
         <div class="sect-head">Stats</div>
         <div class="stats-list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # entry each stat
   DivEntryStatEach = '
-          <div>%s %f %s</div>'.freeze
+          <div>%s %f %s</div>'
 
 
   # entry files
@@ -2165,12 +2167,12 @@ class Client
         <div class="sect-head">Files</div>
         <div class="files-list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # entry each file
   DivEntryFileEach = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   ###############################################
@@ -2181,15 +2183,15 @@ class Client
     lnum = log['log']
     enum = log['entry']['num']
 
-    navp = (lnum == 1) ? 'prev'.freeze : _a_log(env, cid, lnum-1, 'prev'.freeze)
-    navn = _a_log(env, cid, lnum + 1, 'next'.freeze)
+    navp = (lnum == 1) ? 'prev' : _a_log(env, cid, lnum-1, 'prev')
+    navn = _a_log(env, cid, lnum + 1, 'next')
 
     time = _util_time(env, log['time'])
 
     if log['case_hash']
       chash = DivLogCase % _a_case(env, cid, lnum, log['case_hash'])
     else
-      chash = ''.freeze
+      chash = ''
     end
 
     if log['action']
@@ -2198,7 +2200,7 @@ class Client
         log['action']['num'],
       ]
     else
-      action = ''.freeze
+      action = ''
     end
 
     if log['index']
@@ -2207,7 +2209,7 @@ class Client
         log['index']['num'],
       ]
     else
-      index = ''.freeze
+      index = ''
     end
 
     if log['files_hash']
@@ -2215,13 +2217,13 @@ class Client
       fa = []
       ha.each_index do |ix|
         fa << DivLogFileEach % [
-            _a_file(env, cid, enum, lnum, ix, 'file.bin'.freeze, ha[ix]),
+            _a_file(env, cid, enum, lnum, ix, 'file.bin', ha[ix]),
             ix
         ]
       end
-      files = DivLogFiles % fa.join("\n".freeze)
+      files = DivLogFiles % fa.join("\n")
     else
-      files = ''.freeze
+      files = ''
     end
 
     return DivLog % [
@@ -2280,7 +2282,7 @@ class Client
         <div class="list-int">%d</div>
       </div>%s%s%s%s
     </div>
-  </div>'.freeze
+  </div>'
 
 
   # log action
@@ -2289,7 +2291,7 @@ class Client
         <div class="list-label">Action:</div>
         <div class="list-hash">%s</div>
         <div class="list-int">%d</div>
-      </div>'.freeze
+      </div>'
 
 
   # log index
@@ -2298,7 +2300,7 @@ class Client
         <div class="list-label">Index:</div>
         <div class="list-hash">%s</div>
         <div class="list-int">%d</div>
-      </div>'.freeze
+      </div>'
 
 
   # log case
@@ -2307,7 +2309,7 @@ class Client
         <div class="list-label">Case:</div>
         <div class="list-hash">%s</div>
       </div>
-  '.freeze
+  '
 
   # log file
   DivLogFiles = '
@@ -2315,7 +2317,7 @@ class Client
         <div class="list-label">Files:</div>
         <div class="files-list">%s
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # log file
@@ -2323,7 +2325,7 @@ class Client
           <div>
             <div class="list-hash">%s</div>
             <div class="list-int">%d</div>
-          </div>'.freeze
+          </div>'
 
 
   ###############################################
@@ -2342,14 +2344,14 @@ class Client
 
     links = []
     anum = act['action']
-    links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action'.freeze)
+    links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action')
 
     lnum = act['log']
     links << _a_log_search(env, {
         'caseid' => cid,
         'action' => anum,
-        'purpose' => 'Action History'.freeze,
-      }, 'History of Action'.freeze)
+        'purpose' => 'Action History',
+      }, 'History of Action')
 
     # each task
     tasks = []
@@ -2372,13 +2374,13 @@ class Client
       end
 
       tasks << DivActionTask % [
-        edit ? 'task-ed'.freeze : 'task-ro'.freeze,
+        edit ? 'task-ed' : 'task-ro',
         Rack::Utils.escape_html(tk['assigned']),
         Rack::Utils.escape_html(tk['title']),
-        tk['status'] ? 'Open'.freeze : 'Closed'.freeze,
-        tk['flag'] ? 'Raised'.freeze : 'Normal'.freeze,
+        tk['status'] ? 'Open' : 'Closed',
+        tk['flag'] ? 'Raised' : 'Normal',
         _util_time(env, tk['time']),
-        tags.join(''.freeze),
+        tags.join(''),
       ]
     end
 
@@ -2386,8 +2388,8 @@ class Client
       _a_case(env, cid, 0, cid),
       _a_action(env, cid, anum, 0, anum.to_s),
       _a_log(env, cid, lnum, lnum.to_s),
-      links.map{|lk| DivActionLink % lk }.join(''.freeze),
-      tasks.join(''.freeze)
+      links.map{|lk| DivActionLink % lk }.join(''),
+      tasks.join('')
     ]
   end # def _div_action()
 
@@ -2419,12 +2421,12 @@ class Client
     <div class="sbar-main">%s
     </div>
 
-  </div>'.freeze
+  </div>'
 
 
   # Action link
   DivActionLink = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
 
   # Action task
@@ -2455,12 +2457,12 @@ class Client
           <div class="list-vert">%s
           </div>
         </div>
-      </div>'.freeze
+      </div>'
 
 
   # Action Tag
   DivActionTag = '
-            <div>%s</div>'.freeze
+            <div>%s</div>'
 
 
   ###############################################
@@ -2471,20 +2473,20 @@ class Client
 
     links = []
     xnum = idx['index']
-    links << _a_index_edit(env, cid, xnum, 'Edit This Index'.freeze)
+    links << _a_index_edit(env, cid, xnum, 'Edit This Index')
 
     lnum = idx['log']
     links << _a_log_search(env, {
           'caseid' => cid,
           'index' => xnum,
-          'purpose' => 'Index History'.freeze,
+          'purpose' => 'Index History',
         }, 'History of Index')
 
     tags = idx['tags'].map do |tg|
       DivIndexTag % _a_index_search(env, {
           'caseid' => cid,
           'tags' => tg,
-          'purpose' => 'Index Entries'.freeze,
+          'purpose' => 'Index Entries',
         }, tg)
     end
 
@@ -2492,10 +2494,10 @@ class Client
       _a_case(env, cid, 0, cid),
       _a_index(env, cid, xnum, 0, xnum.to_s),
       _a_log(env, cid, lnum, lnum.to_s),
-      links.map{|lk| DivIndexLink % lk }.join(''.freeze),
+      links.map{|lk| DivIndexLink % lk }.join(''),
       Rack::Utils.escape_html(idx['title']),
       Rack::Utils.escape_html(idx['content']),
-      tags.join(''.freeze),
+      tags.join(''),
     ]
   end # def _div_index()
 
@@ -2531,16 +2533,16 @@ class Client
           </div>
         </div>
       </div>
-    </div>'.freeze
+    </div>'
 
 
   # Index Links
   DivIndexLink = '
-          <div>%s</div>'.freeze
+          <div>%s</div>'
 
   # Index tags
   DivIndexTag = '
-            <div>%s</div>'.freeze
+            <div>%s</div>'
 
 
   ###############################################
@@ -2565,7 +2567,7 @@ class Client
       when :string
         para = Rack::Utils.escape_html(val)
       when :boolean
-        para = val ? 'true'.freeze : 'false'.freeze
+        para = val ? 'true' : 'false'
       when :integer
         para = val.to_s
       when :time
@@ -2574,16 +2576,16 @@ class Client
         raise NotImplementedError, pr.to_s
       end
 
-      list << '<i>%s:</i> %s'.freeze % [sym, para]
+      list << '<i>%s:</i> %s' % [sym, para]
     end
     if list.empty?
-      paras = ''.freeze
+      paras = ''
     else
-      paras = ' &ndash; ' + list.join(', '.freeze)
+      paras = ' &ndash; ' + list.join(', ')
     end
 
     # enable value
-    value = disp ? 'true'.freeze : 'false'.freeze
+    value = disp ? 'true' : 'false'
 
     return _div_desc(purp, DivQuery % [ type, paras, value ])
   end # def _div_query()
@@ -2599,7 +2601,7 @@ class Client
     Click to display search form.
     </div></div>
     %s
-    <input name="que-enable" id="que-ena" type="hidden" value="%s">'.freeze
+    <input name="que-enable" id="que-ena" type="hidden" value="%s">'
 
 
 ###########################################################
@@ -2617,114 +2619,114 @@ class Client
 
       case sym
       when :caseid
-        ilabel = 'Case ID'.freeze
-        iclass = 'form-caseid'.freeze
-        ihint = 'Filter for a specific case.'.freeze
+        ilabel = 'Case ID'
+        iclass = 'form-caseid'
+        ihint = 'Filter for a specific case.'
       when :title
-        ilabel = 'Title'.freeze
-        iclass = 'form-title'.freeze
-        ihint = 'Text search within the title.'.freeze
+        ilabel = 'Title'
+        iclass = 'form-title'
+        ihint = 'Text search within the title.'
       when :prefix
-        ilabel = 'Prefix'.freeze
-        iclass = 'form-title'.freeze
-        ihint = 'Filter for titles starting with fixed text.'.freeze
+        ilabel = 'Prefix'
+        iclass = 'form-title'
+        ihint = 'Filter for titles starting with fixed text.'
       when :content
-        ilabel = 'Content'.freeze
-        iclass = 'form-content'.freeze
-        ihint = 'Text search within the content.'.freeze
+        ilabel = 'Content'
+        iclass = 'form-content'
+        ihint = 'Text search within the content.'
       when :tags
-        ilabel = 'Tag'.freeze
-        iclass = 'form-tag'.freeze
-        ihint = 'Filter for only a specific tag.'.freeze
+        ilabel = 'Tag'
+        iclass = 'form-tag'
+        ihint = 'Filter for only a specific tag.'
       when :action
-        ilabel = 'Action'.freeze
-        iclass = 'form-int'.freeze
-        ihint = 'Filter for a specific action (by number).'.freeze
+        ilabel = 'Action'
+        iclass = 'form-int'
+        ihint = 'Filter for a specific action (by number).'
       when :before
-        ilabel = 'Before'.freeze
-        iclass = 'form-time'.freeze
-        ihint = 'Filter for items occuring before this date and time.'.freeze
+        ilabel = 'Before'
+        iclass = 'form-time'
+        ihint = 'Filter for items occuring before this date and time.'
       when :after
-        ilabel = 'After'.freeze
-        iclass = 'form-time'.freeze
-        ihint = 'Filter for items occuring after this date and time.'.freeze
+        ilabel = 'After'
+        iclass = 'form-time'
+        ihint = 'Filter for items occuring after this date and time.'
       when :credit
-        ilabel = 'Credit'.freeze
-        iclass = 'form-usergrp'.freeze
-        ihint = 'Filter for stats crediting this user or role.'.freeze
+        ilabel = 'Credit'
+        iclass = 'form-usergrp'
+        ihint = 'Filter for stats crediting this user or role.'
       when :size
-        ilabel = 'Size'.freeze
-        iclass = 'form-int'.freeze
-        ihint = 'Number of results to be returned per page.'.freeze
+        ilabel = 'Size'
+        iclass = 'form-int'
+        ihint = 'Number of results to be returned per page.'
       when :page
         next
       when :sort
-        ilabel = 'Sort'.freeze
-        iclass = 'form-sort'.freeze
-        ihint = 'How to sort the results.'.freeze
+        ilabel = 'Sort'
+        iclass = 'form-sort'
+        ihint = 'How to sort the results.'
       when :purpose
         next
       when :user
-        ilabel = 'User'.freeze
-        iclass = 'form-usergrp'.freeze
-        ihint = 'Filter for logs authored by this user.'.freeze
+        ilabel = 'User'
+        iclass = 'form-usergrp'
+        ihint = 'Filter for logs authored by this user.'
       when :grantee
-        ilabel = 'Grantee'.freeze
-        iclass = 'form-usergrp'.freeze
-        ihint = 'Filter for cases granting this user or role a permission.'.freeze
+        ilabel = 'Grantee'
+        iclass = 'form-usergrp'
+        ihint = 'Filter for cases granting this user or role a permission.'
       when :perm
-        ilabel = 'Permission'.freeze
-        iclass = 'form-perm'.freeze
-        ihint = 'Filter for cases granting this permission.'.freeze
+        ilabel = 'Permission'
+        iclass = 'form-perm'
+        ihint = 'Filter for cases granting this permission.'
       when :entry
-        ilabel = 'Entry'.freeze
-        iclass = 'form-int'.freeze
-        ihint = 'Filter for logs recording specified entry (by number).'.freeze
+        ilabel = 'Entry'
+        iclass = 'form-int'
+        ihint = 'Filter for logs recording specified entry (by number).'
       when :index
-        ilabel = 'Index'.freeze
-        iclass = 'form-int'.freeze
-        ihint = 'Filter for specified index (by number).'.freeze
+        ilabel = 'Index'
+        iclass = 'form-int'
+        ihint = 'Filter for specified index (by number).'
       when :assigned
-        ilabel = 'Assigned'.freeze
-        iclass = 'form-usergrp'.freeze
-        ihint = 'Filter for tasks assigned to specified user or role.'.freeze
+        ilabel = 'Assigned'
+        iclass = 'form-usergrp'
+        ihint = 'Filter for tasks assigned to specified user or role.'
       when :status
-        ilabel = 'Status'.freeze
-        iclass = 'form-boolean'.freeze
-        ihint = 'Filter for open items. Use true or false.'.freeze
+        ilabel = 'Status'
+        iclass = 'form-boolean'
+        ihint = 'Filter for open items. Use true or false.'
       when :flag
-        ilabel = 'Flag'.freeze
-        iclass = 'form-boolean'.freeze
-        ihint = 'Filter for flagged tasks. Use true or false.'.freeze
+        ilabel = 'Flag'
+        iclass = 'form-boolean'
+        ihint = 'Filter for flagged tasks. Use true or false.'
       when :template
-        ilabel = 'Template'.freeze
-        iclass = 'form-boolean'.freeze
-        ihint = 'Filter for template cases. Use true or false.'.freeze
+        ilabel = 'Template'
+        iclass = 'form-boolean'
+        ihint = 'Filter for template cases. Use true or false.'
       when :stat
-        ilabel = 'Stat'.freeze
-        iclass = 'form-boolean'.freeze
-        ihint = 'Filter for stats by name. Use true or false.'.freeze
+        ilabel = 'Stat'
+        iclass = 'form-boolean'
+        ihint = 'Filter for stats by name. Use true or false.'
       else
         raise NotImplementedError, sym.to_s
       end
 
       case pr
       when :string
-        itype = 'text'.freeze
-        ivalue = query[sym] || ''.freeze
+        itype = 'text'
+        ivalue = query[sym] || ''
       when :boolean
-        itype = 'text'.freeze
+        itype = 'text'
         if query[sym].nil?
-          ivalue = ''.freeze
+          ivalue = ''
         else
-          ivalue = query[sym] ? 'true'.freeze : 'false'.freeze
+          ivalue = query[sym] ? 'true' : 'false'
         end
       when :integer
-        itype = 'text'.freeze
+        itype = 'text'
         ivalue = query[sym] ? query[sym].to_s : ''
       when :time
-        itype = 'text'.freeze
-        ivalue = query[sym] ? _util_time(env, query[sym]) :  ''.freeze
+        itype = 'text'
+        ivalue = query[sym] ? _util_time(env, query[sym]) :  ''
       else
         raise NotImplementedError, pr.to_s
       end
@@ -2733,12 +2735,12 @@ class Client
     end
 
     # display the form
-    formClass = disp ? ''.freeze : ' hidden'.freeze
+    formClass = disp ? '' : ' hidden'
 
     return FormQuery % [
       formClass,
       act,
-      inputs.join(''.freeze)
+      inputs.join('')
     ]
   end # def _form_query
 
@@ -2747,7 +2749,7 @@ class Client
   FormQuery = '
   <div class="form%s" id="que-form"><form method="get" action="%s">%s
     <input class="submit" type="submit" value="Search">
-  </form></div>'.freeze
+  </form></div>'
 
 
   # Query form item
@@ -2758,14 +2760,14 @@ class Client
       <div class="tip"><div class="tip-disp"></div><div class="tip-info">
         %s
       </div></div>
-    </div>'.freeze
+    </div>'
 
 
   ###############################################
   # Case form
   def _form_case(env, cse)
 
-    status = ' checked'.freeze if cse['status']
+    status = ' checked' if cse['status']
 
     # tags
     tags_cnt = 0
@@ -2774,9 +2776,9 @@ class Client
         tags_cnt = tags_cnt + 1
         FormCaseTag % [ tags_cnt, Rack::Utils.escape_html(tg) ]
       end
-      tags = tags_list.join(''.freeze)
+      tags = tags_list.join('')
     else
-      tags = ''.freeze
+      tags = ''
     end
 
     # stats
@@ -2786,9 +2788,9 @@ class Client
         stats_cnt += 1
         FormCaseStat % [stats_cnt, Rack::Utils.escape_html(st)]
       end
-      stats = stats_list.join(''.freeze)
+      stats = stats_list.join('')
     else
-      stats = ''.freeze
+      stats = ''
     end
 
     # access
@@ -2807,7 +2809,7 @@ class Client
       FormCaseAccess % [
         acc_cnt, grant_cnt,
         acc_cnt, Rack::Utils.escape_html(ad['perm']),
-        grants.join(''.freeze),
+        grants.join(''),
       ]
     end
 
@@ -2815,7 +2817,7 @@ class Client
         Rack::Utils.escape_html(cse['title']),
         status,
         tags_cnt, tags,
-        acc_cnt, acc_list.join(''.freeze),
+        acc_cnt, acc_list.join(''),
         stats_cnt, stats,
       ]
   end # def _form_case()
@@ -2898,7 +2900,7 @@ class Client
       <div class="stat-list" id="cse-stat-list">
         <input type="hidden" name="cse-stat" value="%d">%s
       </div>
-    </div>'.freeze
+    </div>'
 
 
   # Case form Tag each
@@ -2907,7 +2909,7 @@ class Client
           <input class="form-tag" type="text" name="cse-tag-%d" value="%s">
           <button class="form-del" type="button" onclick="delDiv(this)">X
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Case form Stat each
@@ -2916,7 +2918,7 @@ class Client
           <input class="form-stat" type="text" name="cse-stat-%d" value="%s">
           <button class="form-del" type="button" onclick="delDiv(this)">X
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Case form Access each
@@ -2930,14 +2932,14 @@ class Client
             <button class="add-grant" type="button"
               onclick="cseAddGrant(this)">+
             </button>
-          </div>'.freeze
+          </div>'
 
   # Case form Grant each
   FormCaseGrant = '
               <div>
                 <input class="form-usergrp" type="text" name="cse-acc-%d-%d"
                   value="%s">
-              </div>'.freeze
+              </div>'
 
 
   #############################################
@@ -2950,21 +2952,21 @@ class Client
     if ent && ent['title']
       title = Rack::Utils.escape_html(ent['title'])
     else
-      title = ''.freeze
+      title = ''
     end
 
     # time
     if ent && ent['time']
       time = _util_time(env, ent['time'])
     else
-      time = ''.freeze
+      time = ''
     end
 
     # content
     if ent && ent['content']
       content = Rack::Utils.escape_html(ent['content'])
     else
-      content = ''.freeze
+      content = ''
     end
 
     # files
@@ -2979,9 +2981,9 @@ class Client
           files_cnt, fd['num'], fd['log']
         ]
       end
-      files = files_list.join("\n".freeze)
+      files = files_list.join("\n")
     else
-      files = ''.freeze
+      files = ''
     end
 
     # tags
@@ -2991,9 +2993,9 @@ class Client
         tags_cnt = tags_cnt + 1
         FormEntryTagEach % [tags_cnt, Rack::Utils.escape_html(tg)]
       end
-      tags = tags_list.join(''.freeze)
+      tags = tags_list.join('')
     else
-      tags = ''.freeze
+      tags = ''
     end
 
     # indexes
@@ -3007,9 +3009,9 @@ class Client
           Rack::Utils.escape_html(idx['title'])
         ]
       end
-      index = idx_list.join(''.freeze)
+      index = idx_list.join('')
     else
-      index = ''.freeze
+      index = ''
     end
 
     # stats select
@@ -3017,7 +3019,7 @@ class Client
       esc = Rack::Utils.escape_html(stat)
       FormEntryStatOpt % [esc, esc]
     end
-    stats_sel = FormEntryStatSel % stats_sel.join(''.freeze)
+    stats_sel = FormEntryStatSel % stats_sel.join('')
 
     # stats count & list
     stats_cnt = 0
@@ -3038,12 +3040,12 @@ class Client
           stats_cnt, claim_cnt,
           stats_cnt, esc, esc,
           stats_cnt, st['value'].to_s,
-          claims.join(''.freeze)
+          claims.join('')
         ]
       end
-      stats = stats_list.join(''.freeze)
+      stats = stats_list.join('')
     else
-      stats = ''.freeze
+      stats = ''
     end
 
     # perms select
@@ -3052,7 +3054,7 @@ class Client
       esc = Rack::Utils.escape_html(pm)
       FormEntryPermOpt % [esc, esc]
     end
-    perms_sel = perms_sel.join(''.freeze)
+    perms_sel = perms_sel.join('')
 
     # perms count & list
     perms_cnt = 0
@@ -3062,9 +3064,9 @@ class Client
         esc = Rack::Utils.escape_html(pm)
         FormEntryPermEach % [esc, perms_cnt, esc]
       end
-      perms = perms_list.join(''.freeze)
+      perms = perms_list.join('')
     else
-      perms = ''.freeze
+      perms = ''
     end
 
     return FormEntry % [
@@ -3208,7 +3210,7 @@ class Client
       <input type="hidden" name="ent-perm-cnt" id="ent-perm-cnt" value="%d">
       <div class="perms-list" id="ent-perm-list">%s
       </div>
-    </div>'.freeze
+    </div>'
 
 
   # Entry form tag each
@@ -3217,7 +3219,7 @@ class Client
           <input class="form-tag" type="text" name="ent-tag-%d" value="%s">
           <button class="form-del" type="button" onclick="delDiv(this)">X
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Entry form index each
@@ -3226,7 +3228,7 @@ class Client
           <input type="hidden" name="ent-idx-%d" value="%d">%s
           <button class="form-del" type="button" onclick="delDiv(this)">X
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Entry form Perm each
@@ -3235,12 +3237,12 @@ class Client
           <input type="hidden" name="ent-perm-%d" value="%s">
           <button class="form-del" type="button" onclick="delDiv(this)">X
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Entry form Perm option
   FormEntryPermOpt = '
-        <option value="%s">%s</option>'.freeze
+        <option value="%s">%s</option>'
 
 
   # Entry form file each
@@ -3252,18 +3254,18 @@ class Client
       <input type="hidden" name="ent-file-%d-num" value="%d-%d">
       <button class="form-del" type="button" onclick="delDiv(this)">X
       </button>
-    </div>'.freeze
+    </div>'
 
 
   # Entry form Stat option
   FormEntryStatOpt = '
-            <option value="%s">%s</option>'.freeze
+            <option value="%s">%s</option>'
 
 
   # Entry form Stat select
   FormEntryStatSel = '
           <select class="stat-sel" id="ent-stat-sel" name="ent-stat-sel">%s
-          </select>'.freeze
+          </select>'
 
 
   # Entry form Stat each
@@ -3279,7 +3281,7 @@ class Client
           <button class="add-claim" type="button"
             onClick="entAddClaim(this)">+
           </button>
-        </div>'.freeze
+        </div>'
 
 
   # Entry form Stat Claim
@@ -3287,7 +3289,7 @@ class Client
             <div>
               <input class="form-usergrp" type="text" name="ent-stat-%d-%d"
                 value="%s">
-            </div>'.freeze
+            </div>'
 
 
   ###############################################
@@ -3300,7 +3302,7 @@ class Client
     if !act
       ta = [{
         'assigned' => ICFS::UserCase,
-        'title' => ''.freeze,
+        'title' => '',
         'status' => true,
         'flag' => true,
         'time' => nil,
@@ -3314,7 +3316,7 @@ class Client
     al = api.access_list(cid)
     perm_act = al.include?(ICFS::PermAction)
     if !perm_act && !act
-      raise(Error::Perms, 'Missing perm: %s'.freeze % ICFS::PermAction)
+      raise(Error::Perms, 'Missing perm: %s' % ICFS::PermAction)
     end
 
     # get user/group list
@@ -3324,13 +3326,13 @@ class Client
 
     # editing
     if opt[:edit]
-      ena_val = 'true'.freeze
-      ena_class_add = ''.freeze
-      ena_class_tasks = ''.freeze
+      ena_val = 'true'
+      ena_class_add = ''
+      ena_class_tasks = ''
     else
-      ena_val = 'false'.freeze
-      ena_class_add = ' invisible'.freeze
-      ena_class_tasks = ' hidden'.freeze
+      ena_val = 'false'
+      ena_class_add = ' invisible'
+      ena_class_tasks = ' hidden'
     end
 
     # each task
@@ -3355,18 +3357,18 @@ class Client
         title = FormActionTitleEd % [
           ix, Rack::Utils.escape_html(tk['title']) ]
         status = FormActionStatusEd % [
-          ix, tk['status'] ? ' checked'.freeze : ''.freeze ]
+          ix, tk['status'] ? ' checked' : '' ]
         flag = FormActionFlagEd % [
-          ix, tk['flag'] ? ' checked'.freeze : ''.freeze ]
+          ix, tk['flag'] ? ' checked' : '' ]
         if tk['time']
           time = FormActionTimeEd % [ ix, _util_time(env, tk['time']) ]
         else
-          time = FormActionTimeEd % [ix, ''.freeze]
+          time = FormActionTimeEd % [ix, '']
         end
 
         if tk['tags'][0] == ICFS::TagNone
           tags_cnt = 1
-          tags = FormActionTagEd % [ix, 1, ''.freeze]
+          tags = FormActionTagEd % [ix, 1, '']
         else
           tags_cnt = 0
           tags = tk['tags'].map do |tg|
@@ -3374,7 +3376,7 @@ class Client
             FormActionTagEd % [
               ix, tags_cnt, Rack::Utils.escape_html(tg) ]
           end
-          tags = tags.join(''.freeze)
+          tags = tags.join('')
         end
 
         tag_list = 'act-%d-tag-list' % ix
@@ -3385,13 +3387,13 @@ class Client
         esc = Rack::Utils.escape_html(tk['title'])
         title = FormActionTitleRo % [ ix, esc, esc ]
         status = FormActionStatusRo % [ ix,
-          tk['status'] ? 'true'.freeze : 'false'.freeze,
-          tk['status'] ? 'Open'.freeze : 'Closed'.freeze,
+          tk['status'] ? 'true' : 'false',
+          tk['status'] ? 'Open' : 'Closed',
         ]
         if tk['flag']
           flag = FormActionFlagRo % ix
         else
-          flag = FormActionFlagEd % [ ix, ''.freeze ]
+          flag = FormActionFlagEd % [ ix, '' ]
         end
         esc = _util_time(env, tk['time'])
         time = FormActionTimeRo % [ ix, esc, esc ]
@@ -3403,17 +3405,17 @@ class Client
             esc = Rack::Utils.escape_html(tg)
             FormActionTagRo % [ ix, tags_cnt, esc, esc ]
           end
-          tags = tags.join(''.freeze)
+          tags = tags.join('')
         else
-          tags = ''.freeze
+          tags = ''
         end
 
-        tag_add = ''.freeze
+        tag_add = ''
 
       end
 
       tasks << FormActionTask % [
-        edit ? 'ed'.freeze : 'ro'.freeze,
+        edit ? 'ed' : 'ro',
         ug, title, status, flag, time, ix, ix, tags_cnt, tags, tag_add
       ]
     end
@@ -3425,7 +3427,7 @@ class Client
         tasks.size,
         act ? act['action'] : 0,
         ena_class_tasks,
-        tasks.join(''.freeze)
+        tasks.join('')
       ]
   end # def _form_action()
 
@@ -3456,7 +3458,7 @@ class Client
       </div>
       <div id="act-tasks" class="%s">%s
       </div>
-    </div>'.freeze
+    </div>'
 
 
   # action task
@@ -3504,66 +3506,66 @@ class Client
               <input type="hidden" name="act-%d-tag" value="%d">%s
             </div>%s
           </div>
-        </div>'.freeze
+        </div>'
 
 
   # action tasked editable
   FormActionTaskedEd = '
             <input class="form-usergrp" name="act-%d-task" type="text"
-              value="%s">'.freeze
+              value="%s">'
 
 
   # action tasked read only
   FormActionTaskedRo = '
             <input name="act-%d-task" type="hidden" value="%s">
-            <div class="list-usergrp">%s</div>'.freeze
+            <div class="list-usergrp">%s</div>'
 
 
   # action title editable
   FormActionTitleEd = '
             <input class="form-title" name="act-%d-title" type="text"
-              value="%s">'.freeze
+              value="%s">'
 
 
   # action title read only
   FormActionTitleRo = '
             <input name="act-%d-title" type="hidden" value="%s">
-            <div class="list-title">%s</div>'.freeze
+            <div class="list-title">%s</div>'
 
 
   # action open editable
   FormActionStatusEd = '
             <input class="form-check" name="act-%d-status" type="checkbox"
-              value="true"%s>'.freeze
+              value="true"%s>'
 
   # action open readonly
   FormActionStatusRo = '
             <input name="act-%d-status" type="hidden" value="%s">
-            <div class="item-boolean">%s</div>'.freeze
+            <div class="item-boolean">%s</div>'
 
 
   # action flag editable
   FormActionFlagEd = '
             <input class="form-check" name="act-%d-flag" type="checkbox"
-              value="true"%s>'.freeze
+              value="true"%s>'
 
 
   # action flag read-only
   FormActionFlagRo = '
             <input name="act-%d-flag" type="hidden" value="true">
-            <div class="item-boolean">flagged</div>'.freeze
+            <div class="item-boolean">flagged</div>'
 
 
   # action time editable
   FormActionTimeEd = '
             <input class="form-time" name="act-%d-time" type="text"
-              value="%s">'.freeze
+              value="%s">'
 
 
   # action time read-only
   FormActionTimeRo = '
             <input name="act-%d-time" type="hidden" value="%s">
-            <div class="item-time">%s</div>'.freeze
+            <div class="item-time">%s</div>'
 
 
   # action tag editable
@@ -3572,20 +3574,20 @@ class Client
                 <input class="form-tag" type="text" name="act-%d-tag-%d"
                   value="%s"><button class="form-del" type="button"
                   onclick="delDiv(this)">X</button>
-              </div>'.freeze
+              </div>'
 
 
   # action tag read-only
   FormActionTagRo = '
               <div>
                 <input type="hidden" name="act-%d-tag-%d" value="%s">%s
-              </div>'.freeze
+              </div>'
 
 
   # action tag button
   FormActionTagButton = '
             <button class="tag-add" type="button"
-              onClick="addTag(&quot;%s&quot;)">+</button>'.freeze
+              onClick="addTag(&quot;%s&quot;)">+</button>'
 
 
   ###############################################
@@ -3596,14 +3598,14 @@ class Client
     if idx && idx['title']
       title = Rack::Utils.escape_html(idx['title'])
     else
-      title = ''.freeze
+      title = ''
     end
 
     # content
     if idx && idx['content']
       content = Rack::Utils.escape_html(idx['content'])
     else
-      content = ''.freeze
+      content = ''
     end
 
     # tags
@@ -3613,9 +3615,9 @@ class Client
         tags_cnt += 1
         FormIndexTagEach % [tags_cnt, Rack::Utils.escape_html(tg)]
       end
-      tags = tags_list.join(''.freeze)
+      tags = tags_list.join('')
     else
-      tags = ''.freeze
+      tags = ''
     end
 
     return FormIndex % [
@@ -3669,14 +3671,14 @@ class Client
       <div class="tag-list" id="idx-tag-list">
         <input type="hidden" name="idx-tag" value="%d">%s
       </div>
-    </div> '.freeze
+    </div> '
 
 
   # Index form tag
   FormIndexTagEach = '
           <div>
             <input class="form-tag" type="text" name="idx-tag-%d" value="%s">
-          </div>'.freeze
+          </div>'
 
 
   ###############################################
@@ -3706,7 +3708,7 @@ class Client
           Timezone to display date/times, format as +/-HH:MM.
         </div></div>
       </div>
-    </div>'.freeze
+    </div>'
 
 
 ###########################################################
@@ -3726,16 +3728,16 @@ class Client
     cse['title'] = para['cse-title']
 
     # status
-    cse['status'] = (para['cse-status'] == 'true'.freeze) ? true : false
+    cse['status'] = (para['cse-status'] == 'true') ? true : false
 
     # tags
     tags = []
     tcnt = para['cse-tag'].to_i
     if tcnt > 100
-      raise(Error::Interface, 'Tag count too large'.freeze)
+      raise(Error::Interface, 'Tag count too large')
     end
     tcnt.times do |ix|
-      tx = 'cse-tag-%d'.freeze % [ix + 1]
+      tx = 'cse-tag-%d' % [ix + 1]
       tag = para[tx]
       next if !tag || tag.empty?
       tags << tag
@@ -3750,21 +3752,21 @@ class Client
     acc = []
     acnt = para['cse-acc-cnt'].to_i
     if acnt > 100
-      raise(Error::Interface, 'Access count too large'.freeze)
+      raise(Error::Interface, 'Access count too large')
     end
     acnt.times do |ix|
       ixr = ix + 1
 
-      pnam = para['cse-acc-%d-perm'.freeze % ixr]
-      gcnt = para['cse-acc-%d'.freeze % ixr].to_i
+      pnam = para['cse-acc-%d-perm' % ixr]
+      gcnt = para['cse-acc-%d' % ixr].to_i
       next if gcnt == 0 || !pnam || pnam.empty?
 
       grant = []
       if gcnt > 100
-        raise(Error::Interface, 'Grant count too large'.freeze)
+        raise(Error::Interface, 'Grant count too large')
       end
       gcnt.times do |gx|
-        sug = para['cse-acc-%d-%d'.freeze % [ixr, gx+1]]
+        sug = para['cse-acc-%d-%d' % [ixr, gx+1]]
         next if !sug || sug.empty?
         grant << sug
       end
@@ -3824,9 +3826,9 @@ class Client
     # tags
     tags = []
     tcnt = para['ent-tag'].to_i
-    raise(Error::Interface, 'too many tags'.freeze) if(tcnt > 100)
+    raise(Error::Interface, 'too many tags') if(tcnt > 100)
     tcnt.times do |ix|
-      tx = 'ent-tag-%d'.freeze % [ix + 1]
+      tx = 'ent-tag-%d' % [ix + 1]
       tag = para[tx]
       tags << tag unless( !tag || tag.empty? )
     end
@@ -3835,9 +3837,9 @@ class Client
     # indexes
     index = []
     icnt = para['ent-idx-cnt'].to_i
-    raise(Error::Interface, 'Too many indexes'.freeze) if(icnt > 100)
+    raise(Error::Interface, 'Too many indexes') if(icnt > 100)
     icnt.times do |ix|
-      tx = 'ent-idx-%d'.freeze % (ix + 1)
+      tx = 'ent-idx-%d' % (ix + 1)
       xnum = para[tx].to_i
       index << xnum unless xnum == 0
     end
@@ -3846,9 +3848,9 @@ class Client
     # perms
     perms = []
     pcnt = para['ent-perm-cnt'].to_i
-    raise(Error::Interface, 'Too many perms'.freeze) if(pcnt > 100)
+    raise(Error::Interface, 'Too many perms') if(pcnt > 100)
     pcnt.times do |ix|
-      px = 'ent-perm-%d'.freeze % [ix + 1]
+      px = 'ent-perm-%d' % [ix + 1]
       pm = para[px]
       next if !pm || pm.empty?
       perms << pm
@@ -3858,20 +3860,20 @@ class Client
     # stats
     stats = []
     scnt = para['ent-stats-cnt'].to_i
-    raise(Error::Interface, 'Too many stats'.freeze) if(scnt > 100)
+    raise(Error::Interface, 'Too many stats') if(scnt > 100)
     scnt.times do |ix|
       ixr = ix + 1
-      sname = para['ent-stat-%d-name'.freeze % ixr]
-      sval = para['ent-stat-%d-value'.freeze % ixr]
+      sname = para['ent-stat-%d-name' % ixr]
+      sval = para['ent-stat-%d-value' % ixr]
       next if !sname || !sval || sname.empty? || sval.empty?
 
       sval = sval.to_f
 
-      scred = para['ent-stat-%d'.freeze % ixr].to_i
+      scred = para['ent-stat-%d' % ixr].to_i
       sugs = []
-      raise(Error::Interface, 'Too many credits'.freeze) if(scred > 100)
+      raise(Error::Interface, 'Too many credits') if(scred > 100)
       scred.times do |cx|
-        sug = para['ent-stat-%d-%d'.freeze % [ixr, cx + 1]]
+        sug = para['ent-stat-%d-%d' % [ixr, cx + 1]]
         next if !sug || sug.empty?
         sugs << sug
       end
@@ -3888,7 +3890,7 @@ class Client
     # files
     files = []
     fcnt = para['ent-file-cnt'].to_i
-    raise(Error::Interface, 'Too many files'.freeze) if(fcnt > 100)
+    raise(Error::Interface, 'Too many files') if(fcnt > 100)
     fcnt.times do |ix|
       ixr = ix + 1
       fnam = para['ent-file-%d-name' % ixr]
@@ -3896,7 +3898,7 @@ class Client
       fnum = para['ent-file-%d-num' % ixr]
 
       if fnum
-        fnum, flog = fnum.split('-'.freeze).map do |xx|
+        fnum, flog = fnum.split('-').map do |xx|
           y = xx.to_i
           (y == 0) ? nil : y
         end
@@ -3941,28 +3943,28 @@ class Client
     act['action'] = anum if anum != 0
 
     # any edit?
-    return anum unless para['act-ena'] == 'true'.freeze
+    return anum unless para['act-ena'] == 'true'
 
     # tasks
     tasks = []
     acnt = para['act-cnt'].to_i
-    raise(Error::Interface, 'Too many tasks'.freeze) if(acnt > 100)
+    raise(Error::Interface, 'Too many tasks') if(acnt > 100)
     acnt.times do |ix|
-      tx = 'act-%d'.freeze % [ix + 1]
+      tx = 'act-%d' % [ix + 1]
 
-      ug = para[tx + '-task'.freeze]
-      title = para[tx + '-title'.freeze]
-      status = (para[tx + '-status'] == 'true'.freeze) ? true : false
-      flag = (para[tx + '-flag'] == 'true'.freeze) ? true : false
+      ug = para[tx + '-task']
+      title = para[tx + '-title']
+      status = (para[tx + '-status'] == 'true') ? true : false
+      flag = (para[tx + '-flag'] == 'true') ? true : false
 
       tstr = para[tx + '-time']
       time = _util_time_parse(env, tstr)
 
       tags = []
-      tcnt = para[tx + '-tag'.freeze].to_i
-      raise(Error::Interface, 'Too many tags'.freeze) if (tcnt > 100)
+      tcnt = para[tx + '-tag'].to_i
+      raise(Error::Interface, 'Too many tags') if (tcnt > 100)
       tcnt.times do |gx|
-        tag = para[tx + '-tag-%d'.freeze % [gx + 1]]
+        tag = para[tx + '-tag-%d' % [gx + 1]]
         next if !tag || tag.empty?
         tags << tag
       end
@@ -4007,9 +4009,9 @@ class Client
     # tags
     tags = []
     tcnt = para['idx-tag'].to_i
-    raise(Error::Interface, 'Too many tags'.freeze) if(tcnt > 100)
+    raise(Error::Interface, 'Too many tags') if(tcnt > 100)
     tcnt.times do |ix|
-      tx = 'idx-tag-%d'.freeze % [ix + 1]
+      tx = 'idx-tag-%d' % [ix + 1]
       tag = para[tx]
       tags << tag unless( !tag | tag.empty? )
     end
@@ -4038,7 +4040,7 @@ class Client
   # Link to info page
   #
   def _a_info(env, txt)
-    '<a href="%s/info">%s</a>'.freeze % [
+    '<a href="%s/info">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape_html(txt)
     ]
@@ -4048,7 +4050,7 @@ class Client
   ###############################################
   # Link to Case search
   def _a_case_search(env, query, txt)
-    '<a href="%s/case_search%s">%s</a>'.freeze % [
+    '<a href="%s/case_search%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4060,7 +4062,7 @@ class Client
   # Link to Entry search
   #
   def _a_entry_search(env, query, txt)
-    '<a href="%s/entry_search%s">%s</a>'.freeze % [
+    '<a href="%s/entry_search%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4072,7 +4074,7 @@ class Client
   # Link to Log search
   #
   def _a_log_search(env, query, txt)
-    '<a href="%s/log_search%s">%s</a>'.freeze % [
+    '<a href="%s/log_search%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4084,7 +4086,7 @@ class Client
   # Link to Action search
   #
   def _a_action_search(env, query, txt)
-    '<a href="%s/action_search%s">%s</a>'.freeze % [
+    '<a href="%s/action_search%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4096,7 +4098,7 @@ class Client
   # Link to Index search
   #
   def _a_index_search(env, query, txt)
-    '<a href="%s/index_search%s">%s</a>'.freeze % [
+    '<a href="%s/index_search%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4108,7 +4110,7 @@ class Client
   # Link to stats search
   #
   def _a_stats(env, query, txt)
-    '<a href="%s/stats%s">%s</a>'.freeze % [
+    '<a href="%s/stats%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4119,7 +4121,7 @@ class Client
   ###############################################
   # Link to case tags
   def _a_case_tags(env, query, txt)
-    '<a href="%s/case_tags%s">%s</a>'.freeze % [
+    '<a href="%s/case_tags%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4131,7 +4133,7 @@ class Client
   # Link to entry tags
   #
   def _a_entry_tags(env, query, txt)
-    '<a href="%s/entry_tags/%s">%s</a>'.freeze % [
+    '<a href="%s/entry_tags/%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt),
@@ -4142,7 +4144,7 @@ class Client
   ###############################################
   # Link to action tags
   def _a_action_tags(env, query, txt)
-    '<a href="%s/action_tags%s">%s</a>'.freeze % [
+    '<a href="%s/action_tags%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4153,7 +4155,7 @@ class Client
   ###############################################
   # Link to action tags
   def _a_index_tags(env, query, txt)
-    '<a href="%s/index_tags/%s">%s</a>'.freeze % [
+    '<a href="%s/index_tags/%s">%s</a>' % [
       env['SCRIPT_NAME'],
       _util_query(query),
       Rack::Utils.escape_html(txt)
@@ -4165,7 +4167,7 @@ class Client
   # Link to create a case
   #
   def _a_case_create(env, tid, txt)
-    '<a href="%s/case_create/%s">%s</a>'.freeze % [
+    '<a href="%s/case_create/%s">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(tid),
       Rack::Utils.escape_html(txt),
@@ -4177,7 +4179,7 @@ class Client
   # Link to Case edit
   #
   def _a_case_edit(env, cid, txt)
-    '<a href="%s/case_edit/%s">%s</a>'.freeze % [
+    '<a href="%s/case_edit/%s">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       Rack::Utils.escape_html(txt)
@@ -4189,7 +4191,7 @@ class Client
   # Link to Entry edit
   #
   def _a_entry_edit(env, cid, enum, anum, txt)
-    '<a href="%s/entry_edit/%s/%d/%d">%s</a>'.freeze % [
+    '<a href="%s/entry_edit/%s/%d/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       enum, anum,
@@ -4202,7 +4204,7 @@ class Client
   # Link to Index edit
   #
   def _a_index_edit(env, cid, xnum, txt)
-    '<a href="%s/index_edit/%s/%d">%s</a>'.freeze % [
+    '<a href="%s/index_edit/%s/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       xnum,
@@ -4215,7 +4217,7 @@ class Client
   # Link to Config edit
   #
   def _a_config_edit(env, txt)
-    '<a href="%s/config_edit">%s</a>'.freeze % [
+    '<a href="%s/config_edit">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape_html(txt)
     ]
@@ -4226,7 +4228,7 @@ class Client
   # Link to Home
   #
   def _a_home(env, txt)
-    '<a href="%s/home">%s</a>'.freeze % [
+    '<a href="%s/home">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape_html(txt)
     ]
@@ -4237,7 +4239,7 @@ class Client
   # Link to Case
   #
   def _a_case(env, cid, lnum, txt)
-    '<a href="%s/case/%s/%d">%s</a>'.freeze % [
+    '<a href="%s/case/%s/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       lnum,
@@ -4249,7 +4251,7 @@ class Client
   ###############################################
   # Link to an entry
   def _a_entry(env, cid, enum, lnum, txt)
-    '<a href="%s/entry/%s/%d/%d">%s</a>'.freeze % [
+    '<a href="%s/entry/%s/%d/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       enum,
@@ -4263,7 +4265,7 @@ class Client
   # Link to a Log
   #
   def _a_log(env, cid, lnum, txt)
-    '<a href="%s/log/%s/%d">%s</a>'.freeze % [
+    '<a href="%s/log/%s/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       lnum,
@@ -4276,7 +4278,7 @@ class Client
   # Link to an Action
   #
   def _a_action(env, cid, anum, lnum, txt)
-    '<a href="%s/action/%s/%d/%d">%s</a>'.freeze % [
+    '<a href="%s/action/%s/%d/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       anum,
@@ -4290,7 +4292,7 @@ class Client
   # Link to an Index
   #
   def _a_index(env, cid, xnum, lnum, txt)
-    '<a href="%s/index/%s/%d/%d">%s</a>'.freeze % [
+    '<a href="%s/index/%s/%d/%d">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       xnum,
@@ -4304,7 +4306,7 @@ class Client
   # Link to a File
   #
   def _a_file(env, cid, enum, lnum, fnum, fname, txt)
-    '<a href="%s/file/%s/%d-%d-%d-%s">%s</a>'.freeze % [
+    '<a href="%s/file/%s/%d-%d-%d-%s">%s</a>' % [
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       enum, lnum, fnum, Rack::Utils.escape(fname),
@@ -4322,8 +4324,8 @@ class Client
   # Require a GET HTTP method
   #
   def _verb_get(env)
-    if env['REQUEST_METHOD'] != 'GET'.freeze
-      raise(Error::Interface, 'Only GET method allowed'.freeze)
+    if env['REQUEST_METHOD'] != 'GET'
+      raise(Error::Interface, 'Only GET method allowed')
     end
   end # def _verb_get()
 
@@ -4332,9 +4334,9 @@ class Client
   # Require a GET or POST method
   #
   def _verb_getpost(env)
-    if env['REQUEST_METHOD'] != 'GET'.freeze &&
-       env['REQUEST_METHOD'] != 'POST'.freeze
-      raise(Error::Interface, 'Only GET or POST method allowed'.freeze)
+    if env['REQUEST_METHOD'] != 'GET' &&
+       env['REQUEST_METHOD'] != 'POST'
+      raise(Error::Interface, 'Only GET or POST method allowed')
     end
   end # def _verb_getpost()
 
@@ -4346,7 +4348,7 @@ class Client
     rck = Rack::Request.new(env)
     para = rck.POST
     para.each do |key, val|
-      val.force_encoding('utf-8'.freeze) if val.is_a?(String)
+      val.force_encoding('utf-8') if val.is_a?(String)
     end
     return para
   end # def _util_post()
@@ -4358,10 +4360,10 @@ class Client
   def _util_case(env)
     cmps = env['icfs.cmps']
     if cmps.size < 2 || cmps[1].empty?
-      raise(Error::NotFound, 'No case specified in the URL'.freeze)
+      raise(Error::NotFound, 'No case specified in the URL')
     end
     cid = Rack::Utils.unescape(cmps[1])
-    Items.validate(cid, 'case'.freeze, Items::FieldCaseid)
+    Items.validate(cid, 'case', Items::FieldCaseid)
     env['icfs.cid'] = cid
     return cid
   end # def _util_case()
@@ -4381,7 +4383,7 @@ class Client
   #
   def _util_time(env, time)
     tz = env['icfs.config'].get('tz')
-    Time.at(time).getlocal(tz).strftime('%F %T'.freeze)
+    Time.at(time).getlocal(tz).strftime('%F %T')
   end
 
 
@@ -4410,11 +4412,11 @@ class Client
   def _util_query(query)
     if query
       qa = query.map do |key, val|
-        '%s=%s'.freeze % [Rack::Utils.escape(key), Rack::Utils.escape(val)]
+        '%s=%s' % [Rack::Utils.escape(key), Rack::Utils.escape(val)]
       end
-      return '?'.freeze + qa.join('&amp;'.freeze)
+      return '?' + qa.join('&amp;')
     else
-      return ''.freeze
+      return ''
     end
   end # def _util_query()
 
@@ -4435,7 +4437,7 @@ class Client
       when :string
         query[sym] = val
       when :array
-        query[sym] = val.split(','.freeze).map{|aa| aa.strip}
+        query[sym] = val.split(',').map{|aa| aa.strip}
       when :boolean
         if val == 'true'
           query[sym] = true
@@ -4479,7 +4481,7 @@ class Client
       body
     ]
     head = {
-      'Content-Type' => 'text/html; charset=utf-8'.freeze,
+      'Content-Type' => 'text/html; charset=utf-8',
       'Content-Length' => html.bytesize.to_s
     }
     return [res, head, [html]]
@@ -4497,7 +4499,7 @@ class Client
 <body>%s
 </body>
 </html>
-'.freeze
+'
 
 
   ###############################################

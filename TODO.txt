@@ -2,8 +2,6 @@
 Short-term
 -------------------------------------------------------------------
 
-Switch to frozen string pragma comment
-
 Add SSL auth testing system
   nginx container
   run/sslauth.rb
