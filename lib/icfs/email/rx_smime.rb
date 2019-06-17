@@ -52,22 +52,6 @@ class RxSmime
   end # end def initialize()
 
 
-  Fields = [
-    "to",
-    "cc",
-    "message-id",
-    "in-reply-to",
-    "references",
-    "subject",
-    "comments",
-    "keywords",
-    "date",
-    "from",
-    "sender",
-    "reply-to",
-  ].freeze
-
-
   ###############################################
   #  Process for S/MIME encryption or signatures
   #
@@ -138,7 +122,7 @@ class RxSmime
     msg.body = part.body.encoded
     oh = env[:msg].header
     hd = msg.header
-    Fields.each do |fn|
+    Rx::CopyFields.each do |fn|
       fi = oh[fn]
       hd[fn] = fi.value if fi
     end

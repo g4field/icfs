@@ -12,6 +12,7 @@
 # frozen_string_literal: true
 
 require 'mail'
+require 'set'
 
 module ICFS
 
@@ -191,6 +192,9 @@ class Rx
     end
     if env[:save_msg]
       tmp = @api.tempfile
+      env[:msg].header.fields.delete_if do |fi|
+        !FieldsSet.include?(fi.name.downcase)
+      end
       tmp.write(env[:msg].without_attachments!.encoded)
       files << { 'name' => DefaultMsg, 'temp' => tmp }
     end
@@ -213,6 +217,42 @@ class Rx
     return [:success, ent]
   end # def receive()
 
+
+  ###############################################
+  # Basic header fields to copy
+  #
+  CopyFields = [
+    "to",
+    "cc",
+    "message-id",
+    "in-reply-to",
+    "references",
+    "subject",
+    "comments",
+    "keywords",
+    "date",
+    "from",
+    "sender",
+    "reply-to",
+  ].freeze
+
+
+  ###############################################
+  # Content related fields
+  #
+  ContentFields = [
+    "content-transfer-encoding",
+    "content-description",
+    "content-disposition",
+    "content-type",
+    "content-id",
+    "content-location",
+  ].freeze
+
+
+  ###############################################
+  # Set of header fields to copy set
+  FieldsSet = Set.new(CopyFields).merge(ContentFields).freeze
 
 end # class ICFS::Email::Rx
 
