@@ -20,6 +20,17 @@ require_relative 'icfs/validate'
 #
 module ICFS
 
+  # version: major, minor, patch
+  Version = [0, 1, 4].freeze
+
+  # version pre-release
+  VersionPre = nil
+
+  # version string
+  VersionString = (
+    '%d.%d.%d' % Version +
+    (VersionPre ? ('-' + VersionPre) : '')
+  ).freeze
 
   # no tags
   TagNone = '[none]'

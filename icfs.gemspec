@@ -9,8 +9,10 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+require_relative 'lib/icfs'
+
 Gem::Specification.new do |gs|
-  gs.version = '0.1.3'
+  gs.version = ICFS::VersionString
 
   gs.name = 'icfs'
   gs.license = 'GPL-3.0'
