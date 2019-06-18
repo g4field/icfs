@@ -29,7 +29,7 @@ class Auth
   #
   # @param app [Object] The rack app
   # @param api [Object] the ICFS API
-  # @param cfg [Object] the ICFS Web Config object
+  # @param cfg [Object] the ICFS Config object
   #
   def initialize(app, api, cfg)
     @app = app

@@ -13,7 +13,6 @@
 
 #
 module ICFS
-module Web
 
 ##########################################################################
 # Configuration storage interface
@@ -104,7 +103,6 @@ class Config
   def save; raise NotImplementedError; end
 
 
-end # class ICFS::Web::Config
+end # class ICFS::Config
 
-end # module ICFS::Web
 end # module ICFS

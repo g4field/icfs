@@ -14,27 +14,28 @@
 require_relative 'config'
 
 module ICFS
-module Web
 
 ##########################################################################
-# Configuration storage implemented in S3
+# Implement Config with a Redis cache
 #
-class ConfigS3 < Config
+class ConfigRedis < Config
 
 
   ###############################################
   # New instance
   #
-  # @param defaults [Hash] The default options
-  # @param s3 [Aws::S3::Client] the configured S3 client
-  # @param bucket [String] The bucket name
-  # @param prefix [String] Prefix to use for object keys
+  # @param redis [Redis] The redis client
+  # @param base [Config] The base Config store
+  # @param opts [Hash] Options
+  # @option opts [String] :prefix Prefix for Redis key
+  # @option opts [Integer] :expires Expiration time in seconds
   #
-  def initialize(defaults, s3, bucket, prefix=nil)
-    super(defaults)
-    @s3 = s3
-    @bck = bucket
-    @pre = prefix || ''
+  def initialize(redis, base, opts={})
+    super(base.defaults)
+    @redis = redis
+    @base = base
+    @pre = opts[:prefix] || ''
+    @exp = opts[:expires] || 1*60*60 # 1 hour default
   end
 
 
@@ -44,12 +45,19 @@ class ConfigS3 < Config
   def load(unam)
     Items.validate(unam, 'User/Role/Group name', Items::FieldUsergrp)
     @unam = unam.dup
-    json = @s3.get_object( bucket: @bck, key: _key(unam) ).body.read
-    @data = Items.parse(json, 'Config values', Config::ValConfig)
-    return true
-  rescue
-    @data = {}
-    return false
+    key = _key(unam)
+
+    # try cache
+    json = @redis.get(key)
+    if json
+      @data = Items.parse(json, 'Config values', Config::ValConfig)
+      return true
+    end
+
+    # get base object
+    succ = @base.load(unam)
+    @data = @base.data
+    return succ
   end # def load()
 
 
@@ -59,10 +67,12 @@ class ConfigS3 < Config
   def save()
     raise(RuntimeError, 'Save requires a user name') if !@unam
     json = Items.generate(@data, 'Config values', Config::ValConfig)
-    @s3.put_object( bucket: @bck, key: _key(@unam), body: json )
+    @redis.del(_key(@unam))
+    @base.data = @data
+    @base.save
   end # def save()
 
-end # class ICFS::Web::ConfigS3
 
-end # module ICFS::Web
+end # class ICFS::Config
+
 end # module ICFS

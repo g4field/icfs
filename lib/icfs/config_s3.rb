@@ -14,29 +14,26 @@
 require_relative 'config'
 
 module ICFS
-module Web
 
 ##########################################################################
-# Implement Config with a Redis cache
+# Configuration storage implemented in S3
 #
-class ConfigRedis < Config
+class ConfigS3 < Config
 
 
   ###############################################
   # New instance
   #
-  # @param redis [Redis] The redis client
-  # @param base [Config] The base Config store
-  # @param opts [Hash] Options
-  # @option opts [String] :prefix Prefix for Redis key
-  # @option opts [Integer] :expires Expiration time in seconds
+  # @param defaults [Hash] The default options
+  # @param s3 [Aws::S3::Client] the configured S3 client
+  # @param bucket [String] The bucket name
+  # @param prefix [String] Prefix to use for object keys
   #
-  def initialize(redis, base, opts={})
-    super(base.defaults)
-    @redis = redis
-    @base = base
-    @pre = opts[:prefix] || ''
-    @exp = opts[:expires] || 1*60*60 # 1 hour default
+  def initialize(defaults, s3, bucket, prefix=nil)
+    super(defaults)
+    @s3 = s3
+    @bck = bucket
+    @pre = prefix || ''
   end
 
 
@@ -46,19 +43,12 @@ class ConfigRedis < Config
   def load(unam)
     Items.validate(unam, 'User/Role/Group name', Items::FieldUsergrp)
     @unam = unam.dup
-    key = _key(unam)
-
-    # try cache
-    json = @redis.get(key)
-    if json
-      @data = Items.parse(json, 'Config values', Config::ValConfig)
-      return true
-    end
-
-    # get base object
-    succ = @base.load(unam)
-    @data = @base.data
-    return succ
+    json = @s3.get_object( bucket: @bck, key: _key(unam) ).body.read
+    @data = Items.parse(json, 'Config values', Config::ValConfig)
+    return true
+  rescue
+    @data = {}
+    return false
   end # def load()
 
 
@@ -68,13 +58,9 @@ class ConfigRedis < Config
   def save()
     raise(RuntimeError, 'Save requires a user name') if !@unam
     json = Items.generate(@data, 'Config values', Config::ValConfig)
-    @redis.del(_key(@unam))
-    @base.data = @data
-    @base.save
+    @s3.put_object( bucket: @bck, key: _key(@unam), body: json )
   end # def save()
 
+end # class ICFS::ConfigS3
 
-end # class ICFS::Web::Config
-
-end # module ICFS::Web
 end # module ICFS

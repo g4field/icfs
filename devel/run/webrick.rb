@@ -22,8 +22,8 @@ require_relative '../../lib/icfs/store_s3'
 require_relative '../../lib/icfs/users_s3'
 require_relative '../../lib/icfs/users_redis'
 require_relative '../../lib/icfs/web/client'
-require_relative '../../lib/icfs/web/config_s3'
-require_relative '../../lib/icfs/web/config_redis'
+require_relative '../../lib/icfs/config_s3'
+require_relative '../../lib/icfs/config_redis'
 require_relative '../../lib/icfs/demo/auth'
 require_relative '../../lib/icfs/demo/static'
 
@@ -69,8 +69,8 @@ users = ICFS::UsersRedis.new(redis, users_base, {
     log: log,
   })
 api = ICFS::Api.new([], users, cache, store)
-config_base = ICFS::Web::ConfigS3.new(defaults, s3, 'icfs', 'config/')
-config = ICFS::Web::ConfigRedis.new(redis, config_base, {
+config_base = ICFS::ConfigS3.new(defaults, s3, 'icfs', 'config/')
+config = ICFS::ConfigRedis.new(redis, config_base, {
     prefix: 'config/',
     expires: 60,  # debug, only cache for one minute
   })
