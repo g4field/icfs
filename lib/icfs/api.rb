@@ -51,12 +51,14 @@ class Api
   # @param users [Users] the User/role/group interface
   # @param cache [Cache] the cache
   # @param store [Store] the store
+  # @param config [Config] the config settings, optional
   #
-  def initialize(stats, users, cache, store)
+  def initialize(stats, users, cache, store, config=nil)
     @users = users
     @cache = cache
     @store = store
     @gstats = stats.map{|st| st.dup.freeze }.freeze
+    @config = config
     reset
   end # def initialize
 
@@ -97,6 +99,8 @@ class Api
     @ur.add @user
     @ur.merge @roles
     @ur.freeze
+
+    @config.load(@user) if @config
 
     reset
   end # def user=()
@@ -143,6 +147,11 @@ class Api
   # User, Roles, Groups set
   #
   attr_reader :urg
+
+
+  ###############################################
+  # Config settings
+  attr_reader :config
 
 
   ###############################################

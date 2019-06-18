@@ -29,12 +29,10 @@ class Auth
   #
   # @param app [Object] The rack app
   # @param api [Object] the ICFS API
-  # @param cfg [Object] the ICFS Config object
   #
-  def initialize(app, api, cfg)
+  def initialize(app, api)
     @app = app
     @api = api
-    @cfg = cfg
   end
 
 
@@ -67,8 +65,6 @@ class Auth
     # set up for the call
     @api.user = user
     env['icfs'] = @api
-    @cfg.load(user)
-    env['icfs.config'] = @cfg
     return @app.call(env)
 
   rescue ICFS::Error::NotFound, ICFS::Error::Value => err

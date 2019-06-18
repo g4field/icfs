@@ -14,55 +14,12 @@
 
 # frozen_string_literal: true
 
-require 'faraday'
-require 'aws-sdk-s3'
-require 'redis'
-
-require_relative '../../lib/icfs'
-require_relative '../../lib/icfs/cache_elastic'
-require_relative '../../lib/icfs/store_s3'
-require_relative '../../lib/icfs/users_s3'
-require_relative '../../lib/icfs/users_redis'
+require_relative 'api'
 require_relative '../../lib/icfs/email/rx_smime'
 require_relative '../../lib/icfs/email/rx_core'
 
-# Minio config
-Aws.config.update(
-  endpoint: 'http://minio:9000',
-  access_key_id: 'minio_key',
-  secret_access_key: 'minio_secret',
-  force_path_style: true,
-  region: 'us-east-1'
-)
-
-# default mapping
-map = {
-  entry: 'entry',
-  case: 'case',
-  action: 'action',
-  index: 'index',
-  log: 'log',
-  lock: 'lock',
-  current: 'current',
-}.freeze
-
-# the log
-log = Logger.new(STDERR)
-log.level = Logger::INFO
-
-# base items
-s3 = Aws::S3::Client.new
-redis = Redis.new(host: 'redis')
-es = Faraday.new('http://elastic:9200')
-cache = ICFS::CacheElastic.new(map, es)
-store = ICFS::StoreS3.new(s3, 'icfs', 'case/')
-users_base = ICFS::UsersS3.new(s3, 'icfs', 'users/')
-users = ICFS::UsersRedis.new(redis, users_base, {
-    prefix: 'users/',
-    expires: 60, # one minute cache for testing
-    log: log,
-  })
-api = ICFS::Api.new([], users, cache, store)
+# api
+api = get_api
 
 # load the email map
 cert = ::OpenSSL::X509::Certificate.new(File.read(ARGV[0]))

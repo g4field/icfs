@@ -763,7 +763,7 @@ class Client
   def _call_config_edit(env)
     env['icfs.page'] = 'Config Edit'
     api = env['icfs']
-    cfg = env['icfs.config']
+    cfg = api.config
     _verb_getpost(env)
 
     # get the form
@@ -1110,7 +1110,7 @@ class Client
   #
   def _div_info(env)
     api = env['icfs']
-    tz = env['icfs.config'].get('tz')
+    tz = api.config.get('tz')
 
     # roles/groups/perms
     roles = api.roles.map{|rol| DivInfoList % Rack::Utils.escape_html(rol)}
@@ -3685,8 +3685,7 @@ class Client
   # Config Form
   #
   def _form_config(env)
-    cfg = env['icfs.config']
-    tz = cfg.get('tz')
+    tz = env['icfs'].config.get('tz')
     return FormConfig % [tz]
   end # def _form_config()
 
@@ -4382,7 +4381,7 @@ class Client
   # Epoch time as local
   #
   def _util_time(env, time)
-    tz = env['icfs.config'].get('tz')
+    tz = env['icfs'].config.get('tz')
     Time.at(time).getlocal(tz).strftime('%F %T')
   end
 
@@ -4400,7 +4399,7 @@ class Client
 
     # default use parse
     ma = /[+-]\d{2}:\d{2}$/.match str
-    tstr = ma ? str : str + env['icfs.config'].get('tz')
+    tstr = ma ? str : str + env['icfs'].config.get('tz')
     time = Time.parse(tstr).to_i
   rescue ArgumentError
     return nil
