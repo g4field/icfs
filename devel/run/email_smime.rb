@@ -15,8 +15,8 @@
 # frozen_string_literal: true
 
 require_relative 'api'
-require_relative '../../lib/icfs/email/rx_smime'
-require_relative '../../lib/icfs/email/rx_core'
+require_relative '../../lib/icfs/email/smime'
+require_relative '../../lib/icfs/email/basic'
 
 # api
 api = get_api
@@ -34,9 +34,9 @@ map_cn = {
 }
 
 # email gateway
-email_core = ICFS::Email::RxCore.new
-email_smime = ICFS::Email::RxSmime.new(key, cert, ca, map_cn)
-email = ICFS::Email::Rx.new(api, [email_smime, email_core])
+email_basic = ICFS::Email::Basic.new
+email_smime = ICFS::Email::Smime.new(key, cert, ca, map_cn)
+email = ICFS::Email::Core.new(api, [email_smime, email_basic])
 
 txt = STDIN.read
 res = email.receive(txt)

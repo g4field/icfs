@@ -24,9 +24,9 @@ module Email
 
 
 ##########################################################################
-# Process received email, resulting in a new Entry
+# Core email processing engine.
 #
-class Rx
+class Core
 
 
   ###############################################
@@ -254,7 +254,7 @@ class Rx
   # Set of header fields to copy set
   FieldsSet = Set.new(CopyFields).merge(ContentFields).freeze
 
-end # class ICFS::Email::Rx
+end # class ICFS::Email::Core
 
 
 end # module ICFS::Email

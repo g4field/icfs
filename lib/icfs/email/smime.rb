@@ -12,9 +12,8 @@
 # frozen_string_literal: true
 
 require 'openssl'
-require 'digest/sha2'
 
-require_relative 'rx'
+require_relative 'core'
 
 module ICFS
 module Email
@@ -33,7 +32,7 @@ module Email
 #  the message is signed and verifies, it will try a lookup of the DN to
 #  determine the user.
 #
-class RxSmime
+class Smime
 
 
   ###############################################
@@ -122,7 +121,7 @@ class RxSmime
     msg.body = part.body.encoded
     oh = env[:msg].header
     hd = msg.header
-    Rx::CopyFields.each do |fn|
+    Core::CopyFields.each do |fn|
       fi = oh[fn]
       hd[fn] = fi.value if fi
     end
@@ -134,7 +133,7 @@ class RxSmime
     return :continue
   end # def receive()
 
-end # class ICFS::Email::RxSmime
+end # class ICFS::Email::Smime
 
 end # module ICFS::Email
 end # module ICFS

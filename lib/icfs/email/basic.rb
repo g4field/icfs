@@ -11,18 +11,18 @@
 
 # frozen_string_literal: true
 
-require_relative 'rx'
+require_relative 'core'
 
 module ICFS
 module Email
 
 ##########################################################################
-# Receive core processing
+# Basic email processing
 #
 # This looks for ICFS email gateway instructions, and processes
 # attachments.
 #
-class RxCore
+class Basic
 
   ###############################################
   # Strip regex

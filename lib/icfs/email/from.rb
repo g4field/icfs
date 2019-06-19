@@ -11,7 +11,7 @@
 
 # frozen_string_literal: true
 
-require_relative 'rx'
+require_relative 'core'
 
 module ICFS
 module Email
@@ -22,7 +22,7 @@ module Email
 # @note Only use this in conjunction with some form of email spoofing
 #   prevention.
 #
-class RxFrom
+class From
 
 
   ###############################################
@@ -46,7 +46,7 @@ class RxFrom
   end # def receive()
 
 
-end # class ICFS::Email::RxFrom
+end # class ICFS::Email::From
 
 end # module ICFS::Email
 end # module ICFS
