@@ -55,7 +55,11 @@ class Basic
   def receive(env)
 
     # we only work on text/plain version of the email
-    txt = env[:msg].text_part
+    if env[:msg].multipart?
+      txt = env[:msg].text_part
+    elsif env[:msg].mime_type == 'text/plain'
+      txt = env[:msg]
+    end
     return :continue if !txt
     lines = txt.decoded.lines
 
