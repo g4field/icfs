@@ -2,6 +2,16 @@
 Short-term
 -------------------------------------------------------------------
 
+Email system to include logging
+
+Devel api renamed to base, provide multiple outputs, including:
+  cache
+  store
+  log
+  users
+  config
+  api
+
 Add SSL auth testing system
   nginx container
   run/sslauth.rb
@@ -14,8 +24,6 @@ Email Rx, Field parsing
 -------------------------------------------------------------------
 Medium-term
 -------------------------------------------------------------------
-
-Email IMAP client
 
 Email Web history interface
 
