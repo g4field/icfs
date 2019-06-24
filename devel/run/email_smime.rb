@@ -20,6 +20,8 @@ require_relative '../../lib/icfs/email/basic'
 
 # api
 api = get_api
+log = Logger.new(STDERR)
+log.level = Logger::DEBUG
 
 # load the email map
 cert = ::OpenSSL::X509::Certificate.new(File.read(ARGV[0]))
@@ -36,7 +38,7 @@ map_cn = {
 # email gateway
 email_basic = ICFS::Email::Basic.new
 email_smime = ICFS::Email::Smime.new(key, cert, ca, map_cn)
-email = ICFS::Email::Core.new(api, [email_smime, email_basic])
+email = ICFS::Email::Core.new(api, log, [email_smime, email_basic])
 
 txt = STDIN.read
 res = email.receive(txt)

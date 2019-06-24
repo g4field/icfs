@@ -33,7 +33,7 @@ cfg_raw.each{|key, val| cfg[key.to_sym] = val}
 # email gateway
 email_basic = ICFS::Email::Basic.new
 email_from = ICFS::Email::From.new(map_email)
-email = ICFS::Email::Core.new(api, [email_from, email_basic])
+email = ICFS::Email::Core.new(api, log, [email_from, email_basic])
 imap = ICFS::Email::Imap.new(email, log, cfg)
 
 # and fetch

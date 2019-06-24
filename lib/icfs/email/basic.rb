@@ -40,6 +40,21 @@ class Basic
 
 
   ###############################################
+  # Check for a boolean
+  #
+  def _boolean(str)
+    case str.downcase
+    when 'true', 'yes'
+      return true
+    when 'false', 'no'
+      return false
+    else
+      return nil
+    end
+  end # def _boolean()
+
+
+  ###############################################
   # Fields regex
   FieldRx = /^ICFS ([^:[:blank:]]*)[[:blank:]]*:[[:blank:]]*(.*)[[:blank:]]*$/.freeze
 
@@ -60,7 +75,7 @@ class Basic
     elsif env[:msg].mime_type == 'text/plain'
       txt = env[:msg]
     end
-    return :continue if !txt
+    return [:continue, nil] if !txt
     lines = txt.decoded.lines
 
     # User specified values
@@ -77,7 +92,10 @@ class Basic
 
           when :tags
             tags = _strip(collect)
-            env[:tags] = tags unless tags.empty?
+            unless tags.empty?
+              env[:tags] ||= []
+              env[:tags] = env[:tags] + tags
+            end
             collect = nil
 
           when :perms
@@ -101,7 +119,7 @@ class Basic
             collect = nil
 
           else
-            raise NotImplementedError
+            raise ScriptError
           end
         else
           collect << ln
@@ -110,15 +128,21 @@ class Basic
       end
 
       next unless ma = FieldRx.match(ln)
-
       fn = ma[1].downcase
 
       case fn
       when 'case'
         env[:caseid] = ma[2].strip
 
+      when 'entry'
+        env[:entry] = ma[2].strip.to_i
+
       when 'title'
         env[:title] = ma[2].strip
+
+      when 'tag'
+        env[:tags] ||= []
+        env[:tags] << ma[2].strip
 
       when 'tags'
         collect = []
@@ -143,6 +167,18 @@ class Basic
         state = :content
         term = ma[2].strip
         term = 'ICFS' if term.empty?
+
+      when 'save_files'
+        val = _boolean(ma[2].strip)
+        env[:save_files] = val unless val.nil?
+
+      when 'save_original'
+        val = _boolean(ma[2].strip)
+        env[:save_original] = val unless val.nil?
+
+      when 'save_email'
+        val = _boolean(ma[2].strip)
+        env[:save_email] = val unless val.nil?
       end
 
     end
@@ -161,27 +197,30 @@ class Basic
     end
 
     # save the edited email defaults to yes
-    unless env.key?(:save_msg)
-      env[:save_msg] = true
+    unless env.key?(:save_email)
+      env[:save_email] = true
     end
 
     # save the raw email defaults to no
-    unless env.key?(:save_raw)
-      env[:save_raw] = false
+    unless env.key?(:save_original)
+      env[:save_original] = false
     end
 
     # save attachments as files
-    cnt = 0
-    env[:msg].attachments.each do |att|
-      type = att.header[:content_disposition].disposition_type
-      next if type == 'inline'
-      cnt += 1
-      name = att.filename
-      if !name
-        ext = MIME::Types[att.content_type].first.extensions.first
-        name = 'unnamed_%d.%s' % [cnt, ext]
+    unless env.key?(:save_files) && !env[:save_files]
+      cnt = 0
+      env[:msg].attachments.each do |att|
+        type = att.header[:content_disposition].disposition_type
+        next if type == 'inline'
+        cnt += 1
+        name = att.filename
+        if !name
+          ext = MIME::Types[att.content_type].first.extensions.first
+          name = 'unnamed_%d.%s' % [cnt, ext]
+        end
+        env[:files] << { name: name, content: att.decoded }
       end
-      env[:files] << { name: name, content: att.decoded }
+      env[:msg] = ::Mail.new(env[:msg].without_attachments!.encoded)
     end
 
     return :continue

@@ -11,7 +11,6 @@
 
 # frozen_string_literal: true
 
-require 'mail'
 require 'set'
 
 module ICFS
@@ -45,7 +44,7 @@ class Core
   ValReceive = {
     method: :hash,
     required: {
-      raw: Validate::IsString,         # the raw message
+      orig: Validate::IsString,        # the raw message
       caseid: Items::FieldCaseid,      # case to write
       user: Items::FieldUsergrp,       # user as author
       files: {                         # files to attach
@@ -54,6 +53,7 @@ class Core
       }.freeze,
     }.freeze,
     optional: {
+      entry: Validate::IsIntPos,       # the entry number
       time: Validate::IsIntPos,        # the time of the entry
       title: Items::FieldTitle,        # title of the entry
       content: Items::FieldContent,    # content of the entry
@@ -100,23 +100,25 @@ class Core
 
 
   ###############################################
-  # Filename for raw content
-  DefaultRaw = 'email_raw.eml'
+  # Filename for original content
+  DefaultOrig = 'email_received.eml'
 
 
   ###############################################
   # Filename for processed content without attachments
-  DefaultMsg = 'email.eml'
+  DefaultEmail = 'email.eml'
 
 
   ###############################################
   # New instance
   #
   # @param api [ICFS::Api] the ICFS API
+  # @param log [Logger] The log
   # @param st [Array] the middleware
   #
-  def initialize(api, st=nil)
+  def initialize(api, log, st=nil)
     @api = api
+    @log = log
     self.stack_set(st) if st
   end # def initialize()
 
@@ -137,45 +139,67 @@ class Core
   ###############################################
   # Process a received email using the middleware stack
   #
-  # @param txt [String] the email message as text
+  # @param msg [::Mail::Message] the email message
   # @return [Array] results, first field is a Symbol, second field is error or
   #   the recorded message
   #
-  def receive(txt)
+  def receive(msg)
+    @log.debug('Email: Processing %s' % msg.message_id)
 
     # setup the environment
     env = {
-      raw: txt.freeze,        # the original text email
-      msg: Mail.new(txt),     # the email message being worked on
-      files: [],              # files to attach to the entry
+      orig: msg.raw_source.dup, # the original text email
+      msg: msg,                 # the email message being worked on
+      files: [],                # files to attach to the entry
     }
 
     # process all middleware
     @stack.each do |mid|
-      resp = mid.receive(env)
+      resp, err = mid.receive(env)
       case resp
       when :continue
         next
-      when :success
+      when :stop
         break
       when :failure
-        return false
+        return [:failure, err]
       else
-        raise NotImplementedError
+        raise ScriptError
       end
     end
 
     # check that all required fields were completed
     err = Validate.check(env, ValReceive)
-    return [:incomplete, err] if err
+    if err
+      @log.info('Email: Invalid: %s' % err.inspect)
+      return [:invalid, err]
+    end
+
+    # API set to active user
+    @api.user = env[:user]
+
+    # if an entry was specified
+    if env[:entry] && env[:entry] != 0
+      ent = @api.entry_read(env[:caseid], env[:entry])
+      ent.delete('icfs')
+      ent.delete('log')
+      ent.delete('user')
+      ent.delete('tags') if ent['tags'][0] == ICFS::TagNone
+    else
+      ent = {}
+      ent['caseid'] = env[:caseid]
+    end
 
     # build entry
-    ent = {}
-    ent['caseid'] = env[:caseid]
     ent['time'] = env[:time] if env[:time]
-    ent['title'] = env[:title] || DefaultTitle
-    ent['content'] = env[:content] || DefaultContent
-    ent['tags'] = env[:tags].uniq if env[:tags]
+    ent['title'] = env[:title] if env[:title]
+    ent['title'] ||= DefaultTitle
+    ent['content'] = env[:content] if env[:content]
+    ent['content'] ||= DefaultContent
+    if env[:tags]
+      ent['tags'] ||= []
+      ent['tags'] = (ent['tags'] + env[:tags]).uniq
+    end
     ent['perms'] = env[:perms].uniq if env[:perms]
     ent['stats'] = env[:stats] if env[:stats]
 
@@ -185,36 +209,43 @@ class Core
       tmp.write(fd[:content])
       { 'name' => fd[:name], 'temp' => tmp }
     end
-    if env[:save_raw]
+    if env[:save_original]
       tmp = @api.tempfile
-      tmp.write(env[:raw])
-      files << { 'name' => DefaultRaw, 'temp' => tmp }
+      tmp.write(env[:orig])
+      files << { 'name' => DefaultOrig, 'temp' => tmp }
     end
-    if env[:save_msg]
+    if env[:save_email]
       tmp = @api.tempfile
       env[:msg].header.fields.delete_if do |fi|
         !FieldsSet.include?(fi.name.downcase)
       end
-      tmp.write(env[:msg].without_attachments!.encoded)
-      files << { 'name' => DefaultMsg, 'temp' => tmp }
+      tmp.write(env[:msg].encoded)
+      files << { 'name' => DefaultEmail, 'temp' => tmp }
     end
-    ent['files'] = files unless files.empty?
+    unless files.empty?
+      ent['files'] ||= []
+      ent['files'] = ent['files'] + files
+    end
 
     # try to record it
-    begin
-      @api.user = env[:user]
-      @api.record(ent, nil, nil, nil)
-    rescue ICFS::Error::Conflict => ex
-      return [:conflict, ex.message]
-    rescue ICFS::Error::NotFound => ex
-      return [:notfound, ex.message]
-    rescue ICFS::Error::Perms => ex
-      return [:perms, ex.message]
-    rescue ICFS::Error::Value => ex
-      return [:value, ex.message]
-    end
+    @api.record(ent, nil, nil, nil)
 
+    @log.info('Email: Success: %s %d-%d' %
+        [ent['caseid'], ent['entry'], ent['log']])
     return [:success, ent]
+
+  rescue ICFS::Error::Conflict => ex
+    @log.warn('Email: Conflict: %s' % ex.message)
+    return [:conflict, ex.message]
+  rescue ICFS::Error::NotFound => ex
+    @log.warn('Email: Not Found: %s' % ex.message)
+    return [:notfound, ex.message]
+  rescue ICFS::Error::Perms => ex
+    @log.warn('Email: Permissions: %s' % ex.message)
+    return [:perms, ex.message]
+  rescue ICFS::Error::Value => ex
+    @log.warn('Email: Value: %s' % ex.message)
+    return [:value, ex.message]
   end # def receive()
 
 

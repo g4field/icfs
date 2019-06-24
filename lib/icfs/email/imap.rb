@@ -13,6 +13,7 @@
 # frozen_string_literal: true
 
 require 'net/imap'
+require 'mail'
 
 module ICFS
 module Email
@@ -79,7 +80,8 @@ class Imap
       uids.each do |uid|
         fd = imap.uid_fetch(uid, ['RFC822'])[0]
         @log.debug('IMAP: message fetched')
-        @core.receive(fd.attr['RFC822'])
+        msg = ::Mail.new(fd.attr['RFC822'])
+        @core.receive(msg)
         if @cfg[:delete]
           imap.uid_store(uid, "+FLAGS", [:Deleted])
           @log.debug('IMAP: message deleted')
