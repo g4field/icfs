@@ -28,6 +28,7 @@ class Basic
   # Strip regex
   StripRx = /^[^[:graph:]]*([[:graph:]].*[[:graph:]])[^[:graph:]]*$/.freeze
 
+
   ###############################################
   # Strip spaces from collected lines
   #
@@ -135,10 +136,18 @@ class Basic
         env[:caseid] = ma[2].strip
 
       when 'entry'
-        env[:entry] = ma[2].strip.to_i
+        enum = ma[2].strip.to_i
+        env[:entry] = enum if enum != 0
 
       when 'title'
         env[:title] = ma[2].strip
+
+      when 'time'
+        if env[:user]
+          env[:api].user = env[:user]
+          tm = ICFS.time_parse(ma[2].strip, env[:api].config)
+          env[:time] = tm if tm
+        end
 
       when 'tag'
         env[:tags] ||= []

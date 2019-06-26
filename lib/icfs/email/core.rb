@@ -151,6 +151,7 @@ class Core
       orig: msg.raw_source.dup, # the original text email
       msg: msg,                 # the email message being worked on
       files: [],                # files to attach to the entry
+      api: @api,                # the ICFS API
     }
 
     # process all middleware
