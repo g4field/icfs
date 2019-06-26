@@ -4390,19 +4390,10 @@ class Client
   # Parse a provided time string
   #
   def _util_time_parse(env, str)
-    return nil if !str || !str.is_a?(String)
-    val = str.strip
-    now = Time.now.to_i
-
-    # empty string defaults to now
-    return now if val.empty?
-
-    # default use parse
-    ma = /[+-]\d{2}:\d{2}$/.match str
-    tstr = ma ? str : str + env['icfs'].config.get('tz')
-    time = Time.parse(tstr).to_i
-  rescue ArgumentError
-    return nil
+    cfg = env['icfs'].config
+    time = ICFS.time_parse(str, cfg)
+    raise(Error::Value, 'Invalid time string') if !time
+    return time
   end
 
 
