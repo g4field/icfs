@@ -16,8 +16,6 @@ Add SSL auth testing system
 
 Email Rx, Field parsing
   indexes - think how to support
-  ICFS time: (.*)
-  ICFS entry: (\d+) - add to existing entry
 
 -------------------------------------------------------------------
 Medium-term

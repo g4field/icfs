@@ -37,6 +37,7 @@ class Imap
   # @option opts [String] :mailbox The mailbox to read
   # @option opts [Array,String] :keys keys to pass to {::Net::IMAP#uid_search}
   # @option opts [Integer] :idle_time Seconds to wait IDLE before polling
+  # @option opts [Integer] :reconnect Seconds after which we can reconnect
   #
   def initialize(core, log, opts={})
     @core = core
@@ -46,9 +47,32 @@ class Imap
       :enable_ssl => true,
       :keys => 'ALL',
       :idle_time => 60*5,
+      :reconnect => 60*15,
     }.merge!(opts)
   end # def initialize()
 
+
+  ###############################################
+  # Handles reconnects when dropped
+  #
+  def reconnect()
+
+    while true
+      start = Time.now
+      begin
+        fetch()
+      rescue EOFError
+        if( (Time.now - start) > @cfg[:reconnect] )
+          @log.info('IMAP: lost connection, reconnecting')
+          next
+        else
+          @log.error('IMAP: disconnected under the reconnect limit')
+          break
+        end
+      end
+    end
+
+  end # def reconnect()
 
 
   ###############################################
@@ -73,7 +97,7 @@ class Imap
       return
     end
 
-    loop do
+    while true
       # fetch messages
       uids = imap.uid_search(@cfg[:keys])
       @log.debug('IMAP: %d messages found' % uids.size)
@@ -115,7 +139,7 @@ class Imap
       imap.disconnect
       @log.info('IMAP: disconnected')
     end
-  end # def get()
+  end # def fetch()
 
 
 end # class ICFS::Email::Imap

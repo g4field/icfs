@@ -37,4 +37,4 @@ email = ICFS::Email::Core.new(api, log, [email_from, email_basic])
 imap = ICFS::Email::Imap.new(email, log, cfg)
 
 # and fetch
-imap.fetch
+imap.reconnect
