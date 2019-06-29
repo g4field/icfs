@@ -22,7 +22,7 @@ require_relative 'icfs/validate'
 module ICFS
 
   # version: major, minor, patch
-  Version = [0, 1, 4].freeze
+  Version = [0, 2, 0].freeze
 
   # version pre-release
   VersionPre = nil
