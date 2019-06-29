@@ -12,12 +12,15 @@
 
 # frozen_string_literal: true
 
-require_relative 'api'
+require_relative 'base'
 require_relative '../../lib/icfs/email/from'
 require_relative '../../lib/icfs/email/basic'
 
 # api
-api = get_api
+base = get_base
+api = base[:api]
+log = base[:log]
+log.level = Logger::DEBUG
 
 # load the email map
 map_email = JSON.parse(File.read(ARGV[0]))
@@ -25,7 +28,7 @@ map_email = JSON.parse(File.read(ARGV[0]))
 # email gateway
 email_basic = ICFS::Email::Basic.new
 email_from = ICFS::Email::From.new(map_email)
-email = ICFS::Email::Core.new(api, [email_from, email_basic])
+email = ICFS::Email::Core.new(api, log, [email_from, email_basic])
 
 txt = STDIN.read
 res = email.receive(txt)

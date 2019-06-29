@@ -27,7 +27,7 @@ require_relative '../../lib/icfs/config_redis'
 #################################################
 # Get the API
 #
-def get_api
+def get_base
 
   # the log
   log = Logger.new(STDERR)
@@ -78,6 +78,15 @@ def get_api
       prefix: 'config/',
       expires: 60,  # debug, only cache for one minute
     })
+  api = ICFS::Api.new([], users, cache, store, config)
 
-  return ICFS::Api.new([], users, cache, store, config)
-end # def api
+  return {
+    cache: cache,
+    store: store,
+    users: users,
+    config: config,
+    api: api,
+    log: log,
+  }
+
+end # def base

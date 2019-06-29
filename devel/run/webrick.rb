@@ -12,12 +12,13 @@
 
 # frozen_string_literal: true
 
-require_relative 'api'
+require_relative 'base'
 require_relative '../../lib/icfs/web/client'
 require_relative '../../lib/icfs/demo/auth'
 require_relative '../../lib/icfs/demo/static'
 
-api = get_api()
+base = get_base()
+api = base[:api]
 
 web = ICFS::Web::Client.new('/static/icfs.css', '/static/icfs.js')
 

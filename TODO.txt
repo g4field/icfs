@@ -2,14 +2,6 @@
 Short-term
 -------------------------------------------------------------------
 
-Devel api renamed to base, provide multiple outputs, including:
-  cache
-  store
-  log
-  users
-  config
-  api
-
 Add SSL auth testing system
   nginx container
   run/sslauth.rb

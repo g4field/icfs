@@ -14,13 +14,14 @@
 
 # frozen_string_literal: true
 
-require_relative 'api'
+require_relative 'base'
 require_relative '../../lib/icfs/email/smime'
 require_relative '../../lib/icfs/email/basic'
 
 # api
-api = get_api
-log = Logger.new(STDERR)
+base = get_base
+api = base[:api]
+log = base[:log]
 log.level = Logger::DEBUG
 
 # load the email map
