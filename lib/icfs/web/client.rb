@@ -304,6 +304,7 @@ class Client
     ['tags', :tags, :string].freeze,
     ['caseid', :caseid, :string].freeze,
     ['action', :action, :integer].freeze,
+    ['index', :index, :integer].freeze,
     ['after', :after, :time].freeze,
     ['before', :before, :time].freeze,
     ['stat', :stat, :string].freeze,
