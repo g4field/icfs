@@ -2,27 +2,44 @@
 Short-term
 -------------------------------------------------------------------
 
+Fix web info to display all config values
+
+Web Case div
+  History of Case -> only logs which change Case
+  All Logs -> logs for the case
+
+Log search, include case edited boolean
+
 Add SSL auth testing system
   nginx container
   run/sslauth.rb
 
-Email Rx, Field parsing
-  indexes - think how to support
+Allow editing/creating Index/Case/Action with Entry optional
+  Items updates
+    Index/Case/Action - Add edited field
+    Log entry optional
+  Api#record logic updated
+  Web::Client
+    Toggle edit moved to Entry form from Action form as option
+    Update entry_edit, remove action
+    Update index_edit, add entry as option
+    Update case_edit, add entry as option
+    Add action_edit interface
+    Add New Action to navbar
+    Update Index/Case/Action read to include edited entry
 
 -------------------------------------------------------------------
 Medium-term
 -------------------------------------------------------------------
 
-Email Web history interface
-
 Change CSS file to be a config setting
 
 Add event logging to ICFS::Api
 
-Improve time handling in ICFS::Web::Client
-
 Auto find the last log in ICFS::Utils::Check
 
+Email Rx, Field parsing
+  indexes - think how to support
 
 -------------------------------------------------------------------
 Long-term

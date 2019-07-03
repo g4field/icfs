@@ -234,6 +234,28 @@ module ICFS
 
 
   ###############################################
+  # Get epoch time as local
+  #
+  # @param tme [Integer] the epoch time
+  # @param cfg [Config] the config
+  #
+  def self.time_local(tme, cfg)
+      Time.at(tme).getlocal(cfg.get('tz')).strftime('%F %T')
+  end # def self.time_local()
+
+
+  ###############################################
+  # Get epoch time as local with weekday
+  #
+  # @param tme [Integer] the epoch time
+  # @param cfg [Config] the config
+  #
+  def self.time_weekday(tme, cfg)
+      Time.at(tme).getlocal(cfg.get('tz')).strftime('%F %T (%a)')
+  end # def self.time_weekday()
+
+
+  ###############################################
   # Get relative display time from epoch
   #
   # @param tme [Integer] the epoch time

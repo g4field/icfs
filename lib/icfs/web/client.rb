@@ -323,7 +323,7 @@ class Client
     [:action, :current].freeze,
     [:time, :entry].freeze,
     [:tags, nil].freeze,
-    [:index, :entry].freeze,
+    [:indexes, nil].freeze,
     [:files, nil].freeze,
     [:stats, nil].freeze,
     [:title, :entry].freeze,
@@ -1178,17 +1178,18 @@ class Client
     entry: 'list-int',
     action: 'list-int',
     index: 'list-int',
+    indexes: 'list-int-sm',
     log: 'list-int',
-    tags: 'list-int',
+    tags: 'list-int-sm',
     tag: 'list-tag',
-    stats: 'list-int',
+    stats: 'list-int-sm',
     time: 'list-time',
     title: 'list-title',
     caseid: 'list-caseid',
     stat: 'list-stat',
     sum: 'list-float',
     count: 'list-int',
-    files: 'list-int',
+    files: 'list-int-sm',
     user: 'list-usergrp',
   }.freeze
 
@@ -1220,7 +1221,8 @@ class Client
     head = DivListHead % hcols.join('')
 
     # do we do relative times?
-    rel_time = env['icfs'].config.get('rel_time')
+    cfg = env['icfs'].config
+    rel_time = cfg.get('rel_time')
 
     # search results into rows
     rows = resp[:list].map do |sr|
@@ -1285,8 +1287,6 @@ class Client
         # index
         when :index
           case opt
-          when :entry
-            cd = (it == 0) ? '' : it.to_s
           when :current
             cd = _a_index(env, cid, it, 0, it.to_s)
           when :log
@@ -1298,6 +1298,10 @@ class Client
           else
             cd = it.to_s
           end
+
+        # indexes
+        when :indexes
+          cd = (it == 0) ? '' : it.to_s
 
         # log
         when :log
@@ -1339,9 +1343,9 @@ class Client
         when :time
           if rel_time
             tme = ICFS.time_relative(it)
-            ct = _util_time(env, it)
+            ct = ICFS.time_weekday(it, cfg)
           else
-            tme = _util_time(env, it)
+            tme = ICFS.time_weekday(it, cfg)
           end
 
           case opt
@@ -1449,13 +1453,15 @@ class Client
   # Search results header items
   DivListHeadItems = {
     tags: '
-      <div class="list-int">Tags</div>',
+      <div class="list-int-sm" title="Number of tags">#T</div>',
     tag: '
       <div class="list-tag">Tag</div>',
     entry: '
       <div class="list-int">Entry</div>',
     index: '
       <div class="list-int">Index</div>',
+    indexes: '
+      <div class="list-int-sm" title="Number of Indexes">#I</div>',
     action: '
       <div class="list-int">Action</div>',
     log: '
@@ -1465,7 +1471,7 @@ class Client
     caseid: '
       <div class="list-caseid">Case ID</div>',
     stats: '
-      <div class="list-int">Stats</div>',
+      <div class="list-int-sm" title="Number of stats">#S</div>',
     time: '
       <div class="list-time">Date/Time</div>',
     stat: '
@@ -1475,7 +1481,7 @@ class Client
     count: '
       <div class="list-int">Count</div>',
     files: '
-      <div class="list-int">Files</div>',
+      <div class="list-int-sm" title="Number of files">#F</div>',
     user: '
       <div class="list-usergrp">User</div>',
     snippet: ''
@@ -2075,7 +2081,7 @@ class Client
       action,
       links.map{|lk| DivEntryLink % lk }.join(''),
       Rack::Utils.escape_html(ent['title']),
-      _util_time(env, ent['time']),
+      ICFS.time_weekday(ent['time'], api.config),
       Rack::Utils.escape_html(ent['content']),
       tags.join("\n"),
       index,
@@ -2210,8 +2216,6 @@ class Client
     navp = (lnum == 1) ? 'prev' : _a_log(env, cid, lnum-1, 'prev')
     navn = _a_log(env, cid, lnum + 1, 'next')
 
-    time = _util_time(env, log['time'])
-
     if log['case_hash']
       chash = DivLogCase % _a_case(env, cid, lnum, log['case_hash'])
     else
@@ -2255,7 +2259,7 @@ class Client
       log['log'],
       navp,
       navn,
-      _util_time(env, log['time']),
+      ICFS.time_weekday(log['time'], env['icfs'].config),
       Rack::Utils.escape_html(log['user']),
       log['prev'],
       _a_entry(env, cid, enum, lnum, log['entry']['hash']),
@@ -2403,7 +2407,7 @@ class Client
         Rack::Utils.escape_html(tk['title']),
         tk['status'] ? 'Open' : 'Closed',
         tk['flag'] ? 'Raised' : 'Normal',
-        _util_time(env, tk['time']),
+        ICFS.time_weekday(tk['time'], api.config),
         tags.join(''),
       ]
     end
@@ -2573,6 +2577,7 @@ class Client
   # Description div for queries
   #
   def _div_query(env, type, sup, query, disp=false)
+    cfg = env['icfs'].config
 
     # query purpose
     if query[:purpose]
@@ -2595,7 +2600,7 @@ class Client
       when :integer
         para = val.to_s
       when :time
-        para = _util_time(env, val)
+        para = ICFS.time_local(val, cfg)
       else
         raise NotImplementedError, pr.to_s
       end
@@ -2637,6 +2642,7 @@ class Client
   # Query form
   #
   def _form_query(env, sup, query, act, disp=false)
+    cfg = env['icfs'].config
 
     # supported params
     inputs = sup.map do |txt, sym, pr|
@@ -2750,7 +2756,7 @@ class Client
         ivalue = query[sym] ? query[sym].to_s : ''
       when :time
         itype = 'text'
-        ivalue = query[sym] ? _util_time(env, query[sym]) :  ''
+        ivalue = query[sym] ? ICFS.time_local(query[sym], cfg) :  ''
       else
         raise NotImplementedError, pr.to_s
       end
@@ -2981,7 +2987,7 @@ class Client
 
     # time
     if ent && ent['time']
-      time = _util_time(env, ent['time'])
+      time = ICFS.time_local(ent['time'], api.config)
     else
       time = ''
     end
@@ -3321,6 +3327,7 @@ class Client
   #
   def _form_action(env, cid, act = nil, opt={})
     api = env['icfs']
+    cfg = api.config
 
     # new action
     if !act
@@ -3385,7 +3392,7 @@ class Client
         flag = FormActionFlagEd % [
           ix, tk['flag'] ? ' checked' : '' ]
         if tk['time']
-          time = FormActionTimeEd % [ ix, _util_time(env, tk['time']) ]
+          time = FormActionTimeEd % [ ix, ICFS.time_local(tk['time'], cfg) ]
         else
           time = FormActionTimeEd % [ix, '']
         end
@@ -3419,7 +3426,7 @@ class Client
         else
           flag = FormActionFlagEd % [ ix, '' ]
         end
-        esc = _util_time(env, tk['time'])
+        esc = ICFS.time_local(tk['time'], cfg)
         time = FormActionTimeRo % [ ix, esc, esc ]
 
         tags_cnt = 0
@@ -4409,15 +4416,6 @@ class Client
     cmps = env['icfs.cmps']
     (cmps.size < (loc+1) || cmps[loc].empty?) ? 0 : cmps[loc].to_i
   end # def _util_num()
-
-
-  ###############################################
-  # Epoch time as local
-  #
-  def _util_time(env, time)
-    tz = env['icfs'].config.get('tz')
-    Time.at(time).getlocal(tz).strftime('%F %T')
-  end
 
 
   ###############################################

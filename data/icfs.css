@@ -200,6 +200,12 @@ div.list-int {
 }
 
 
+div.list-int-sm {
+  width: 2em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
 div.list-perm {
   width: 15em;
   padding: 0 0.15em 0 0.15em;
@@ -238,7 +244,7 @@ div.list-text-m {
 
 
 div.list-time {
-  width: 12em;
+  width: 15em;
   padding: 0 0.15em 0 0.15em;
 }
 

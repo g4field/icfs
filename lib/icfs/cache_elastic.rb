@@ -532,7 +532,7 @@ class CacheElastic < Cache
     tags: 'tags',
     perms: ['perms', :empty],
     action: ['action', :zero],
-    index: ['index', :size],
+    indexes: ['index', :size],
     files: ['files', :size],
     stats: ['stats', :size],
   }.freeze
