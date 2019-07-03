@@ -61,7 +61,8 @@ def get_base
 
   # default config
   defaults = {
-    'tz' => '-04:00'
+    'tz' => '-04:00',
+    'rel_time' => true,
   }
 
   # base objects

@@ -30,9 +30,10 @@ class Config
         method: :string,
         valid: /[+\-](0[0-9]|1[0-2]):[0-5][0-9]/.freeze,
         whitelist: true,
-      }
-    }
-  }
+      }.freeze,
+      'rel_time' => Validate::IsBoolean,      
+    }.freeze
+  }.freeze
 
   ###############################################
   # New instance

@@ -563,7 +563,7 @@ class Client
       # process
       cse = _post_case(env, para)
       cid =  para['create_cid']
-      cse['template'] = (para['create_tmpl'] == 'true') ? true : false
+      cse['template'] = (para['create_tmpl'].downcase == 'true') ? true : false
 
       # process entry
       ent = _post_entry(env, para)
@@ -1219,6 +1219,9 @@ class Client
     end
     head = DivListHead % hcols.join('')
 
+    # do we do relative times?
+    rel_time = env['icfs'].config.get('rel_time')
+
     # search results into rows
     rows = resp[:list].map do |sr|
       obj = sr[:object]
@@ -1227,6 +1230,7 @@ class Client
       cols = list.map do |sym, opt|
         it = obj[sym]
         cc = ListColClass[sym]
+        ct = nil
 
         # snippets are special non-column, not in the object itself
         if sym == :snippet
@@ -1296,7 +1300,7 @@ class Client
           end
 
         # log
-      when :log
+        when :log
           case opt
           when :link
             cd = _a_log(env, cid, it, it.to_s)
@@ -1333,13 +1337,20 @@ class Client
 
         # time
         when :time
+          if rel_time
+            tme = ICFS.time_relative(it)
+            ct = _util_time(env, it)
+          else
+            tme = _util_time(env, it)
+          end
+
           case opt
           when :entry
-            cd = _a_entry(env, cid, obj[:entry], 0, _util_time(env, it))
+            cd = _a_entry(env, cid, obj[:entry], 0, tme)
           when :log
-            cd = _a_log(env, cid, obj[:log], _util_time(env, it))
+            cd = _a_log(env, cid, obj[:log], tme)
           else
-            cd = _util_time(env, it)
+            cd = tme
           end
 
         # title
@@ -1401,7 +1412,15 @@ class Client
           raise NotImplementedError, sym.to_s
         end
 
-        cd ? (DivListItem % [cc, cd]) : ''
+        if cd
+          if ct
+            DivListItemTitle % [cc, ct, cd]
+          else
+            DivListItem % [cc, cd]
+          end
+        else
+          ''
+        end
       end
 
       DivListRow % cols.join('')
@@ -1465,6 +1484,10 @@ class Client
   # search results item
   DivListItem = '
       <div class="%s">%s</div>'
+
+  # search results item with title
+  DivListItemTitle = '
+      <div class="%s" title="%s">%s</div>'
 
 
   ###############################################
@@ -3686,8 +3709,10 @@ class Client
   # Config Form
   #
   def _form_config(env)
-    tz = env['icfs'].config.get('tz')
-    return FormConfig % [tz]
+    cfg = env['icfs'].config
+    tz = cfg.get('tz')
+    rel_time = cfg.get('rel_time') ? 'true' : 'false'
+    return FormConfig % [tz, rel_time]
   end # def _form_config()
 
 
@@ -3706,6 +3731,13 @@ class Client
         <input class="form-tz" name="cfg-tz" type="text" value="%s">
         <div class="tip"><div class="tip-disp"></div><div class="tip-info">
           Timezone to display date/times, format as +/-HH:MM.
+        </div></div>
+      </div>
+      <div class="form-row">
+        <div class="list-label">Rel. Time:</div>
+        <input class="form-boolean" name="cfg-reltime" type="text" value="%s">
+        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
+          Display relative times e.g. 3 days ago.
         </div></div>
       </div>
     </div>'
@@ -3728,7 +3760,7 @@ class Client
     cse['title'] = para['cse-title']
 
     # status
-    cse['status'] = (para['cse-status'] == 'true') ? true : false
+    cse['status'] = (para['cse-status'].downcase == 'true') ? true : false
 
     # tags
     tags = []
@@ -3943,7 +3975,7 @@ class Client
     act['action'] = anum if anum != 0
 
     # any edit?
-    return anum unless para['act-ena'] == 'true'
+    return anum unless para['act-ena'].downcase == 'true'
 
     # tasks
     tasks = []
@@ -3954,8 +3986,8 @@ class Client
 
       ug = para[tx + '-task']
       title = para[tx + '-title']
-      status = (para[tx + '-status'] == 'true') ? true : false
-      flag = (para[tx + '-flag'] == 'true') ? true : false
+      status = (para[tx + '-status'].downcase == 'true') ? true : false
+      flag = (para[tx + '-flag'].downcase == 'true') ? true : false
 
       tstr = para[tx + '-time']
       time = _util_time_parse(env, tstr)
@@ -4026,7 +4058,8 @@ class Client
   #
   def _post_config(env, para)
     cfg = {
-      'tz' => para['cfg-tz']
+      'tz' => para['cfg-tz'],
+      'rel_time' => (para['cfg-reltime'].downcase == 'true' ? true : false),
     }
     return cfg
   end # def _post_config()
@@ -4430,7 +4463,7 @@ class Client
       when :array
         query[sym] = val.split(',').map{|aa| aa.strip}
       when :boolean
-        if val == 'true'
+        if val.downcase == 'true'
           query[sym] = true
         elsif val == 'false'
           query[sym] = false

@@ -233,6 +233,53 @@ module ICFS
   end # def self.time_parse()
 
 
+  ###############################################
+  # Get relative display time from epoch
+  #
+  # @param tme [Integer] the epoch time
+  # @return [String] Relative time string
+  #
+  def self.time_relative(tme)
+    rel = Time.now.to_i - tme
+    abs = rel.abs
+
+    # time periods
+    if abs >= (2*365*24*60*60)
+      num = abs / (365*24*60*60)
+      txt = 'years'
+    elsif abs >= (3*7*24*60*60)
+      num = abs / (7*24*60*60)
+      txt = 'weeks'
+    elsif abs >= (3*24*60*60)
+      num = abs / (24*60*60)
+      txt = 'days'
+    elsif abs >= (3*60*60)
+      num = abs / (60*60)
+      txt = 'hours'
+    elsif abs >= 2*60
+      num = abs / 60
+      txt = 'minutes'
+    else
+      num = 0
+      txt = 'just now'
+    end
+
+    # description
+    desc = '%d %s' % [num, txt]
+
+    # before/after
+    if num == 0
+      final = 'just now'
+    elsif rel < 0
+      final = 'in ' + desc
+    else
+      final = desc + ' ago'
+    end
+
+    return final
+  end # def self.time_relative()
+
+
 ##########################################################################
 # Error
 #
