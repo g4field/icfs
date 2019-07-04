@@ -168,6 +168,23 @@
 // Entry
 
   ///////////////////////////////////////////////
+  // Enable/disable editing the entry
+  function entEnable(){
+    var ena = document.getElementById("ent-ena");
+    var bdy = document.getElementById("ent-body");
+
+    var enabled = ena.getAttribute("value");
+    if( enabled == "true" ){
+      ena.setAttribute("value", "false");
+      bdy.setAttribute("class", "ent-body hidden");
+    } else {
+      ena.setAttribute("value", "true");
+      bdy.setAttribute("class", "ent-body");
+    }
+  }
+
+
+  ///////////////////////////////////////////////
   // Add an index
   function entAddIndex(){
     var ht = new XMLHttpRequest();
@@ -375,25 +392,6 @@
 
 
 // Action
-
-  ///////////////////////////////////////////////
-  // Enable/disable editing the action
-  function actEnable(){
-    var but = document.getElementById("act-task-add");
-    var ena = document.getElementById("act-ena");
-    var tsk = document.getElementById("act-tasks");
-
-    var enabled = ena.getAttribute("value");
-    if( enabled == "true" ){
-      ena.setAttribute("value", "false");
-      tsk.setAttribute("class", "sect-right hidden");
-      but.setAttribute("class", "sect-right invisible");
-    } else {
-      ena.setAttribute("value", "true");
-      tsk.setAttribute("class", "sect-right");
-      but.setAttribute("class", "sect-right");
-    }
-  }
 
 
   ///////////////////////////////////////////////

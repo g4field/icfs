@@ -518,6 +518,7 @@ class Api
       after: Validate::IsIntPos,
       before: Validate::IsIntPos,
       user: Items::FieldUsergrp,
+      case_edit: Validate::IsBoolean,
       entry: Validate::IsIntPos,
       index: Validate::IsIntPos,
       action: Validate::IsIntPos,
@@ -908,6 +909,13 @@ class Api
     Items.validate(ent, 'entry', Items::ItemEntryNew)
     Items.validate(cse, 'case', Items::ItemCaseEdit)
 
+    # get caseid
+    cid = ent['caseid']
+    cid ||= cse['caseid']
+    unless cid
+      raise(Error::Values, 'No caseid provided')
+    end
+
     # access users/roles/groups are valid, unless manually specifying user
     unless unam
       cse["access"].each do |acc|
@@ -953,11 +961,11 @@ class Api
     # Prep
 
     # case
-    cid = ent['caseid']
     cse['icfs'] = 1
     cse['caseid'] = cid
     cse['log'] = 1
     cse['tags'] ||= [ ICFS::TagNone ]
+    cse['entry'] = 1
     citem = Items.generate(cse, 'case', Items::ItemCase)
 
     # entry
@@ -979,7 +987,10 @@ class Api
       'entry' => {
         'num' => 1,
        },
-       'case_hash' => ICFS.hash(citem),
+       'case' => {
+         'set' => true,
+         'hash' => ICFS.hash(citem),
+       },
     }
     log['files_hash'] = fhash if fhash
 
@@ -1040,7 +1051,7 @@ class Api
   ###############################################
   # Write items to a case
   #
-  # @param ent [Hash] Entry to record, required
+  # @param ent [Hash] Entry to record, optional
   # @param act [Hash, Nilclass] Action to record, optional
   # @param idx [Hash, Nilclass] Index to record, optional
   # @param cse [Hash, Nilclass] Case to record, optional
@@ -1051,22 +1062,36 @@ class Api
     # Sanity checks
 
     # form & content
-    if idx || cse
-      Items.validate(ent, 'New Entry', Items::ItemEntryNew)
-    else
-      Items.validate(ent, 'Editable Entry', Items::ItemEntryEdit)
+    if ent
+      if (act || idx || cse)
+        Items.validate(ent, 'New Entry', Items::ItemEntryNew)
+      else
+        Items.validate(ent, 'Editable Entry', Items::ItemEntryEdit)
+      end
     end
     Items.validate(act, 'action', Items::ItemActionEdit) if act
     Items.validate(idx, 'index', Items::ItemIndexEdit) if idx
     Items.validate(cse, 'case', Items::ItemCaseEdit) if cse
 
-    # edit index OR case, not both
-    if idx && cse
-      raise(Error::Value, 'May not edit both case and index at once')
+    # get caseid
+    cid ||= ent['caseid'] if ent
+    cid ||= cse['caseid'] if cse
+    cid ||= act['caseid'] if act
+    cid ||= idx['caseid'] if idx
+    unless cid
+      raise(Error::Values, 'No caseid provided')
+    end
+
+    # no conflicting caseids
+    if( (cse && cse['caseid'] && cse['caseid'] != cid) ||
+        (act && act['caseid'] && act['caseid'] != cid) ||
+        (idx && idx['caseid'] && idx['caseid'] != cid) )
+      raise(Error::Values, 'Conflicting caseids provided')
     end
 
     # no changing the action
-    if act && ent['action'] && act['action'] && act['action'] != ent['action']
+    if( act && ent && ent['action'] && act['action'] &&
+        act['action'] != ent['action'] )
       raise(Error::Conflict, 'May not change entry\'s action')
     end
 
@@ -1103,17 +1128,21 @@ class Api
 
     ####################
     # Prep
-    cid = ent['caseid']
 
     # entry
-    ent['icfs'] = 1
-    ent['tags'] ||= [ ]
-    ent['user'] = @user
-    files, fhash = _pre_files(ent)
+    if ent
+      ent['icfs'] = 1
+      ent['tags'] ||= [ ]
+      ent['user'] = @user
+      ent['caseid'] = cid
+      files, fhash = _pre_files(ent)
+    else
+      files = []
+    end
 
     # action
     if act
-      ent['tags'] << ICFS::TagAction
+      ent['tags'] << ICFS::TagAction if ent
       act['icfs'] = 1
       act['caseid'] = cid
       act['tasks'].each do |tk|
@@ -1123,7 +1152,7 @@ class Api
 
     # index
     if idx
-      ent['tags'] << ICFS::TagIndex
+      ent['tags'] << ICFS::TagIndex if ent
       idx['icfs'] = 1
       idx['caseid'] = cid
       idx['tags'] ||= [ ICFS::TagNone ]
@@ -1131,7 +1160,7 @@ class Api
 
     # case
     if cse
-      ent['tags'] << ICFS::TagCase
+      ent['tags'] << ICFS::TagCase if ent
       cse['icfs'] = 1
       cse['caseid'] = cid
       cse['tags'] ||= [ ICFS::TagNone ]
@@ -1146,7 +1175,7 @@ class Api
     log['files_hash'] = fhash if fhash
 
     # no tags
-    ent['tags'] = [ ICFS::TagNone ] if ent['tags'].empty?
+    ent['tags'] = [ ICFS::TagNone ] if ent && ent['tags'].empty?
 
     # current
     nxt = {
@@ -1171,14 +1200,18 @@ class Api
       cur = Items.parse(json, 'current', Items::ItemCurrent)
 
       # entry
-      if ent['entry']
-        enum = ent['entry']
-        json = @cache.entry_read(cid, enum)
-        ent_pri = Items.parse(json, 'entry', Items::ItemEntry)
-        nxt['entry'] = cur['entry']
+      if ent
+        if ent['entry']
+          enum = ent['entry']
+          json = @cache.entry_read(cid, enum)
+          ent_pri = Items.parse(json, 'entry', Items::ItemEntry)
+          nxt['entry'] = cur['entry']
+        else
+          enum = cur['entry'] + 1
+          nxt['entry'] = enum
+        end
       else
-        enum = cur['entry'] + 1
-        nxt['entry'] = enum
+        nxt['entry'] = cur['entry']
       end
 
       # action
@@ -1186,7 +1219,7 @@ class Api
         anum = ent_pri['action']
       elsif act && act['action']
         anum = act['action']
-      elsif ent['action']
+      elsif ent && ent['action']
         anum = ent['action']
       end
       if anum
@@ -1228,7 +1261,7 @@ class Api
       perms = Set.new
 
       # entry
-      perms.merge(ent['perms']) if ent['perms']
+      perms.merge(ent['perms']) if ent && ent['perms']
       if ent_pri
 
         # must have those perms
@@ -1326,7 +1359,7 @@ class Api
 
       # write unless a case or pre-existing action
       unless cse || act_pri
-        perms.add( ICFS::PermWrite)
+        perms.add( ICFS::PermWrite )
       end
 
       # permissions
@@ -1341,28 +1374,32 @@ class Api
       # Items
 
       # entry
-      ent['entry'] = enum
-      ent['log'] = lnum
-      ent['time'] ||= now
-      ent['action'] = anum if act
-      if idx
-        if ent['index']
-          ent['index'] = ent['index'].push(xnum).uniq.sort
-        else
-          ent['index'] = [ xnum ]
+      if ent
+        ent['entry'] = enum
+        ent['log'] = lnum
+        ent['time'] ||= now
+        ent['action'] = anum if act
+        if idx
+          if ent['index']
+            ent['index'] << xnum
+          else
+            ent['index'] = [ xnum ]
+          end
         end
+        ent['index'].sort!.uniq! if ent['index']
+        ent['files'].each{|fi| fi['log'] ||= lnum } if ent['files']
+        eitem = Items.generate(ent, 'entry', Items::ItemEntry)
+        log['entry'] = {
+          'num' => enum,
+          'hash' => ICFS.hash(eitem)
+        }
       end
-      ent['files'].each{|fi| fi['log'] ||= lnum } if ent['files']
-      eitem = Items.generate(ent, 'entry', Items::ItemEntry)
-      log['entry'] = {
-        'num' => enum,
-        'hash' => ICFS.hash(eitem)
-      }
 
       # action
       if act
         act['action'] = anum
         act['log'] = lnum
+        act['entry'] = enum if ent
         aitem = Items.generate(act, 'action', Items::ItemAction)
         log['action'] = {
           'num' => anum,
@@ -1374,6 +1411,7 @@ class Api
       if idx
         idx['index'] = xnum
         idx['log'] = lnum
+        idx['entry'] = enum if ent
         xitem = Items.generate(idx, 'index', Items::ItemIndex)
         log['index'] = {
           'num' => xnum,
@@ -1384,8 +1422,12 @@ class Api
       # case
       if cse
         cse['log'] = lnum
+        cse['entry'] = enum if ent
         citem = Items.generate(cse, 'case', Items::ItemCase)
-        log['case_hash'] = ICFS.hash(citem)
+        log['case'] = {
+          'set' => true,
+          'hash' => ICFS.hash(citem),
+        }
       end
 
       # log
@@ -1403,8 +1445,10 @@ class Api
       # Write
 
       # entry
-      @cache.entry_write(cid, enum, eitem)
-      @store.entry_write(cid, enum, lnum, eitem)
+      if ent
+        @cache.entry_write(cid, enum, eitem)
+        @store.entry_write(cid, enum, lnum, eitem)
+      end
 
       # action
       if act

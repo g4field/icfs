@@ -169,6 +169,7 @@ class Client
     when 'case_edit'; return _call_case_edit(env)
     when 'entry_edit'; return _call_entry_edit(env)
     when 'index_edit'; return _call_index_edit(env)
+    when 'action_edit'; return _call_action_edit(env)
     when 'config_edit'; return _call_config_edit(env)
 
     # view
@@ -337,6 +338,7 @@ class Client
     ['after', :after, :time].freeze,
     ['before', :before, :time].freeze,
     ['user', :user, :string].freeze,
+    ['case_edit', :case_edit, :boolean].freeze,
     ['entry', :entry, :integer].freeze,
     ['index', :index, :integer].freeze,
     ['action', :action, :integer].freeze,
@@ -356,6 +358,7 @@ class Client
     [:entry, :log].freeze,
     [:action, :log].freeze,
     [:index, :log].freeze,
+    [:case, :log].freeze,
   ].freeze
 
 
@@ -542,9 +545,9 @@ class Client
       tpl = api.case_read(tid)
       tpl['title'] = ''
       parts = [
-        _form_entry(env, tid, nil),
         _form_create(env),
         _form_case(env, tpl),
+        _form_entry(env, tid, nil),
       ]
       body = [
         _div_nav(env),
@@ -563,7 +566,7 @@ class Client
       # process
       cse = _post_case(env, para)
       cid =  para['create_cid']
-      cse['template'] = (para['create_tmpl'].downcase == 'true') ? true : false
+      cse['template'] = (para['create_tmpl'] == 'true') ? true : false
 
       # process entry
       ent = _post_entry(env, para)
@@ -594,8 +597,8 @@ class Client
     if env['REQUEST_METHOD'] == 'GET'
       cse = api.case_read(cid)
       parts = [
-        _form_entry(env, cid, nil),
         _form_case(env, cse),
+        _form_entry(env, cid, nil, {enable: false}),
       ]
       body = [
         _div_nav(env),
@@ -611,19 +614,18 @@ class Client
       # process
       cse = _post_case(env, para)
       ent = _post_entry(env, para)
-      act = _post_action(env, para)
-      if act.is_a?(Integer)
-        ent['action'] = act if act != 0
-        act = nil
-      end
-      ent['caseid'] = cid
+      cse['caseid'] = cid
       cse_old = api.case_read(cid)
       cse['template'] = cse_old['template']
-      api.record(ent, act, nil, cse)
+      api.record(ent, nil, nil, cse)
 
       # display the case
-      body = _div_nav(env) + _div_case(env, cse)
-      return _resp_success(env, body)
+      body = [
+        _div_nav(env),
+        _div_case(env, cse),
+      ]
+      body << _div_entry(env, ent) if ent
+      return _resp_success(env, body.join(''))
     end
   end # def _call_case_edit()
 
@@ -661,16 +663,14 @@ class Client
       end
 
       # build form
-      parts = [ _form_entry(env, cid, ent) ]
-      if !ent &&
-         (act || api.access_list(cid).include?(ICFS::PermAction))
-        parts <<  _form_action(env, cid, act, {edit: false})
-      end
+      opts = {}
+      opts[:enable] = true if enum == 0
+      opts[:action] = anum if anum
+      parts = [ _form_entry(env, cid, ent, opts) ]
       body = [
         _div_nav(env),
         _div_desc(desc, ''),
-        _div_form(env, '/entry_edit/', cid, parts,
-          'Record Entry'),
+        _div_form(env, '/entry_edit/', cid, parts, 'Record Entry'),
       ].join('')
       return _resp_success(env, body)
 
@@ -680,20 +680,15 @@ class Client
 
       # process
       ent = _post_entry(env, para)
-      act = _post_action(env, para)
-      if act.is_a?(Integer)
-        ent['action'] = act if act != 0
-        act = nil
-      end
+      raise(Error::Values, 'Entry form not enabled') unless ent
       ent['caseid'] = cid
-      api.record(ent, act, nil, nil)
+      api.record(ent, nil, nil, nil)
 
       # display the entry
       body = [
         _div_nav(env),
         _div_entry(env, ent)
       ]
-      body << _div_action(env, act) if act
       return _resp_success(env, body.join(''))
     end
   end # def _call_entry_edit()
@@ -720,8 +715,8 @@ class Client
       xnum = _util_num(env, 2)
       idx = api.index_read(cid, xnum) if xnum != 0
       parts = [
-        _form_entry(env, cid, nil),
         _form_index(env, cid, idx),
+        _form_entry(env, cid, nil, {enable: false}),
       ]
       desc = idx ? 'Edit Index' : 'New Index'
       body = [
@@ -738,24 +733,76 @@ class Client
 
       # process
       ent = _post_entry(env, para)
-      act = _post_action(env, para)
       idx = _post_index(env, para)
-      if act.is_a?(Integer)
-        ent['action'] = act if act != 0
-        act = nil
-      end
-      ent['caseid'] = cid
-      api.record(ent, act, idx, nil)
+      idx['caseid'] = cid
+      api.record(ent, nil, idx, nil)
 
       # display the index
       body = [
         _div_nav(env),
-        _div_entry(env, ent),
-        _div_index(env, idx)
-      ].join('')
-      return _resp_success(env, body)
+        _div_index(env, idx),
+      ]
+      body << _div_entry(env, ent) if ent
+      return _resp_success(env, body.join(''))
     end
   end # def _call_index_edit()
+
+
+  ###############################################
+  # Edit an Action
+  #
+  def _call_action_edit(env)
+    env['icfs.page'] = 'Action Edit'
+    api = env['icfs']
+    _verb_getpost(env)
+
+    cid = _util_case(env)
+
+    # get the form
+    if env['REQUEST_METHOD'] == 'GET'
+      anum = _util_num(env, 2)
+
+      # see if editing is possible
+      unless( api.access_list(cid).include?(ICFS::PermAction) ||
+              ((anum != 0) && api.tasked?(cid, anum)) )
+        raise(Error::Perms, 'Not able to edit this action.')
+      end
+
+      act = api.action_read(cid, anum) if anum != 0
+      opts = {enable: false}
+      opts[:action] = anum if act
+      parts = [
+        _form_action(env, cid, act),
+        _form_entry(env, cid, nil, opts),
+      ]
+      desc = act ? 'Edit Action' : 'New Action'
+      body = [
+        _div_nav(env),
+        _div_desc(desc, ''),
+        _div_form(env, '/action_edit/', cid, parts,
+          'Record Action'),
+      ].join('')
+      return _resp_success(env, body)
+
+    # post the form
+    elsif env['REQUEST_METHOD'] == 'POST'
+      para = _util_post(env)
+
+      # process
+      ent = _post_entry(env, para)
+      act = _post_action(env, para)
+      act['caseid'] = cid
+      api.record(ent, act, nil, nil)
+
+      # display the index
+      body = [
+        _div_nav(env),
+        _div_action(env, act),
+      ]
+      body << _div_entry(env, ent) if ent
+      return _resp_success(env, body.join(''))
+    end
+  end # def _call_action_edit()
 
 
   ###############################################
@@ -820,17 +867,15 @@ class Client
     cid = _util_case(env)
     lnum = _util_num(env, 2)
     cse = api.case_read(cid, lnum)
-    if lnum != 0
-      msg = 'This is a historical version of this Case'
-    else
-      msg = ''
-    end
+    ent = api.entry_read(cid, cse['entry']) if cse['entry']
+    msg = (lnum != 0) ? 'This is a historical version of this Case' : ''
     body = [
       _div_nav(env),
       _div_desc('Case Information', msg),
       _div_case(env, cse),
-    ].join('')
-    return _resp_success(env, body)
+    ]
+    body << _div_entry(env, ent) if ent
+    return _resp_success(env, body.join(''))
   end # def _call_case()
 
 
@@ -892,31 +937,37 @@ class Client
     lnum = _util_num(env, 3)
     raise(Error::Interface, 'No Action requested') if anum == 0
 
-    # get the action
     act = api.action_read(cid, anum, lnum)
+    ent = api.entry_read(cid, act['entry']) if act['entry']
+    ent_div = _div_entry(env, ent) if ent
+
+    # historical
     if lnum != 0
       msg = 'This is a historical version of this Action'
+      list_div = ''
+
+    # current
     else
       msg = ''
+      query = {
+        caseid: cid,
+        action: anum,
+        purpose: 'Action Entries',
+      }
+      resp = api.entry_search(query)
+      list_div = _div_list(env, resp, ListEntry) +
+          _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)}
     end
-
-    # get the entries
-    query = {
-      caseid: cid,
-      action: anum,
-      purpose: 'Action Entries',
-    }
-    resp = api.entry_search(query)
 
     # display
     body = [
       _div_nav(env),
       _div_desc('View Action', msg),
       _div_action(env, act),
-      _div_list(env, resp, ListEntry),
-      _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)},
-    ].join('')
-    return _resp_success(env, body)
+      ent_div,
+      list_div
+    ]
+    return _resp_success(env, body.join(''))
   end # def _call_action()
 
 
@@ -932,30 +983,37 @@ class Client
     lnum = _util_num(env, 3)
     raise(Error::Interface, 'No Index requested') if xnum == 0
 
-    # get the index
+
     idx = api.index_read(cid, xnum, lnum)
+    ent = api.entry_read(cid, idx['entry']) if idx['entry']
+    ent_div = ent ? _div_entry(env, ent) : ''
+
+    # historical index
     if lnum != 0
       msg = 'This is a historical version of this Index'
+      list_div = ''
+
+    # current index
     else
       msg = ''
+      query = {
+        caseid: cid,
+        index: xnum
+      }
+      resp = api.entry_search(query)
+      list_div = _div_list(env, resp, ListEntry) +
+        _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)}
     end
-
-    # get the entries
-    query = {
-      caseid: cid,
-      index: xnum
-    }
-    resp = api.entry_search(query)
 
     # display
     body = [
-      _div_nav(env) +
+      _div_nav(env),
       _div_desc('View Index', msg),
       _div_index(env, idx),
-      _div_list(env, resp, ListEntry),
-      _div_page(resp){|qu, txt| _a_entry_search(env, qu, txt)},
-    ].join('')
-    return _resp_success(env, body)
+      ent_div,
+      list_div
+    ]
+    return _resp_success(env, body.join(''))
   end # def _call_index()
 
 
@@ -1179,6 +1237,7 @@ class Client
     action: 'list-int',
     index: 'list-int',
     indexes: 'list-int-sm',
+    case: 'list-int',
     log: 'list-int',
     tags: 'list-int-sm',
     tag: 'list-tag',
@@ -1264,7 +1323,7 @@ class Client
           when :current
             cd = _a_entry(env, cid, it, 0, it.to_s)
           when :log
-            cd = _a_entry(env, cid, it, obj[:log], it.to_s)
+            cd = (it != 0) ? _a_entry(env, cid, it, obj[:log], it.to_s) : ''
           else
             cd = it.to_s
           end
@@ -1275,11 +1334,7 @@ class Client
           when :current
             cd = (it == 0) ? '' :  _a_action(env, cid, it, 0, it.to_s)
           when :log
-            if it != 0
-              cd = _a_action(env, cid, it, obj[:log], it.to_s)
-            else
-              cd = ''
-            end
+            cd = (it != 0) ? _a_action(env, cid, it, obj[:log], it.to_s) : ''
           else
             cd = it == 0 ? '' : it.to_s
           end
@@ -1297,6 +1352,15 @@ class Client
             end
           else
             cd = it.to_s
+          end
+
+        # case
+        when :case
+          case opt
+          when :log
+            cd = (it != 0) ? _a_case(env, cid, obj[:log], 'Y') : ''
+          else
+            cd = ''
           end
 
         # indexes
@@ -1464,6 +1528,8 @@ class Client
       <div class="list-int-sm" title="Number of Indexes">#I</div>',
     action: '
       <div class="list-int">Action</div>',
+    case: '
+      <div class="list-int">Case</div>',
     log: '
       <div class="list-int">Log</div>',
     title: '
@@ -1809,7 +1875,8 @@ class Client
 
     # case links
     links = [
-      _a_log_search(env, {caseid: cid}, 'History of Case'),
+      _a_log_search(env, {caseid: cid, case_edit: true}, 'History of Case'),
+      _a_log_search(env, {caseid: cid}, 'All Logs'),
     ]
     if al.include?(ICFS::PermManage)
       links << _a_case_edit(env, cid, 'Edit This Case')
@@ -1823,13 +1890,14 @@ class Client
     if al.include?(ICFS::PermAction)
       now = Time.now.to_i
       actions = [
+        _a_action_edit(env, cid, 0, 'New Action'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
             flag: true,
             purpose: 'Flagged Actions',
-          }, 'flagged'),
+          }, 'List flagged'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
@@ -1837,7 +1905,7 @@ class Client
             before: now,
             sort: 'time_asc',
             purpose: 'Actions - Past Date',
-          }, 'past'),
+          }, 'List past'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
@@ -1845,19 +1913,19 @@ class Client
             after: now,
             sort: 'time_desc',
             purpose: 'Actions - Future Date',
-          }, 'future'),
+          }, 'List future'),
         _a_action_search(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
             purpose: 'Open Actions',
-          }, 'all open'),
+          }, 'List open'),
         _a_action_tags(env, {
             caseid: cid,
             assigned: ICFS::UserCase,
             status: true,
             purpose: 'Open Action Tags',
-          }, 'tags'),
+          }, 'Action tags'),
       ].map{|lk| DivCaseLink % lk}
       actions = DivCaseActions % actions.join('')
     else
@@ -2211,15 +2279,24 @@ class Client
   def _div_log(env, log)
     cid = log['caseid']
     lnum = log['log']
-    enum = log['entry']['num']
 
     navp = (lnum == 1) ? 'prev' : _a_log(env, cid, lnum-1, 'prev')
     navn = _a_log(env, cid, lnum + 1, 'next')
 
-    if log['case_hash']
-      chash = DivLogCase % _a_case(env, cid, lnum, log['case_hash'])
+    if log['case']
+      chash = DivLogCase % _a_case(env, cid, lnum, log['case']['hash'])
     else
       chash = ''
+    end
+
+    if log['entry']
+      enum = log['entry']['num']
+      entry = DivLogEntry % [
+        _a_entry(env, cid, enum, lnum, log['entry']['hash']),
+        enum
+      ]
+    else
+      entry = ''
     end
 
     if log['action']
@@ -2262,8 +2339,7 @@ class Client
       ICFS.time_weekday(log['time'], env['icfs'].config),
       Rack::Utils.escape_html(log['user']),
       log['prev'],
-      _a_entry(env, cid, enum, lnum, log['entry']['hash']),
-      enum,
+      entry,
       chash,
       action,
       index,
@@ -2303,14 +2379,18 @@ class Client
       <div class="list-row">
         <div class="list-label">Prev:</div>
         <div class="list-hash">%s</div>
-      </div>
+      </div>%s%s%s%s%s
+    </div>
+  </div>'
+
+
+  # log entry
+  DivLogEntry = '
       <div class="list-row">
         <div class="list-label">Entry:</div>
         <div class="list-hash">%s</div>
         <div class="list-int">%d</div>
-      </div>%s%s%s%s
-    </div>
-  </div>'
+      </div>'
 
 
   # log action
@@ -2372,7 +2452,7 @@ class Client
 
     links = []
     anum = act['action']
-    links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action')
+    links << _a_action_edit(env, cid, anum, 'Edit this Action')
 
     lnum = act['log']
     links << _a_log_search(env, {
@@ -2380,6 +2460,8 @@ class Client
         'action' => anum,
         'purpose' => 'Action History',
       }, 'History of Action')
+
+    links << _a_entry_edit(env, cid, 0, anum, 'New Entry in Action')
 
     # each task
     tasks = []
@@ -2708,6 +2790,10 @@ class Client
         ilabel = 'Permission'
         iclass = 'form-perm'
         ihint = 'Filter for cases granting this permission.'
+      when :case_edit
+        ilabel = 'Case edited'
+        iclass = 'form-boolean'
+        ihint = 'Filter for logs recoding a case.'
       when :entry
         ilabel = 'Entry'
         iclass = 'form-int'
@@ -2975,7 +3061,13 @@ class Client
   #############################################
   # New entry form
   #
-  def _form_entry(env, cid, ent=nil)
+  # @param env [Hash] Rack enviornment
+  # @param cid [String] caseid
+  # @param ent [Hash] the Entry
+  # @param opts [Hash] options
+  #
+  #
+  def _form_entry(env, cid, ent=nil, opts={})
     api = env['icfs']
 
     # title
@@ -2990,6 +3082,15 @@ class Client
       time = ICFS.time_local(ent['time'], api.config)
     else
       time = ''
+    end
+
+    # action
+    if opts[:action]
+      anum = opts[:action]
+    elsif ent && ent['action']
+      anum = ent['action']
+    else
+      anum = 0
     end
 
     # content
@@ -3100,8 +3201,11 @@ class Client
     end
 
     return FormEntry % [
+        opts[:enable] ? 'true' : 'false',
         ent ? ent['entry'] : 0,
-        (ent && ent['action']) ? ent['action'] : 0,
+        anum,
+        opts[:enable] ? '' : FormEntryEnable,
+        opts[:enable] ? '' : ' hidden',
         title, time, content,
         tags_cnt, tags,
         files_cnt, files,
@@ -3114,6 +3218,15 @@ class Client
   end # def _form_entry
 
 
+  # entry toggle button
+  FormEntryEnable = '
+      <div class="sect-right">
+        <button id="ent-ena-button" class="ent-ena" type="button"
+          onclick="entEnable()">Toggle Edit
+        </button>
+      </div>'.freeze
+
+
   # entry edit form
   FormEntry = '
     <div class="sect">
@@ -3123,9 +3236,14 @@ class Client
           Describe the activity.
         </div></div>
         <div class="sect-fill"> </div>
+        <input id="ent-ena" name="ent-ena" type="hidden" value="%s">
         <input name="ent-num" type="hidden" value="%d">
-        <input name="ent-act" type="hidden" value="%d">
+        <input name="ent-act" type="hidden" value="%d">%s
       </div>
+    </div>
+    <div id="ent-body" class="ent-body%s">
+
+    <div class="sect">
       <div class="form-row">
         <div class="list-label">Title:</div>
         <input class="form-title" name="ent-title" type="text"
@@ -3240,6 +3358,7 @@ class Client
       <input type="hidden" name="ent-perm-cnt" id="ent-perm-cnt" value="%d">
       <div class="perms-list" id="ent-perm-list">%s
       </div>
+    </div>
     </div>'
 
 
@@ -3325,7 +3444,7 @@ class Client
   ###############################################
   # Action form
   #
-  def _form_action(env, cid, act = nil, opt={})
+  def _form_action(env, cid, act = nil)
     api = env['icfs']
     cfg = api.config
 
@@ -3354,17 +3473,6 @@ class Client
     ur = Set.new
     ur.add api.user
     ur.merge api.roles
-
-    # editing
-    if opt[:edit]
-      ena_val = 'true'
-      ena_class_add = ''
-      ena_class_tasks = ''
-    else
-      ena_val = 'false'
-      ena_class_add = ' invisible'
-      ena_class_tasks = ' hidden'
-    end
 
     # each task
     tasks = []
@@ -3453,11 +3561,8 @@ class Client
 
     return FormAction % [
         act ? act['action'] : 0,
-        ena_class_add,
-        ena_val,
         tasks.size,
         act ? act['action'] : 0,
-        ena_class_tasks,
         tasks.join('')
       ]
   end # def _form_action()
@@ -3470,24 +3575,18 @@ class Client
         <div class="sect-label">Action</div>
         <div class="tip"><div class="tip-disp"></div><div class="tip-info">
           A unit of work, accomplished in a set of related real-world
-          and administrative activitires.
+          and administrative activities.
         </div></div>
         <div class="sect-fill"> </div>
         <input name="act-num" type="hidden" value="%d">
-        <div class="sect-right">
-          <button id="act-ena-button" class="act-ena" type="button"
-            onclick="actEnable()">Toggle Edit
-          </button>
-        </div>
-        <div id="act-task-add" class="sect-right%s">
+        <div id="act-task-add" class="sect-right">
           <button class="tsk-add" type="button" onclick="actAddTask()">+
           </button>
         </div>
-        <input id="act-ena" name="act-ena" type="hidden" value="%s">
         <input id="act-cnt" name="act-cnt" type="hidden" value="%d">
         <input type="hidden" name="act-num" value="%d">
       </div>
-      <div id="act-tasks" class="%s">%s
+      <div id="act-tasks">%s
       </div>
     </div>'
 
@@ -3767,7 +3866,7 @@ class Client
     cse['title'] = para['cse-title']
 
     # status
-    cse['status'] = (para['cse-status'].downcase == 'true') ? true : false
+    cse['status'] = (para['cse-status'] == 'true') ? true : false
 
     # tags
     tags = []
@@ -3840,6 +3939,8 @@ class Client
   # Entry edit
   #
   def _post_entry(env, para)
+    return nil unless para['ent-ena'] == 'true'
+
     api = env['icfs']
 
     # entry object
@@ -3973,16 +4074,11 @@ class Client
   # Action edit
   #
   def _post_action(env, para)
-
-    # action object
     act = {}
 
     # action
     anum = para['act-num'].to_i
     act['action'] = anum if anum != 0
-
-    # any edit?
-    return anum unless para['act-ena'].downcase == 'true'
 
     # tasks
     tasks = []
@@ -3993,8 +4089,8 @@ class Client
 
       ug = para[tx + '-task']
       title = para[tx + '-title']
-      status = (para[tx + '-status'].downcase == 'true') ? true : false
-      flag = (para[tx + '-flag'].downcase == 'true') ? true : false
+      status = (para[tx + '-status'] == 'true') ? true : false
+      flag = (para[tx + '-flag'] == 'true') ? true : false
 
       tstr = para[tx + '-time']
       time = _util_time_parse(env, tstr)
@@ -4248,6 +4344,19 @@ class Client
       env['SCRIPT_NAME'],
       Rack::Utils.escape(cid),
       xnum,
+      Rack::Utils.escape_html(txt)
+    ]
+  end
+
+
+  ###############################################
+  # Link to Action edit
+  #
+  def _a_action_edit(env, cid, anum, txt)
+    '<a href="%s/action_edit/%s/%d">%s</a>' % [
+      env['SCRIPT_NAME'],
+      Rack::Utils.escape(cid),
+      anum,
       Rack::Utils.escape_html(txt)
     ]
   end

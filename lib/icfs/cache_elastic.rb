@@ -35,6 +35,7 @@ class CacheElastic < Cache
     "icfs": { "enabled": false },
     "caseid": { "type": "keyword" },
     "log": { "enabled": false },
+    "entry": { "enabled": false },
     "template": { "type": "boolean" },
     "status": { "type": "boolean" },
     "title": { "type": "text" },
@@ -66,7 +67,10 @@ class CacheElastic < Cache
       "num": { "type": "integer" },
       "hash": { "enabled": false }
     }},
-    "case_hash": { "enabled": false },
+    "case": { "properties": {
+      "set": { "type": "boolean" },
+      "hash": { "enabled": false }
+    }},
     "files_hash": { "enabled": false }
   }}}
 }',
@@ -104,6 +108,7 @@ class CacheElastic < Cache
     "caseid": { "type": "keyword" },
     "action": { "type": "integer" },
     "log": { "enabled": false },
+    "entry": { "enabled": false },
     "tasks": { "type": "nested","properties": {
       "assigned": { "type": "keyword" },
       "title": { "type": "text" },
@@ -121,6 +126,7 @@ class CacheElastic < Cache
     "caseid": { "type": "keyword" },
     "index": { "type": "integer" },
     "log": { "enabled": false },
+    "entry": { "enabled": false },
     "title": {
       "type": "text",
       "fields": { "raw": { "type": "keyword" }}
@@ -792,6 +798,7 @@ class CacheElastic < Cache
     entry: ['entry', :sub, 'num'].freeze,
     index: ['index', :sub, 'num'].freeze,
     action: ['action', :sub, 'num'].freeze,
+    case: ['case', :sub, 'set'].freeze,
     files: ['files_hash', :size].freeze,
   }.freeze
 
@@ -806,6 +813,7 @@ class CacheElastic < Cache
       _query_term('caseid', query[:caseid]),
       _query_times('times', query[:after], query[:before]),
       _query_term('user', query[:user]),
+      _query_exists('case.set', query[:case_edit]),
       _query_term('entry.num', query[:entry]),
       _query_term('index.num', query[:index]),
       _query_term('action.num', query[:action]),

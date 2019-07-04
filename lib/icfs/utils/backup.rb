@@ -111,13 +111,15 @@ class Backup
       end
 
       # entry
-      enum = log['entry']['num']
-      _copy_item(dest,
-        'entry %d-%d' % [enum, lnum],
-        :entry_read,
-        :entry_write,
-        [cid, enum, lnum]
-      )
+      if log['entry']
+        enum = log['entry']['num']
+        _copy_item(dest,
+          'entry %d-%d' % [enum, lnum],
+          :entry_read,
+          :entry_write,
+          [cid, enum, lnum]
+        )
+      end
 
       # index
       if log['index']
@@ -142,7 +144,7 @@ class Backup
       end
 
       # case
-      if log['case_hash']
+      if log['case']
         _copy_item(dest,
           'case %d' % lnum,
           :case_read,
@@ -280,15 +282,17 @@ class Backup
         end
 
         # entry
-        enum = log['entry']['num']
-        _restore_item(src,
-          'entry %d-%d' % [enum, lnum],
-          :entry_read,
-          :entry_write,
-          [cid, enum, lnum],
-          [cid, enum]
-        )
-        emax = enum if enum > emax
+        if log['entry']
+          enum = log['entry']['num']
+          _restore_item(src,
+            'entry %d-%d' % [enum, lnum],
+            :entry_read,
+            :entry_write,
+            [cid, enum, lnum],
+            [cid, enum]
+          )
+          emax = enum if enum > emax
+        end
 
         # index
         if log['index']
@@ -317,7 +321,7 @@ class Backup
         end
 
         # case
-        if log['case_hash']
+        if log['case']
           _restore_item(src,
             'case %d' % lnum,
             :case_read,

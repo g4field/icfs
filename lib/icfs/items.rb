@@ -499,9 +499,10 @@ module Items
       'template' => Validate::IsBoolean,
       'status' => Validate::IsBoolean,
       'title' => FieldTitle,
-      'access' => SubAccess
+      'access' => SubAccess,
     }.freeze,
     optional: {
+      'caseid' => FieldCaseid,
       'tags' => SubTags,
       'stats' => SubCaseStats,
     }.freeze
@@ -512,11 +513,11 @@ module Items
   ItemEntryNew = {
     method: :hash,
     required: {
-      'caseid' => FieldCaseid,
       'title' => FieldTitle,
       'content' => FieldContent,
     }.freeze,
     optional: {
+      'caseid' => FieldCaseid,
       'time' => Validate::IsIntPos,
       'tags' => SubTagsNormal,
       'index' => SubIndexes,
@@ -536,11 +537,11 @@ module Items
   ItemEntryEdit = {
     method: :hash,
     required: {
-      'caseid' => FieldCaseid,
       'title' => FieldTitle,
       'content' => FieldContent,
     }.freeze,
     optional: {
+      'caseid' => FieldCaseid,
       'entry' => Validate::IsIntPos,
       'time' => Validate::IsIntPos,
       'tags' => SubTagsEntry,
@@ -567,6 +568,7 @@ module Items
       'tasks' => SubTasksEdit
     }.freeze,
     optional: {
+      'caseid' => FieldCaseid,
       'action' => Validate::IsIntPos
     }.freeze
   }.freeze
@@ -580,6 +582,7 @@ module Items
       'content' => FieldContent,
     }.freeze,
     optional: {
+      'caseid' => FieldCaseid,
       'index' => Validate::IsIntPos,
       'tags' => SubTags,
     }.freeze
@@ -605,6 +608,7 @@ module Items
     }.freeze,
     optional: {
       'stats' => SubCaseStats,
+      'entry' => Validate::IsIntPos,
     }.freeze,
   }.freeze
 
@@ -619,12 +623,18 @@ module Items
       'prev' => FieldHash,
       'time' => Validate::IsIntPos,
       'user' => FieldUsergrp,
-      'entry' => SubLogItem,
     }.freeze,
     optional: {
+      'entry' => SubLogItem,
       'index' => SubLogItem,
       'action' => SubLogItem,
-      'case_hash' => FieldHash,
+      'case' => {
+        method: :hash,
+        required: {
+          'set' => Validate::IsBoolean,
+          'hash' => FieldHash,
+        }.freeze,
+      }.freeze,
       'files_hash' => {
         method: :array,
         min: 1,
@@ -677,6 +687,9 @@ module Items
       'action' => Validate::IsIntPos,
       'log' => Validate::IsIntPos,
       'tasks' => SubTasks
+    }.freeze,
+    optional: {
+      'entry' => Validate::IsIntPos,
     }.freeze
   }.freeze
 
@@ -693,6 +706,9 @@ module Items
       'content' => FieldContent,
       'tags' => SubTags
     }.freeze,
+    optional: {
+      'entry' => Validate::IsIntPos,
+    }.freeze
   }.freeze
 
 

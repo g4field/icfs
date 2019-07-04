@@ -138,27 +138,29 @@ class Check
       end
 
       # entry
-      enum = log['entry']['num']
-      ent = _item(
-        'entry %d-%d' % [enum, lnum],
-        :entry_read,
-        [cid, enum, lnum],
-        ent_cur.include?(enum),
-        log['entry']['hash'],
-        Items::ItemEntry,
-        [
-          ['caseid', 0].freeze,
-          ['entry', 1].freeze,
-          ['log', 2].freeze
-        ].freeze,
-      )
+      if log['entry']
+        enum = log['entry']['num']
+        ent = _item(
+          'entry %d-%d' % [enum, lnum],
+          :entry_read,
+          [cid, enum, lnum],
+          ent_cur.include?(enum),
+          log['entry']['hash'],
+          Items::ItemEntry,
+          [
+            ['caseid', 0].freeze,
+            ['entry', 1].freeze,
+            ['log', 2].freeze
+          ].freeze,
+        )
 
-      # current entry
-      unless ent_cur.include?(enum)
-        ent_cur.add(enum)
-        if ent['files']
-          ent['files'].each do |fd|
-            file_cur.add( '%d-%d-%d' % [enum, fd['num'], fd['log']] )
+        # current entry
+        unless ent_cur.include?(enum)
+          ent_cur.add(enum)
+          if ent['files']
+            ent['files'].each do |fd|
+              file_cur.add( '%d-%d-%d' % [enum, fd['num'], fd['log']] )
+            end
           end
         end
       end
@@ -202,13 +204,13 @@ class Check
       end
 
       # case
-      if log['case_hash']
+      if log['case']
         cse = _item(
           'case %d' % lnum,
           :case_read,
           [cid, lnum],
           cse_cur,
-          log['case_hash'],
+          log['case']['hash'],
           Items::ItemCase,
           [
             ['caseid', 0].freeze,
