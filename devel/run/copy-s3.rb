@@ -10,6 +10,8 @@
 # This program is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# usage: ./copy-s3.rb <source_dir> <prefix>
+
 # frozen_string_literal: true
 
 require 'aws-sdk-s3'
