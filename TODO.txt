@@ -4,8 +4,6 @@ Short-term
 
 Remove entry indexes from case create web client
 
-Delete button for tasks in action_edit
-
 Fix web info to display all config values
 
 Add SSL auth testing system

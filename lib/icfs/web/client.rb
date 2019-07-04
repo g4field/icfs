@@ -4088,6 +4088,7 @@ class Client
       tx = 'act-%d' % [ix + 1]
 
       ug = para[tx + '-task']
+      next if ug.nil? || ug.empty?
       title = para[tx + '-title']
       status = (para[tx + '-status'] == 'true') ? true : false
       flag = (para[tx + '-flag'] == 'true') ? true : false
