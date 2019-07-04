@@ -32,7 +32,6 @@ Gem::Specification.new do |gs|
       'LICENSE.txt',
     ] +
     Dir['lib/**/*'] +
-    Dir['bin/*'] +
     Dir['data/**/*'] +
     Dir['devel/**/*']
 end
