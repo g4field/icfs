@@ -811,7 +811,7 @@ class CacheElastic < Cache
     # build the query
     filter = [
       _query_term('caseid', query[:caseid]),
-      _query_times('times', query[:after], query[:before]),
+      _query_times('time', query[:after], query[:before]),
       _query_term('user', query[:user]),
       _query_exists('case.set', query[:case_edit]),
       _query_term('entry.num', query[:entry]),
