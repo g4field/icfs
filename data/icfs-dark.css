@@ -1,0 +1,504 @@
+/*************************************************************************
+#
+# Investigative Case File System
+#
+# Copyright 2019 by Graham A. Field
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3.
+#
+# This program is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+**************************************************************************/
+
+/*************************************************************************
+  General
+*/
+
+
+html {
+  background-color: #212121;
+}
+
+div {
+  color: #ffffff;
+  background-color: #212121;
+}
+
+a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+input {
+  border: 1px solid black;
+  border-radius: 3px;
+  font-family: serif;
+  font-size: 12pt;
+  margin: 0.1em;
+  padding: 0.2em;
+}
+
+textarea {
+  border: 1px solid black;
+  border-radius: 3px;
+  font-family: serif;
+  font-size: 12pt;
+  margin: 0.1em;
+  padding: 0.2em;
+}
+
+
+/*************************************************************************
+  Navbar
+*/
+
+div.nav {
+  border-width: 3px;
+  border-style: none none solid none;
+  border-color: green;
+  display: flex;
+}
+
+div.nav-icfs {
+  color: green;
+  width: 3em;
+}
+
+div.nav-icfs a {
+  color: green;
+}
+
+div.nav-case {
+  color: blue;
+  width: 15em;
+}
+
+div.nav-case a {
+  color: blue;
+}
+
+div.nav-tab {
+  text-align: center;
+  border: 1px;
+  width: 7em;
+  border-style: solid solid none solid;
+  border-radius: 5px 5px 0 0;
+}
+
+
+/*************************************************************************
+ Sidebar layout
+*/
+
+div.sbar {
+  border-bottom: thin solid;
+  display: flex;
+  align-content: stretch;
+}
+
+div.sbar-main {
+  flex: 1 0 0;
+  vertical-align: top;
+}
+
+div.sbar-side {
+  flex: 0 0 20em;
+  border-right: thin solid;
+  vertical-align: top;
+}
+
+div.sbar-side-head {
+  text-align: center;
+  border-bottom: thin solid;
+  color: rgba(0, 0, 255, 89);
+}
+
+div.sbar-main-head {
+  font-size: 120%;
+  padding: 0.25em;
+}
+
+div.sbar-main-sub {
+  font-weight: bold;
+  font-size: 75%;
+}
+
+pre.sbar-main-content {
+  font-family: serif;
+  font-size: 12pt;
+  border-top: thin solid;
+  border-bottom: thin solid;
+  margin: 0px;
+  padding: 0.25em;
+  white-space: pre-wrap;
+}
+
+
+/*************************************************************************
+  Sections
+*/
+
+div.sect {
+  padding: 0.25em;
+}
+
+div.sect-head {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0.2em;
+  background: #446600;
+}
+
+div.sect-head div {
+  background: #446600;
+}
+
+div.sect-main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0.2em;
+  background: #99bbff;
+}
+
+div.sect-main div {
+  background: #99bbff;
+}
+
+
+div.sect-label {
+  flex: 0 1 auto;
+}
+
+
+div.sect-fill {
+  flex: 1 1 auto;
+}
+
+
+div.sect-head-right {
+  flex: 0 1 auto;
+}
+
+
+/*************************************************************************
+  List
+*/
+
+div.list-head {
+  display: flex;
+  flex-direction: row;
+  border-bottom: solid;
+  border-width: 1px;
+  font-style: italic;
+}
+
+
+div.list-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  border-bottom: dotted;
+  border-width: 1px;
+  align-items: flex-start;
+}
+
+
+div.list-int {
+  width: 4em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-int-sm {
+  width: 2em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-perm {
+  width: 15em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-usergrp {
+  width: 15em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-label {
+  width: 7em;
+  padding: 0 0.15em 0 0.15em;
+  text-align: right;
+}
+
+
+div.list-caseid {
+  width: 10em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-text-s {
+  width: 8em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-text-m {
+  width: 12em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-time {
+  width: 15em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+
+div.list-tag {
+  width: 12em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+div.list-hash {
+  font-family: monospace;
+  font-size: 12pt;
+  padding: 0 0.15em 0 0.15em;
+}
+
+div.list-stat {
+  width: 12em;
+  padding: 0 0.15em 0 0.15em;
+}
+
+div.list-snip {
+  flex: 0 1 100%;
+  padding: 0.1em;
+  margin: 0.1em 1em 0.1em 1em;
+  background: #f0f0f0;
+}
+
+/*************************************************************************
+  Tasks
+*/
+
+div.task {
+  border-bottom: thin solid;
+}
+
+
+div.task-ed {
+  background: #99b3ff;
+}
+
+
+div.task-ro {
+  background: #ff6666;
+}
+
+
+/*************************************************************************
+  Forms
+*/
+
+div.form-row {
+  min-height: 2em;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+
+input.form-index {
+  width: 20em;
+}
+
+
+input.form-stat {
+  width: 15em;
+}
+
+
+input.form-usergrp {
+  width: 10em;
+}
+
+
+input.form-caseid {
+  width: 12em;
+}
+
+
+input.form-sort {
+  width: 10em;
+}
+
+
+input.form-content {
+  width: 50em;
+}
+
+
+input.form-title {
+  width: 40em;
+}
+
+
+input.form-file-name {
+  width: 30em;
+}
+
+
+input.form-file-upl {
+}
+
+
+input.form-float {
+  width: 5em;
+}
+
+
+input.form-check {
+}
+
+
+input.form-time {
+  width: 15em;
+}
+
+
+input.form-perm {
+  width: 15em;
+}
+
+
+input.form-int {
+  width: 5em;
+}
+
+
+input.form-tag {
+  width: 20em;
+}
+
+
+input.form-boolean {
+  width: 5em;
+}
+
+
+textarea.form-content {
+  width: 50em;
+  height: 20em;
+}
+
+
+/*************************************************************************
+ Other divs
+*/
+
+div.desc {
+  padding: 0.25em;
+  background: #663d00;
+  margin-bottom: 1em;
+}
+
+div.desc div {
+  background: #663d00;
+}
+
+div.desc-head {
+  font-size: 120%;
+  text-align: center;
+}
+
+span.desc-query {
+  text-decoration: underline;
+
+}
+
+div.query-form {
+  border-bottom: solid;
+  border-width: 1px;
+  padding: 0.5em;
+}
+
+
+
+div.hidden {
+  display: none;
+}
+
+div.invisible {
+  visibility: hidden;
+}
+
+
+/*************************************************************************
+  Tooltips
+*/
+
+div.tip {
+  display: inline-block;
+}
+
+div.tip div.tip-disp {
+  border: thin solid;
+  border-radius: 50%;
+  font-size: 60%;
+  text-align: center;
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.1em;
+}
+
+
+div.tip div.tip-disp::before {
+  content: "?";
+}
+
+
+/* status bar tooltips */
+div.tip div.tip-info {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  position: fixed;
+  padding: 0.5em;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+}
+
+
+/* floating tooltips
+div.tip div.tip-info {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  border-radius: 0.5em;
+  padding: 0.5em;
+  margin: 0.25em;
+  width: 25em;
+  margin-left: 0em;
+  position: absolute;
+  z-index: 1;
+}
+*/
+
+
+div.tip:hover div.tip-info {
+  visibility: visible;
+}

@@ -28,11 +28,9 @@ class Client
   ###############################################
   # New instance
   #
-  # @param css [String] the URL for the stylesheet
   # @param js [String] the URL for the javascript
   #
-  def initialize(css, js)
-    @css = css.freeze
+  def initialize(js)
     @js = js.freeze
   end
 
@@ -4709,7 +4707,7 @@ class Client
   def _resp(env, res, body)
     html = Page % [
       env['icfs.page'],
-      @css,
+      env['icfs'].config.get('css'),
       @js,
       body
     ]

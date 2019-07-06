@@ -20,12 +20,16 @@ require_relative '../../lib/icfs/demo/static'
 base = get_base()
 api = base[:api]
 
-web = ICFS::Web::Client.new('/static/icfs.css', '/static/icfs.js')
+web = ICFS::Web::Client.new('/static/icfs.js')
 
 # static files
 static = {
   '/static/icfs.css' => {
     'path' => '/icfs/data/icfs.css',
+    'mime' => 'text/css; charset=utf-8'
+  },
+  '/static/icfs-dark.css' => {
+    'path' => '/icfs/data/icfs-dark.css',
     'mime' => 'text/css; charset=utf-8'
   },
   '/static/icfs.js' => {
