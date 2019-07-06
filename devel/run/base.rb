@@ -59,11 +59,12 @@ def get_base
     current: 'current',
   }.freeze
 
-  # default config
-  defaults = {
-    'tz' => '-04:00',
-    'rel_time' => true,
-  }
+  # config setup
+  setup = [
+    ['tz', ICFS::Config::SetupTimezone].freeze,
+    ['rel_time', ICFS::Config::SetupRelTime].freeze,
+    ['css', ICFS::Config::SetupCss].freeze,
+  ].freeze
 
   # base objects
   cache = ICFS::CacheElastic.new(map, es)
@@ -74,7 +75,7 @@ def get_base
       expires: 60, # one minute cache for testing
       log: log,
     })
-  config_base = ICFS::ConfigS3.new(defaults, s3, 'icfs', 'config/')
+  config_base = ICFS::ConfigS3.new(setup, s3, 'icfs', 'config/')
   config = ICFS::ConfigRedis.new(redis, config_base, {
       prefix: 'config/',
       expires: 60,  # debug, only cache for one minute

@@ -226,8 +226,10 @@ class Client
     _verb_get(env)
     body = [
       _div_nav(env),
-      _div_desc('Info', ''),
-      _div_info(env)
+      _div_desc('User Info', ''),
+      _div_info(env),
+      _div_desc('Config Info', ''),
+      _div_config(env),
     ].join('')
     return _resp_success(env, body)
   end # def _call_info()
@@ -828,7 +830,9 @@ class Client
     # post the form
     elsif env['REQUEST_METHOD'] == 'POST'
       para = _util_post(env)
-      _post_config(env, para).each{|key, val| cfg.set(key,val) }
+      vals = _post_config(env, para)
+      cfg.clear
+      vals.each{|key, val| cfg.set(key,val) }
       cfg.save
       api.user_flush()
 
@@ -836,7 +840,7 @@ class Client
       body = [
         _div_nav(env),
         _div_desc('Edit Configuration', 'Settings saved'),
-        _div_info(env),
+        _div_config(env),
       ].join('')
       return _resp_success(env, body)
     end
@@ -1163,6 +1167,39 @@ class Client
   <div class="message">%s
   </div>'
 
+  ###############################################
+  # Config div
+  #
+  def _div_config(env)
+    api = env['icfs']
+    cfg = api.config
+
+    items = cfg.setup.map do |key, opt|
+      DivConfigItem % [
+        opt[:name],
+        opt[:display],
+        _util_config(cfg, key, cfg.get(key))
+      ]
+    end
+    return DivConfig % items.join('')
+  end # def _div_config
+
+
+  # The config settings div
+  DivConfig = '
+  <div class="config">
+    <div class="list">%s
+    </div>
+  </div>'
+
+
+  # each config setting
+  DivConfigItem = '
+      <div class="list-row">
+        <div class="list-label">%s:</div>
+        <div class="%s">%s</div>
+      </div>'
+
 
   ###############################################
   # Info div
@@ -1180,7 +1217,6 @@ class Client
     gstats = api.gstats.map{|st| DivInfoList % Rack::Utils.escape_html(st)}
 
     return DivInfo % [
-      Rack::Utils.escape_html(tz),
       Rack::Utils.escape_html(api.user),
       roles.join(''),
       grps.join(''),
@@ -1194,10 +1230,6 @@ class Client
   DivInfo = '
   <div class="info">
     <div class="list">
-      <div class="list-row">
-        <div class="list-label">Timezone:</div>
-        <div class="list-text-s">%s</div>
-      </div>
       <div class="list-row">
         <div class="list-label">User:</div>
         <div class="list-text-m">%s</div>
@@ -3816,10 +3848,59 @@ class Client
   #
   def _form_config(env)
     cfg = env['icfs'].config
-    tz = cfg.get('tz')
-    rel_time = cfg.get('rel_time') ? 'true' : 'false'
-    return FormConfig % [tz, rel_time]
+
+    items = cfg.setup.map do |key, opt|
+      input = opt[:input]
+      input_string = case input[0]
+      when :text
+        '<input class="%s" name="%s" type="text" value="%s">' % [
+          input[1],
+          opt[:label],
+          cfg.set?(key) ? Rack::Utils.escape_html(cfg.get(key)) : ''
+        ]
+      when :boolean
+        '<input class="form-boolean" name="%s" type="text" value="%s">' % [
+          opt[:label],
+          cfg.set?(key) ? (cfg.get(key) ? 'true' : 'false') : ''
+        ]
+      when :select
+        items = [ '<option value=""></option>' ]
+        cur = cfg.set?(key) ? cfg.get(key) : false
+        input[3].each do |it|
+          sel = (it[0] == cur) ? ' selected' : ''
+          items << '<option value="%s"%s>%s</option>' % [it[0], sel, it[1]]
+        end
+        '<select class="%s" name="%s">%s</select>' % [
+          input[1],
+          input[2],
+          items.join('')
+        ]
+      else
+        raise(ArgumentError, 'Invalid Config setup')
+      end
+
+      FormConfigItem % [
+        opt[:name],
+        input_string,
+        opt[:tip],
+        _util_config(cfg, key, cfg.default(key))
+      ]
+    end
+
+    return FormConfig % items.join('')
   end # def _form_config()
+
+
+  # Item on the config form
+  FormConfigItem = '
+  <div class="form-row">
+    <div class="list-label">%s:</div>
+    %s
+    <div class="tip"><div class="tip-disp"></div><div class="tip-info">
+      %s
+      Default is: %s
+    </div></div>
+  </div>'.freeze
 
 
   # Config form
@@ -3830,22 +3911,8 @@ class Client
         <div class="tip"><div class="tip-disp"></div><div class="tip-info">
           Configuration settings.
         </div></div>
-        <div class="sect-fill"> </div>
-      </div>
-      <div class="form-row">
-        <div class="list-label">Timezone:</div>
-        <input class="form-tz" name="cfg-tz" type="text" value="%s">
-        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
-          Timezone to display date/times, format as +/-HH:MM.
-        </div></div>
-      </div>
-      <div class="form-row">
-        <div class="list-label">Rel. Time:</div>
-        <input class="form-boolean" name="cfg-reltime" type="text" value="%s">
-        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
-          Display relative times e.g. 3 days ago.
-        </div></div>
-      </div>
+        <div class="sect-fill"></div>
+      </div>%s
     </div>'
 
 
@@ -4161,11 +4228,25 @@ class Client
   # Config edit
   #
   def _post_config(env, para)
-    cfg = {
-      'tz' => para['cfg-tz'],
-      'rel_time' => (para['cfg-reltime'].downcase == 'true' ? true : false),
-    }
-    return cfg
+    api = env['icfs']
+    cfg = api.config
+
+    vals = {}
+    cfg.setup.each do |key, opt|
+      val = para[opt[:label]]
+      next if val.nil? || val.empty?
+
+      case opt[:parse]
+      when :text
+        vals[key] = val
+      when :boolean
+        vals[key] = (val.downcase == 'true') ? true : false
+      else
+        raise(ArgumentError, 'Invalid config parser')
+      end
+    end
+
+    return vals
   end # def _post_config()
 
 
@@ -4489,6 +4570,26 @@ class Client
       raise(Error::Interface, 'Only GET or POST method allowed')
     end
   end # def _verb_getpost()
+
+
+  ###############################################
+  # Display the config value
+  #
+  def _util_config(cfg, key, val)
+    opt = cfg.setup(key)
+
+    case opt[:input][0]
+    when :text
+      return val
+    when :boolean
+      return val ? 'true' : 'false'
+    when :select
+      opt[:input][3].each{|ary| return ary[1] if ary[0] == val }
+      return 'Invalid select option'
+    else
+      raise(ArgumentError, 'Unsupported config display type')
+    end
+  end # def _util_config
 
 
   ###############################################

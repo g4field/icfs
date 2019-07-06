@@ -24,13 +24,13 @@ class ConfigS3 < Config
   ###############################################
   # New instance
   #
-  # @param defaults [Hash] The default options
+  # @param setup [Array] The setup
   # @param s3 [Aws::S3::Client] the configured S3 client
   # @param bucket [String] The bucket name
   # @param prefix [String] Prefix to use for object keys
   #
-  def initialize(defaults, s3, bucket, prefix=nil)
-    super(defaults)
+  def initialize(setup, s3, bucket, prefix=nil)
+    super(setup)
     @s3 = s3
     @bck = bucket
     @pre = prefix || ''
@@ -44,7 +44,7 @@ class ConfigS3 < Config
     Items.validate(unam, 'User/Role/Group name', Items::FieldUsergrp)
     @unam = unam.dup
     json = @s3.get_object( bucket: @bck, key: _key(unam) ).body.read
-    @data = Items.parse(json, 'Config values', Config::ValConfig)
+    _parse(json)
     return true
   rescue
     @data = {}
@@ -57,7 +57,7 @@ class ConfigS3 < Config
   #
   def save()
     raise(RuntimeError, 'Save requires a user name') if !@unam
-    json = Items.generate(@data, 'Config values', Config::ValConfig)
+    json = _generate()
     @s3.put_object( bucket: @bck, key: _key(@unam), body: json )
   end # def save()
 

@@ -31,7 +31,7 @@ class ConfigRedis < Config
   # @option opts [Integer] :expires Expiration time in seconds
   #
   def initialize(redis, base, opts={})
-    super(base.defaults)
+    super(base.setup)
     @redis = redis
     @base = base
     @pre = opts[:prefix] || ''
@@ -50,7 +50,7 @@ class ConfigRedis < Config
     # try cache
     json = @redis.get(key)
     if json
-      @data = Items.parse(json, 'Config values', Config::ValConfig)
+      _parse(json)
       return true
     end
 
@@ -66,7 +66,7 @@ class ConfigRedis < Config
   #
   def save()
     raise(RuntimeError, 'Save requires a user name') if !@unam
-    json = Items.generate(@data, 'Config values', Config::ValConfig)
+    json = _generate()
     @redis.del(_key(@unam))
     @base.data = @data
     @base.save
