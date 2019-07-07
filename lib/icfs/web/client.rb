@@ -547,7 +547,7 @@ class Client
       parts = [
         _form_create(env),
         _form_case(env, tpl),
-        _form_entry(env, tid, nil),
+        _form_entry(env, tid, nil, {no_index: true}),
       ]
       body = [
         _div_nav(env),
@@ -569,7 +569,7 @@ class Client
       cse['template'] = (para['create_tmpl'] == 'true') ? true : false
 
       # process entry
-      ent = _post_entry(env, para)
+      ent = _post_entry(env, para, {no_index: true})
       Items.validate(tid, 'Template ID', Items::FieldCaseid)
       ent['caseid'] = cid
 
@@ -3095,6 +3095,8 @@ class Client
   # @param cid [String] caseid
   # @param ent [Hash] the Entry
   # @param opts [Hash] options
+  # @option opts [Integer] The action num
+  # @option opts [Boolean] :no_index Does not display indexe
   #
   #
   def _form_entry(env, cid, ent=nil, opts={})
@@ -3161,7 +3163,9 @@ class Client
 
     # indexes
     index_cnt = 0
-    if ent && ent['index']
+    if opts[:no_index]
+      index = ''
+    elsif ent && ent['index']
       idx_list = ent['index'].map do |xnum|
         index_cnt += 1
         idx = api.index_read(cid, xnum, 0)
@@ -3230,6 +3234,17 @@ class Client
       perms = ''
     end
 
+    # do index
+    if opts[:no_index]
+      index = ''
+    else
+      index = FormEntryIndex % [
+        env['SCRIPT_NAME'],
+        Rack::Utils.escape(cid),
+        index_cnt, index,
+      ]
+    end
+
     return FormEntry % [
         opts[:enable] ? 'true' : 'false',
         ent ? ent['entry'] : 0,
@@ -3239,9 +3254,7 @@ class Client
         title, time, content,
         tags_cnt, tags,
         files_cnt, files,
-        env['SCRIPT_NAME'],
-        Rack::Utils.escape(cid),
-        index_cnt, index,
+        index,
         stats_sel, stats_cnt, stats,
         perms_sel, perms_cnt, perms
       ]
@@ -3330,28 +3343,7 @@ class Client
       <input type="hidden" id="ent-file-cnt" name="ent-file-cnt" value="%d">
       <div class="files-list" id="ent-file-list">%s
       </div>
-    </div>
-
-    <div class="sect">
-      <div class="sect-head">
-        <div class="sect-label">Indexes</div>
-        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
-          Real-world factors that appear in a case multiple times.
-        </div></div>
-        <div class="sect-fill"> </div>
-        <div class="sect-right">
-          <input class="form-index" type="text" id="ent-idx-lu"
-            name="ent-idx-lu">
-          <button class="index-add" type="button"
-            onclick="entAddIndex()">?</button>
-        </div>
-      </div>
-      <input type="hidden" id="ent-idx-script" value="%s">
-      <input type="hidden" id="ent-idx-caseid" value="%s">
-      <input type="hidden" id="ent-idx-cnt" name="ent-idx-cnt" value="%d">
-      <div class="index-list" id="ent-idx-list">%s
-      </div>
-    </div>
+    </div>%s
 
     <div class="sect">
       <div class="sect-head">
@@ -3389,6 +3381,31 @@ class Client
       <div class="perms-list" id="ent-perm-list">%s
       </div>
     </div>
+    </div>'
+
+
+    #Entry form for indexes
+    FormEntryIndex = '
+
+    <div class="sect">
+      <div class="sect-head">
+        <div class="sect-label">Indexes</div>
+        <div class="tip"><div class="tip-disp"></div><div class="tip-info">
+          Real-world factors that appear in a case multiple times.
+        </div></div>
+        <div class="sect-fill"> </div>
+        <div class="sect-right">
+          <input class="form-index" type="text" id="ent-idx-lu"
+            name="ent-idx-lu">
+          <button class="index-add" type="button"
+            onclick="entAddIndex()">?</button>
+        </div>
+      </div>
+      <input type="hidden" id="ent-idx-script" value="%s">
+      <input type="hidden" id="ent-idx-caseid" value="%s">
+      <input type="hidden" id="ent-idx-cnt" name="ent-idx-cnt" value="%d">
+      <div class="index-list" id="ent-idx-list">%s
+      </div>
     </div>'
 
 
@@ -4003,7 +4020,7 @@ class Client
   ###############################################
   # Entry edit
   #
-  def _post_entry(env, para)
+  def _post_entry(env, para, opts={})
     return nil unless para['ent-ena'] == 'true'
 
     api = env['icfs']
@@ -4040,15 +4057,17 @@ class Client
     ent['tags'] = tags.uniq.sort unless tags.empty?
 
     # indexes
-    index = []
-    icnt = para['ent-idx-cnt'].to_i
-    raise(Error::Interface, 'Too many indexes') if(icnt > 100)
-    icnt.times do |ix|
-      tx = 'ent-idx-%d' % (ix + 1)
-      xnum = para[tx].to_i
-      index << xnum unless xnum == 0
+    unless opts[:no_index]
+      index = []
+      icnt = para['ent-idx-cnt'].to_i
+      raise(Error::Interface, 'Too many indexes') if(icnt > 100)
+      icnt.times do |ix|
+        tx = 'ent-idx-%d' % (ix + 1)
+        xnum = para[tx].to_i
+        index << xnum unless xnum == 0
+      end
+      ent['index'] = index.uniq.sort unless index.empty?
     end
-    ent['index'] = index.uniq.sort unless index.empty?
 
     # perms
     perms = []

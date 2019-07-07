@@ -2,12 +2,6 @@
 Short-term
 -------------------------------------------------------------------
 
-Remove entry indexes from case create web client
-
-Add SSL auth testing system
-  nginx container
-  run/sslauth.rb
-
 -------------------------------------------------------------------
 Medium-term
 -------------------------------------------------------------------
@@ -19,8 +13,17 @@ Auto find the last log in ICFS::Utils::Check
 Email Rx, Field parsing
   indexes - think how to support
 
+
+Add SSL auth testing system
+  nginx container
+  run/sslauth.rb
+
 -------------------------------------------------------------------
 Long-term
 -------------------------------------------------------------------
 
 Move ICFS::Items code into ICFS
+
+AWS Cognito integration
+
+Email GPG support
